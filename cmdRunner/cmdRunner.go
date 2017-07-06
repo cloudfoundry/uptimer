@@ -13,39 +13,37 @@ type cmdStartWaiter interface {
 }
 
 type CmdRunner interface {
-	Run() error
+	Run(cmdStartWaiter cmdStartWaiter) error
 }
 
 type cmdRunner struct {
-	CmdStartWaiter cmdStartWaiter
-	OutWriter      io.Writer
-	ErrWriter      io.Writer
-	CopyFunc       copyFunc
+	OutWriter io.Writer
+	ErrWriter io.Writer
+	CopyFunc  copyFunc
 }
 
 type copyFunc func(io.Writer, io.Reader) (int64, error)
 
-func New(cmdStartWaiter cmdStartWaiter, outWriter, errWriter io.Writer, copyFunc copyFunc) CmdRunner {
+func New(outWriter, errWriter io.Writer, copyFunc copyFunc) CmdRunner {
 	return &cmdRunner{
-		CmdStartWaiter: cmdStartWaiter,
-		OutWriter:      outWriter,
-		ErrWriter:      errWriter,
-		CopyFunc:       copyFunc,
+		OutWriter: outWriter,
+		ErrWriter: errWriter,
+		CopyFunc:  copyFunc,
 	}
 }
 
-func (r *cmdRunner) Run() error {
-	stdoutPipe, err := r.CmdStartWaiter.StdoutPipe()
+func (r *cmdRunner) Run(csw cmdStartWaiter) error {
+	stdoutPipe, err := csw.StdoutPipe()
 	if err != nil {
 		return err
 	}
 
-	stderrPipe, err := r.CmdStartWaiter.StderrPipe()
+	stderrPipe, err := csw.StderrPipe()
 	if err != nil {
 		return err
 	}
 
-	if err := r.CmdStartWaiter.Start(); err != nil {
+	if err := csw.Start(); err != nil {
 		return err
 	}
 
@@ -57,7 +55,7 @@ func (r *cmdRunner) Run() error {
 		return err
 	}
 
-	if err := r.CmdStartWaiter.Wait(); err != nil {
+	if err := csw.Wait(); err != nil {
 		return err
 	}
 

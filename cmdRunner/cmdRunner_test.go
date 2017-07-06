@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 
 	. "github.com/cloudfoundry/uptimer/cmdRunner"
-	"github.com/cloudfoundry/uptimer/cmdRunner/cmdRunnerfakes"
+	"github.com/cloudfoundry/uptimer/fakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -18,7 +18,7 @@ var _ = Describe("CmdRunner", func() {
 		outBuf *bytes.Buffer
 		errBuf *bytes.Buffer
 
-		fakeCmdStartWaiter *cmdRunnerfakes.FakeCmdStartWaiter
+		fakeCmdStartWaiter *fakes.FakeCmdStartWaiter
 
 		runner CmdRunner
 	)
@@ -27,15 +27,15 @@ var _ = Describe("CmdRunner", func() {
 		outBuf = bytes.NewBuffer([]byte{})
 		errBuf = bytes.NewBuffer([]byte{})
 
-		fakeCmdStartWaiter = &cmdRunnerfakes.FakeCmdStartWaiter{}
+		fakeCmdStartWaiter = &fakes.FakeCmdStartWaiter{}
 		fakeCmdStartWaiter.StdoutPipeReturns(ioutil.NopCloser(bytes.NewBufferString("")), nil)
 		fakeCmdStartWaiter.StderrPipeReturns(ioutil.NopCloser(bytes.NewBufferString("")), nil)
 
-		runner = New(fakeCmdStartWaiter, outBuf, errBuf, io.Copy)
+		runner = New(outBuf, errBuf, io.Copy)
 	})
 
 	It("starts a command and waits for it to complete", func() {
-		err := runner.Run()
+		err := runner.Run(fakeCmdStartWaiter)
 
 		Expect(err).NotTo(HaveOccurred())
 		Expect(fakeCmdStartWaiter.StartCallCount()).To(Equal(1))
@@ -45,7 +45,7 @@ var _ = Describe("CmdRunner", func() {
 	It("returns an error when calling start", func() {
 		fakeCmdStartWaiter.StartReturns(fmt.Errorf("something bad"))
 
-		err := runner.Run()
+		err := runner.Run(fakeCmdStartWaiter)
 
 		Expect(err).To(MatchError("something bad"))
 	})
@@ -53,7 +53,7 @@ var _ = Describe("CmdRunner", func() {
 	It("returns an error when calling wait", func() {
 		fakeCmdStartWaiter.WaitReturns(fmt.Errorf("something bad"))
 
-		err := runner.Run()
+		err := runner.Run(fakeCmdStartWaiter)
 
 		Expect(err).To(MatchError("something bad"))
 	})
@@ -61,7 +61,7 @@ var _ = Describe("CmdRunner", func() {
 	It("writes the command's stdout to outWriter", func() {
 		fakeCmdStartWaiter.StdoutPipeReturns(ioutil.NopCloser(bytes.NewBufferString("something happened on stdout")), nil)
 
-		err := runner.Run()
+		err := runner.Run(fakeCmdStartWaiter)
 
 		Expect(err).NotTo(HaveOccurred())
 		Expect(outBuf.String()).To(Equal("something happened on stdout"))
@@ -70,7 +70,7 @@ var _ = Describe("CmdRunner", func() {
 	It("returns an error when failing to write the command's stdout to outWriter", func() {
 		fakeCmdStartWaiter.StdoutPipeReturns(ioutil.NopCloser(bytes.NewBufferString("")), fmt.Errorf("something bad happened"))
 
-		err := runner.Run()
+		err := runner.Run(fakeCmdStartWaiter)
 
 		Expect(err).To(MatchError("something bad happened"))
 	})
@@ -78,7 +78,7 @@ var _ = Describe("CmdRunner", func() {
 	It("writes the command's stderr to errWriter", func() {
 		fakeCmdStartWaiter.StderrPipeReturns(ioutil.NopCloser(bytes.NewBufferString("something happened on stderr")), nil)
 
-		err := runner.Run()
+		err := runner.Run(fakeCmdStartWaiter)
 
 		Expect(err).NotTo(HaveOccurred())
 		Expect(errBuf.String()).To(Equal("something happened on stderr"))
@@ -87,7 +87,7 @@ var _ = Describe("CmdRunner", func() {
 	It("returns an error when failing to write the command's stderr to errWriter", func() {
 		fakeCmdStartWaiter.StderrPipeReturns(ioutil.NopCloser(bytes.NewBufferString("")), fmt.Errorf("something bad happened"))
 
-		err := runner.Run()
+		err := runner.Run(fakeCmdStartWaiter)
 
 		Expect(err).To(MatchError("something bad happened"))
 	})
@@ -96,9 +96,9 @@ var _ = Describe("CmdRunner", func() {
 		mockCopy := func(io.Writer, io.Reader) (int64, error) {
 			return 0, fmt.Errorf("i failed on first copyfunc")
 		}
-		runner = New(fakeCmdStartWaiter, outBuf, errBuf, mockCopy)
+		runner = New(outBuf, errBuf, mockCopy)
 
-		err := runner.Run()
+		err := runner.Run(fakeCmdStartWaiter)
 
 		Expect(err).To(MatchError("i failed on first copyfunc"))
 	})
@@ -113,9 +113,9 @@ var _ = Describe("CmdRunner", func() {
 
 			return 0, nil
 		}
-		runner = New(fakeCmdStartWaiter, outBuf, errBuf, mockCopy)
+		runner = New(outBuf, errBuf, mockCopy)
 
-		err := runner.Run()
+		err := runner.Run(fakeCmdStartWaiter)
 
 		Expect(err).To(MatchError("i failed on second copyfunc"))
 	})

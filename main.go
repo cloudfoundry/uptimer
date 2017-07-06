@@ -24,12 +24,12 @@ func main() {
 		panic(err)
 	}
 
-	cmd := exec.Command(cfg.Command, cfg.CommandArgs...)
-	runner := cmdRunner.New(cmd, os.Stdout, os.Stderr, io.Copy)
+	runner := cmdRunner.New(os.Stdout, os.Stderr, io.Copy)
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime|log.LUTC|log.Lshortfile)
 
 	logger.Printf("Running command: `%s %s`\n", cfg.Command, strings.Join(cfg.CommandArgs, " "))
-	if err := runner.Run(); err != nil {
+	cmd := exec.Command(cfg.Command, cfg.CommandArgs...)
+	if err := runner.Run(cmd); err != nil {
 		logger.Fatalln("Failed running command:", err)
 	}
 	logger.Println("Finished running command")
