@@ -14,6 +14,7 @@ type cmdStartWaiter interface {
 
 type CmdRunner interface {
 	Run(cmdStartWaiter cmdStartWaiter) error
+	RunInSequence(cmdStartWaiters ...cmdStartWaiter) error
 }
 
 type cmdRunner struct {
@@ -57,6 +58,16 @@ func (r *cmdRunner) Run(csw cmdStartWaiter) error {
 
 	if err := csw.Wait(); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (r *cmdRunner) RunInSequence(csws ...cmdStartWaiter) error {
+	for _, cmd := range csws {
+		if err := r.Run(cmd); err != nil {
+			return err
+		}
 	}
 
 	return nil
