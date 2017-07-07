@@ -1,11 +1,12 @@
 package cfWorkflow
 
 import "github.com/cloudfoundry/uptimer/cfCmdGenerator"
-import "os/exec"
+
+import "github.com/cloudfoundry/uptimer/cmdRunner"
 
 type CfWorkflow interface {
-	Setup() []*exec.Cmd
-	Cleanup() []*exec.Cmd
+	Setup() []cmdRunner.CmdStartWaiter
+	TearDown() []cmdRunner.CmdStartWaiter
 }
 
 type cfWorkflow struct {
@@ -44,8 +45,8 @@ func New(
 	}
 }
 
-func (c *cfWorkflow) Setup() []*exec.Cmd {
-	return []*exec.Cmd{
+func (c *cfWorkflow) Setup() []cmdRunner.CmdStartWaiter {
+	return []cmdRunner.CmdStartWaiter{
 		c.CfCmdGenerator.Api(c.ApiUrl, c.SkipSslValidation),
 		c.CfCmdGenerator.Auth(c.Username, c.Password),
 		c.CfCmdGenerator.CreateOrg(c.Org),
@@ -55,8 +56,8 @@ func (c *cfWorkflow) Setup() []*exec.Cmd {
 	}
 }
 
-func (c *cfWorkflow) Cleanup() []*exec.Cmd {
-	return []*exec.Cmd{
+func (c *cfWorkflow) TearDown() []cmdRunner.CmdStartWaiter {
+	return []cmdRunner.CmdStartWaiter{
 		c.CfCmdGenerator.DeleteOrg(c.Org),
 	}
 }

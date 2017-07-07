@@ -5,11 +5,12 @@ import (
 	"io"
 	"log"
 	"os"
-	"os/exec"
-	"strings"
 
+	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
+	"github.com/cloudfoundry/uptimer/cfWorkflow"
 	"github.com/cloudfoundry/uptimer/cmdRunner"
 	"github.com/cloudfoundry/uptimer/config"
+	"github.com/cloudfoundry/uptimer/uptimer"
 )
 
 func main() {
@@ -24,13 +25,33 @@ func main() {
 		panic(err)
 	}
 
-	runner := cmdRunner.New(os.Stdout, os.Stderr, io.Copy)
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime|log.LUTC|log.Lshortfile)
+	runner := cmdRunner.New(os.Stdout, os.Stderr, io.Copy)
+	cfCmdGenerator := cfCmdGenerator.New()
+	workflow := cfWorkflow.New(
+		cfg.Api,
+		cfg.AdminUsername,
+		cfg.AdminUsername,
+		"org",
+		"space",
+		"appName",
+		"appPath",
+		cfg.SkipSslValidation, cfCmdGenerator,
+	)
 
-	logger.Printf("Running command: `%s %s`\n", cfg.Command, strings.Join(cfg.CommandArgs, " "))
-	cmd := exec.Command(cfg.Command, cfg.CommandArgs...)
-	if err := runner.Run(cmd); err != nil {
-		logger.Fatalln("Failed running command:", err)
+	uptimer := uptimer.New(cfg, logger, workflow, runner)
+
+	if err := uptimer.Setup(); err != nil {
+		logger.Fatalln("Failed setup:", err)
 	}
-	logger.Println("Finished running command")
+
+	defer func() {
+		if err := uptimer.TearDown(); err != nil {
+			logger.Fatalln("Failed teardown:", err)
+		}
+	}()
+
+	if err := uptimer.Run(); err != nil {
+		logger.Fatalln("Failed run:", err)
+	}
 }

@@ -3,6 +3,8 @@ package cfCmdGenerator_test
 import (
 	. "github.com/cloudfoundry/uptimer/cfCmdGenerator"
 
+	"os/exec"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -18,63 +20,79 @@ var _ = Describe("CfHelper", func() {
 
 	Describe("Api", func() {
 		It("Generates the correct command not skipping ssl validation", func() {
+			expectedCmd := exec.Command("cf", "api", "api.example.com")
+
 			cmd := helper.Api("api.example.com", false)
 
-			Expect(cmd.Args).To(Equal([]string{"cf", "api", "api.example.com"}))
+			Expect(cmd).To(Equal(expectedCmd))
 		})
 
 		It("Generates the correct command skipping ssl validation", func() {
+			expectedCmd := exec.Command("cf", "api", "api.example.com", "--skip-ssl-validation")
+
 			cmd := helper.Api("api.example.com", true)
 
-			Expect(cmd.Args).To(Equal([]string{"cf", "api", "api.example.com", "--skip-ssl-validation"}))
+			Expect(cmd).To(Equal(expectedCmd))
 		})
 	})
 
 	Describe("Auth", func() {
 		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "auth", "user44", "pass55")
+
 			cmd := helper.Auth("user44", "pass55")
 
-			Expect(cmd.Args).To(Equal([]string{"cf", "auth", "user44", "pass55"}))
+			Expect(cmd).To(Equal(expectedCmd))
 		})
 	})
 
 	Describe("CreateOrg", func() {
 		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "create-org", "someOrg")
+
 			cmd := helper.CreateOrg("someOrg")
 
-			Expect(cmd.Args).To(Equal([]string{"cf", "create-org", "someOrg"}))
+			Expect(cmd).To(Equal(expectedCmd))
 		})
 	})
 
 	Describe("CreateSpace", func() {
 		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "create-space", "someOrg", "someSpace")
+
 			cmd := helper.CreateSpace("someOrg", "someSpace")
 
-			Expect(cmd.Args).To(Equal([]string{"cf", "create-space", "someOrg", "someSpace"}))
+			Expect(cmd).To(Equal(expectedCmd))
 		})
 	})
 
 	Describe("Target", func() {
 		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "target", "-o", "someOrg", "-s", "someSpace")
+
 			cmd := helper.Target("someOrg", "someSpace")
 
-			Expect(cmd.Args).To(Equal([]string{"cf", "target", "-o", "someOrg", "-s", "someSpace"}))
+			Expect(cmd).To(Equal(expectedCmd))
 		})
 	})
 
 	Describe("Push", func() {
 		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "push", "appName", "-p", "path/to/app")
+
 			cmd := helper.Push("appName", "path/to/app")
 
-			Expect(cmd.Args).To(Equal([]string{"cf", "push", "appName", "-p", "path/to/app"}))
+			Expect(cmd).To(Equal(expectedCmd))
 		})
 	})
 
 	Describe("DeleteOrg", func() {
 		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "delete-org", "orgName", "-f")
+
 			cmd := helper.DeleteOrg("orgName")
 
-			Expect(cmd.Args).To(Equal([]string{"cf", "delete-org", "orgName", "-f"}))
+			Expect(cmd).To(Equal(expectedCmd))
 		})
 	})
 })

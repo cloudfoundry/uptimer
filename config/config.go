@@ -6,8 +6,12 @@ import (
 )
 
 type Config struct {
-	Command     string   `json:"command"`
-	CommandArgs []string `json:"commandArgs"`
+	Command           string   `json:"command"`
+	CommandArgs       []string `json:"commandArgs"`
+	Api               string   `json:"api"`
+	AdminUsername     string   `json:"adminUsername"`
+	AdminPassword     string   `json:"adminPassword"`
+	SkipSslValidation bool     `json:"skipSslValidation"`
 }
 
 func Load(filename string) (*Config, error) {

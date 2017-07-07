@@ -1,11 +1,10 @@
 package cfWorkflow_test
 
 import (
-	"os/exec"
-
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
 	. "github.com/cloudfoundry/uptimer/cfWorkflow"
 
+	"github.com/cloudfoundry/uptimer/cmdRunner"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -38,7 +37,7 @@ var _ = Describe("CfWorkflow", func() {
 			cmds := cw.Setup()
 
 			Expect(cmds).To(Equal(
-				[]*exec.Cmd{
+				[]cmdRunner.CmdStartWaiter{
 					ccg.Api("jigglypuff.cf-app.com", true),
 					ccg.Auth("pika", "chu"),
 					ccg.CreateOrg("someOrg"),
@@ -50,12 +49,12 @@ var _ = Describe("CfWorkflow", func() {
 		})
 	})
 
-	Describe("Cleanup", func() {
+	Describe("TearDown", func() {
 		It("returns a set of commands to delete an org", func() {
-			cmds := cw.Cleanup()
+			cmds := cw.TearDown()
 
 			Expect(cmds).To(Equal(
-				[]*exec.Cmd{
+				[]cmdRunner.CmdStartWaiter{
 					ccg.DeleteOrg("someOrg"),
 				},
 			))
