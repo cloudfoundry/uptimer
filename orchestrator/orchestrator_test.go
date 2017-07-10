@@ -1,4 +1,4 @@
-package uptimer_test
+package orchestrator_test
 
 import (
 	"bytes"
@@ -9,31 +9,31 @@ import (
 	"github.com/cloudfoundry/uptimer/cmdRunner"
 	"github.com/cloudfoundry/uptimer/config"
 	"github.com/cloudfoundry/uptimer/fakes"
-	. "github.com/cloudfoundry/uptimer/uptimer"
+	. "github.com/cloudfoundry/uptimer/orchestrator"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Uptimer", func() {
+var _ = Describe("Orchestrator", func() {
 	var (
-		cfg          *config.Config
+		wcfg         *config.CommandConfig
 		logBuf       *bytes.Buffer
 		logger       *log.Logger
 		fakeWorkflow *fakes.FakeCfWorkflow
 		fakeRunner   *fakes.FakeCmdRunner
 
-		uptimer Uptimer
+		uptimer Orchestrator
 	)
 
 	BeforeEach(func() {
-		cfg = &config.Config{}
+		wcfg = &config.CommandConfig{}
 		logBuf = bytes.NewBuffer([]byte{})
 		logger = log.New(logBuf, "", 0)
 		fakeWorkflow = &fakes.FakeCfWorkflow{}
 		fakeRunner = &fakes.FakeCmdRunner{}
 
-		uptimer = New(cfg, logger, fakeWorkflow, fakeRunner)
+		uptimer = New(wcfg, logger, fakeWorkflow, fakeRunner)
 	})
 
 	Describe("Setup", func() {
@@ -68,7 +68,7 @@ var _ = Describe("Uptimer", func() {
 	})
 
 	Describe("Run", func() {
-
+		PIt("runs a measurement and returns a report")
 	})
 
 	Describe("TearDown", func() {

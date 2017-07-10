@@ -7,7 +7,7 @@ import (
 )
 
 type CfCmdGenerator interface {
-	Api(url string, skipSslValidation bool) cmdRunner.CmdStartWaiter
+	Api(url string) cmdRunner.CmdStartWaiter
 	Auth(username, password string) cmdRunner.CmdStartWaiter
 	CreateOrg(org string) cmdRunner.CmdStartWaiter
 	CreateSpace(org, space string) cmdRunner.CmdStartWaiter
@@ -22,12 +22,8 @@ func New() CfCmdGenerator {
 	return &cfCmdGenerator{}
 }
 
-func (c *cfCmdGenerator) Api(url string, skipSslValidation bool) cmdRunner.CmdStartWaiter {
-	if skipSslValidation {
-		return exec.Command("cf", "api", url, "--skip-ssl-validation")
-	}
-
-	return exec.Command("cf", "api", url)
+func (c *cfCmdGenerator) Api(url string) cmdRunner.CmdStartWaiter {
+	return exec.Command("cf", "api", url, "--skip-ssl-validation")
 }
 
 func (c *cfCmdGenerator) Auth(username string, password string) cmdRunner.CmdStartWaiter {
@@ -39,7 +35,7 @@ func (c *cfCmdGenerator) CreateOrg(org string) cmdRunner.CmdStartWaiter {
 }
 
 func (c *cfCmdGenerator) CreateSpace(org string, space string) cmdRunner.CmdStartWaiter {
-	return exec.Command("cf", "create-space", org, space)
+	return exec.Command("cf", "create-space", space, "-o", org)
 }
 
 func (c *cfCmdGenerator) Target(org string, space string) cmdRunner.CmdStartWaiter {

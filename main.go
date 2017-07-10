@@ -10,48 +10,43 @@ import (
 	"github.com/cloudfoundry/uptimer/cfWorkflow"
 	"github.com/cloudfoundry/uptimer/cmdRunner"
 	"github.com/cloudfoundry/uptimer/config"
-	"github.com/cloudfoundry/uptimer/uptimer"
+	"github.com/cloudfoundry/uptimer/orchestrator"
 )
 
 func main() {
 	configPath := flag.String("configFile", "", "Path to the config file")
 	flag.Parse()
 	if *configPath == "" {
-		panic("configPath required")
+		log.Fatalln("Error: '-configFile' flag required")
 	}
 
 	cfg, err := config.Load(*configPath)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime|log.LUTC|log.Lshortfile)
 	runner := cmdRunner.New(os.Stdout, os.Stderr, io.Copy)
 	cfCmdGenerator := cfCmdGenerator.New()
-	workflow := cfWorkflow.New(
-		cfg.Api,
-		cfg.AdminUsername,
-		cfg.AdminUsername,
-		"org",
-		"space",
-		"appName",
-		"appPath",
-		cfg.SkipSslValidation, cfCmdGenerator,
-	)
+	workflow := cfWorkflow.New(cfg.CF, cfCmdGenerator)
 
-	uptimer := uptimer.New(cfg, logger, workflow, runner)
+	orc := orchestrator.New(cfg.While, logger, workflow, runner)
 
-	if err := uptimer.Setup(); err != nil {
-		logger.Fatalln("Failed setup:", err)
+	if err := orc.Setup(); err != nil {
+		logger.Println("Failed setup:", err)
+		TearDownAndExit(orc, logger)
 	}
 
-	defer func() {
-		if err := uptimer.TearDown(); err != nil {
-			logger.Fatalln("Failed teardown:", err)
-		}
-	}()
+	if err := orc.Run(); err != nil {
+		logger.Println("Failed run:", err)
+		TearDownAndExit(orc, logger)
+	}
 
-	if err := uptimer.Run(); err != nil {
-		logger.Fatalln("Failed run:", err)
+	TearDownAndExit(orc, logger)
+}
+
+func TearDownAndExit(orc orchestrator.Orchestrator, logger *log.Logger) {
+	if err := orc.TearDown(); err != nil {
+		logger.Fatalln("Failed teardown:", err)
 	}
 }

@@ -6,12 +6,24 @@ import (
 )
 
 type Config struct {
-	Command           string   `json:"command"`
-	CommandArgs       []string `json:"commandArgs"`
-	Api               string   `json:"api"`
-	AdminUsername     string   `json:"adminUsername"`
-	AdminPassword     string   `json:"adminPassword"`
-	SkipSslValidation bool     `json:"skipSslValidation"`
+	While *CommandConfig `json:"while"`
+	CF    *CfConfig      `json:"cf"`
+}
+
+type CommandConfig struct {
+	Command     string   `json:"command"`
+	CommandArgs []string `json:"command_args"`
+}
+
+type CfConfig struct {
+	API           string `json:"api"`
+	AdminUser     string `json:"admin_user"`
+	AdminPassword string `json:"admin_password"`
+
+	Org     string `json:"org"`
+	Space   string `json:"space"`
+	AppName string `json:"app_name"`
+	AppPath string `json:"app_path"`
 }
 
 func Load(filename string) (*Config, error) {

@@ -1,4 +1,4 @@
-package uptimer_test
+package orchestrator_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -9,5 +9,5 @@ import (
 
 func TestUptimer(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Uptimer Suite")
+	RunSpecs(t, "Orchestrator Suite")
 }

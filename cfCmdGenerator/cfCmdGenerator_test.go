@@ -19,18 +19,10 @@ var _ = Describe("CfHelper", func() {
 	})
 
 	Describe("Api", func() {
-		It("Generates the correct command not skipping ssl validation", func() {
-			expectedCmd := exec.Command("cf", "api", "api.example.com")
-
-			cmd := helper.Api("api.example.com", false)
-
-			Expect(cmd).To(Equal(expectedCmd))
-		})
-
 		It("Generates the correct command skipping ssl validation", func() {
 			expectedCmd := exec.Command("cf", "api", "api.example.com", "--skip-ssl-validation")
 
-			cmd := helper.Api("api.example.com", true)
+			cmd := helper.Api("api.example.com")
 
 			Expect(cmd).To(Equal(expectedCmd))
 		})
@@ -58,7 +50,7 @@ var _ = Describe("CfHelper", func() {
 
 	Describe("CreateSpace", func() {
 		It("Generates the correct command", func() {
-			expectedCmd := exec.Command("cf", "create-space", "someOrg", "someSpace")
+			expectedCmd := exec.Command("cf", "create-space", "someSpace", "-o", "someOrg")
 
 			cmd := helper.CreateSpace("someOrg", "someSpace")
 

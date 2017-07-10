@@ -1,8 +1,14 @@
 package cfWorkflow
 
-import "github.com/cloudfoundry/uptimer/cfCmdGenerator"
+import (
+	"fmt"
 
-import "github.com/cloudfoundry/uptimer/cmdRunner"
+	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
+	"github.com/cloudfoundry/uptimer/cmdRunner"
+	"github.com/cloudfoundry/uptimer/config"
+
+	"github.com/satori/go.uuid"
+)
 
 type CfWorkflow interface {
 	Setup() []cmdRunner.CmdStartWaiter
@@ -10,54 +16,44 @@ type CfWorkflow interface {
 }
 
 type cfWorkflow struct {
-	ApiUrl            string
-	Username          string
-	Password          string
-	Org               string
-	Space             string
-	AppName           string
-	AppPath           string
-	SkipSslValidation bool
-	CfCmdGenerator    cfCmdGenerator.CfCmdGenerator
+	Cf             *config.CfConfig
+	CfCmdGenerator cfCmdGenerator.CfCmdGenerator
 }
 
-func New(
-	apiUrl string,
-	username string,
-	password string,
-	org string,
-	space string,
-	appName string,
-	appPath string,
-	skipSslValidation bool,
-	cfCmdGenerator cfCmdGenerator.CfCmdGenerator,
-) CfWorkflow {
+func New(cfConfig *config.CfConfig, cfCmdGenerator cfCmdGenerator.CfCmdGenerator) CfWorkflow {
+	if cfConfig.Org == "" {
+		cfConfig.Org = fmt.Sprintf("uptimer-org-%s", uuid.NewV4().String())
+	}
+
+	if cfConfig.Space == "" {
+		cfConfig.Space = fmt.Sprintf("uptimer-space-%s", uuid.NewV4().String())
+	}
+
+	if cfConfig.AppName == "" {
+		cfConfig.AppName = fmt.Sprintf("uptimer-app-%s", uuid.NewV4().String())
+	}
+
 	return &cfWorkflow{
-		ApiUrl:            apiUrl,
-		Username:          username,
-		Password:          password,
-		Org:               org,
-		Space:             space,
-		AppName:           appName,
-		AppPath:           appPath,
-		SkipSslValidation: skipSslValidation,
-		CfCmdGenerator:    cfCmdGenerator,
+		Cf:             cfConfig,
+		CfCmdGenerator: cfCmdGenerator,
 	}
 }
 
 func (c *cfWorkflow) Setup() []cmdRunner.CmdStartWaiter {
 	return []cmdRunner.CmdStartWaiter{
-		c.CfCmdGenerator.Api(c.ApiUrl, c.SkipSslValidation),
-		c.CfCmdGenerator.Auth(c.Username, c.Password),
-		c.CfCmdGenerator.CreateOrg(c.Org),
-		c.CfCmdGenerator.CreateSpace(c.Org, c.Space),
-		c.CfCmdGenerator.Target(c.Org, c.Space),
-		c.CfCmdGenerator.Push(c.AppName, c.AppPath),
+		c.CfCmdGenerator.Api(c.Cf.API),
+		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
+		c.CfCmdGenerator.CreateOrg(c.Cf.Org),
+		c.CfCmdGenerator.CreateSpace(c.Cf.Org, c.Cf.Space),
+		c.CfCmdGenerator.Target(c.Cf.Org, c.Cf.Space),
+		c.CfCmdGenerator.Push(c.Cf.AppName, c.Cf.AppPath),
 	}
 }
 
 func (c *cfWorkflow) TearDown() []cmdRunner.CmdStartWaiter {
 	return []cmdRunner.CmdStartWaiter{
-		c.CfCmdGenerator.DeleteOrg(c.Org),
+		c.CfCmdGenerator.Api(c.Cf.API),
+		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
+		c.CfCmdGenerator.DeleteOrg(c.Cf.Org),
 	}
 }
