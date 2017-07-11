@@ -22,6 +22,7 @@ var _ = Describe("CfWorkflow", func() {
 	BeforeEach(func() {
 		cfc = &config.CfConfig{
 			API:           "jigglypuff.cf-app.com",
+			AppDomain:     "app.jigglypuff.cf-app.com",
 			AdminUser:     "pika",
 			AdminPassword: "chu",
 			Org:           "someOrg",
@@ -32,6 +33,10 @@ var _ = Describe("CfWorkflow", func() {
 		ccg = cfCmdGenerator.New()
 
 		cw = New(cfc, ccg)
+	})
+
+	It("has the correct app url", func() {
+		Expect(cw.AppUrl()).To(Equal("doraApp.app.jigglypuff.cf-app.com"))
 	})
 
 	Describe("Setup", func() {

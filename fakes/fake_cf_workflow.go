@@ -21,14 +21,17 @@ type FakeCfWorkflow struct {
 	tearDownReturns     struct {
 		result1 []cmdRunner.CmdStartWaiter
 	}
-	invocations      map[string][][]interface{}
-	invocationsMutex sync.RWMutex
+	AppUrlStub        func() string
+	appUrlMutex       sync.RWMutex
+	appUrlArgsForCall []struct{}
+	appUrlReturns     struct {
+		result1 string
+	}
 }
 
 func (fake *FakeCfWorkflow) Setup() []cmdRunner.CmdStartWaiter {
 	fake.setupMutex.Lock()
 	fake.setupArgsForCall = append(fake.setupArgsForCall, struct{}{})
-	fake.recordInvocation("Setup", []interface{}{})
 	fake.setupMutex.Unlock()
 	if fake.SetupStub != nil {
 		return fake.SetupStub()
@@ -53,7 +56,6 @@ func (fake *FakeCfWorkflow) SetupReturns(result1 []cmdRunner.CmdStartWaiter) {
 func (fake *FakeCfWorkflow) TearDown() []cmdRunner.CmdStartWaiter {
 	fake.tearDownMutex.Lock()
 	fake.tearDownArgsForCall = append(fake.tearDownArgsForCall, struct{}{})
-	fake.recordInvocation("TearDown", []interface{}{})
 	fake.tearDownMutex.Unlock()
 	if fake.TearDownStub != nil {
 		return fake.TearDownStub()
@@ -75,26 +77,28 @@ func (fake *FakeCfWorkflow) TearDownReturns(result1 []cmdRunner.CmdStartWaiter) 
 	}{result1}
 }
 
-func (fake *FakeCfWorkflow) Invocations() map[string][][]interface{} {
-	fake.invocationsMutex.RLock()
-	defer fake.invocationsMutex.RUnlock()
-	fake.setupMutex.RLock()
-	defer fake.setupMutex.RUnlock()
-	fake.tearDownMutex.RLock()
-	defer fake.tearDownMutex.RUnlock()
-	return fake.invocations
+func (fake *FakeCfWorkflow) AppUrl() string {
+	fake.appUrlMutex.Lock()
+	fake.appUrlArgsForCall = append(fake.appUrlArgsForCall, struct{}{})
+	fake.appUrlMutex.Unlock()
+	if fake.AppUrlStub != nil {
+		return fake.AppUrlStub()
+	} else {
+		return fake.appUrlReturns.result1
+	}
 }
 
-func (fake *FakeCfWorkflow) recordInvocation(key string, args []interface{}) {
-	fake.invocationsMutex.Lock()
-	defer fake.invocationsMutex.Unlock()
-	if fake.invocations == nil {
-		fake.invocations = map[string][][]interface{}{}
-	}
-	if fake.invocations[key] == nil {
-		fake.invocations[key] = [][]interface{}{}
-	}
-	fake.invocations[key] = append(fake.invocations[key], args)
+func (fake *FakeCfWorkflow) AppUrlCallCount() int {
+	fake.appUrlMutex.RLock()
+	defer fake.appUrlMutex.RUnlock()
+	return len(fake.appUrlArgsForCall)
+}
+
+func (fake *FakeCfWorkflow) AppUrlReturns(result1 string) {
+	fake.AppUrlStub = nil
+	fake.appUrlReturns = struct {
+		result1 string
+	}{result1}
 }
 
 var _ cfWorkflow.CfWorkflow = new(FakeCfWorkflow)

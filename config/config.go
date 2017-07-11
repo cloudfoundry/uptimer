@@ -17,6 +17,7 @@ type CommandConfig struct {
 
 type CfConfig struct {
 	API           string `json:"api"`
+	AppDomain     string `json:"app_domain"`
 	AdminUser     string `json:"admin_user"`
 	AdminPassword string `json:"admin_password"`
 

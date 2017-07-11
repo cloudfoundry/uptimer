@@ -13,11 +13,13 @@ import (
 type CfWorkflow interface {
 	Setup() []cmdRunner.CmdStartWaiter
 	TearDown() []cmdRunner.CmdStartWaiter
+	AppUrl() string
 }
 
 type cfWorkflow struct {
 	Cf             *config.CfConfig
 	CfCmdGenerator cfCmdGenerator.CfCmdGenerator
+	appUrl         string
 }
 
 func New(cfConfig *config.CfConfig, cfCmdGenerator cfCmdGenerator.CfCmdGenerator) CfWorkflow {
@@ -36,6 +38,7 @@ func New(cfConfig *config.CfConfig, cfCmdGenerator cfCmdGenerator.CfCmdGenerator
 	return &cfWorkflow{
 		Cf:             cfConfig,
 		CfCmdGenerator: cfCmdGenerator,
+		appUrl:         fmt.Sprintf("%s.%s", cfConfig.AppName, cfConfig.AppDomain),
 	}
 }
 
@@ -57,4 +60,8 @@ func (c *cfWorkflow) TearDown() []cmdRunner.CmdStartWaiter {
 		c.CfCmdGenerator.DeleteOrg(c.Cf.Org),
 		c.CfCmdGenerator.LogOut(),
 	}
+}
+
+func (c *cfWorkflow) AppUrl() string {
+	return c.appUrl
 }
