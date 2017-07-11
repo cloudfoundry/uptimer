@@ -14,6 +14,7 @@ type CfCmdGenerator interface {
 	Target(org, space string) cmdRunner.CmdStartWaiter
 	Push(name, path string) cmdRunner.CmdStartWaiter
 	DeleteOrg(org string) cmdRunner.CmdStartWaiter
+	LogOut() cmdRunner.CmdStartWaiter
 }
 
 type cfCmdGenerator struct{}
@@ -48,4 +49,8 @@ func (c *cfCmdGenerator) Push(name string, path string) cmdRunner.CmdStartWaiter
 
 func (c *cfCmdGenerator) DeleteOrg(org string) cmdRunner.CmdStartWaiter {
 	return exec.Command("cf", "delete-org", org, "-f")
+}
+
+func (c *cfCmdGenerator) LogOut() cmdRunner.CmdStartWaiter {
+	return exec.Command("cf", "logout")
 }

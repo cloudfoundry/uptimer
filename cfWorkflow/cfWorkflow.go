@@ -55,5 +55,6 @@ func (c *cfWorkflow) TearDown() []cmdRunner.CmdStartWaiter {
 		c.CfCmdGenerator.Api(c.Cf.API),
 		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
 		c.CfCmdGenerator.DeleteOrg(c.Cf.Org),
+		c.CfCmdGenerator.LogOut(),
 	}
 }

@@ -9,20 +9,20 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("CfHelper", func() {
+var _ = Describe("CfCmdGenerator", func() {
 	var (
-		helper CfCmdGenerator
+		generator CfCmdGenerator
 	)
 
 	BeforeEach(func() {
-		helper = New()
+		generator = New()
 	})
 
 	Describe("Api", func() {
 		It("Generates the correct command skipping ssl validation", func() {
 			expectedCmd := exec.Command("cf", "api", "api.example.com", "--skip-ssl-validation")
 
-			cmd := helper.Api("api.example.com")
+			cmd := generator.Api("api.example.com")
 
 			Expect(cmd).To(Equal(expectedCmd))
 		})
@@ -32,7 +32,7 @@ var _ = Describe("CfHelper", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "auth", "user44", "pass55")
 
-			cmd := helper.Auth("user44", "pass55")
+			cmd := generator.Auth("user44", "pass55")
 
 			Expect(cmd).To(Equal(expectedCmd))
 		})
@@ -42,7 +42,7 @@ var _ = Describe("CfHelper", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "create-org", "someOrg")
 
-			cmd := helper.CreateOrg("someOrg")
+			cmd := generator.CreateOrg("someOrg")
 
 			Expect(cmd).To(Equal(expectedCmd))
 		})
@@ -52,7 +52,7 @@ var _ = Describe("CfHelper", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "create-space", "someSpace", "-o", "someOrg")
 
-			cmd := helper.CreateSpace("someOrg", "someSpace")
+			cmd := generator.CreateSpace("someOrg", "someSpace")
 
 			Expect(cmd).To(Equal(expectedCmd))
 		})
@@ -62,7 +62,7 @@ var _ = Describe("CfHelper", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "target", "-o", "someOrg", "-s", "someSpace")
 
-			cmd := helper.Target("someOrg", "someSpace")
+			cmd := generator.Target("someOrg", "someSpace")
 
 			Expect(cmd).To(Equal(expectedCmd))
 		})
@@ -72,7 +72,7 @@ var _ = Describe("CfHelper", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "push", "appName", "-p", "path/to/app")
 
-			cmd := helper.Push("appName", "path/to/app")
+			cmd := generator.Push("appName", "path/to/app")
 
 			Expect(cmd).To(Equal(expectedCmd))
 		})
@@ -82,7 +82,17 @@ var _ = Describe("CfHelper", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "delete-org", "orgName", "-f")
 
-			cmd := helper.DeleteOrg("orgName")
+			cmd := generator.DeleteOrg("orgName")
+
+			Expect(cmd).To(Equal(expectedCmd))
+		})
+	})
+
+	Describe("LogOut", func() {
+		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "logout")
+
+			cmd := generator.LogOut()
 
 			Expect(cmd).To(Equal(expectedCmd))
 		})

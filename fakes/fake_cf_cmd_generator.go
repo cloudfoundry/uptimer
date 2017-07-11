@@ -69,6 +69,12 @@ type FakeCfCmdGenerator struct {
 	deleteOrgReturns struct {
 		result1 cmdRunner.CmdStartWaiter
 	}
+	LogOutStub        func() cmdRunner.CmdStartWaiter
+	logOutMutex       sync.RWMutex
+	logOutArgsForCall []struct{}
+	logOutReturns     struct {
+		result1 cmdRunner.CmdStartWaiter
+	}
 }
 
 func (fake *FakeCfCmdGenerator) Api(url string) cmdRunner.CmdStartWaiter {
@@ -295,6 +301,30 @@ func (fake *FakeCfCmdGenerator) DeleteOrgArgsForCall(i int) string {
 func (fake *FakeCfCmdGenerator) DeleteOrgReturns(result1 cmdRunner.CmdStartWaiter) {
 	fake.DeleteOrgStub = nil
 	fake.deleteOrgReturns = struct {
+		result1 cmdRunner.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfCmdGenerator) LogOut() cmdRunner.CmdStartWaiter {
+	fake.logOutMutex.Lock()
+	fake.logOutArgsForCall = append(fake.logOutArgsForCall, struct{}{})
+	fake.logOutMutex.Unlock()
+	if fake.LogOutStub != nil {
+		return fake.LogOutStub()
+	} else {
+		return fake.logOutReturns.result1
+	}
+}
+
+func (fake *FakeCfCmdGenerator) LogOutCallCount() int {
+	fake.logOutMutex.RLock()
+	defer fake.logOutMutex.RUnlock()
+	return len(fake.logOutArgsForCall)
+}
+
+func (fake *FakeCfCmdGenerator) LogOutReturns(result1 cmdRunner.CmdStartWaiter) {
+	fake.LogOutStub = nil
+	fake.logOutReturns = struct {
 		result1 cmdRunner.CmdStartWaiter
 	}{result1}
 }

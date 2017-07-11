@@ -109,6 +109,7 @@ var _ = Describe("CfWorkflow", func() {
 					ccg.Api("jigglypuff.cf-app.com"),
 					ccg.Auth("pika", "chu"),
 					ccg.DeleteOrg("someOrg"),
+					ccg.LogOut(),
 				},
 			))
 		})
