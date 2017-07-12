@@ -97,4 +97,14 @@ var _ = Describe("CfCmdGenerator", func() {
 			Expect(cmd).To(Equal(expectedCmd))
 		})
 	})
+
+	Describe("RecentLogs", func() {
+		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "logs", "appName", "--recent")
+
+			cmd := generator.RecentLogs("appName")
+
+			Expect(cmd).To(Equal(expectedCmd))
+		})
+	})
 })
