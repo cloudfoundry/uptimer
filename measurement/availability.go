@@ -8,23 +8,6 @@ import (
 	"github.com/benbjohnson/clock"
 )
 
-type availabilityResultSet struct {
-	successful int
-	failed     int
-}
-
-func (rs *availabilityResultSet) Successful() int {
-	return rs.successful
-}
-
-func (rs *availabilityResultSet) Failed() int {
-	return rs.failed
-}
-
-func (rs *availabilityResultSet) Total() int {
-	return rs.successful + rs.failed
-}
-
 type availability struct {
 	name      string
 	URL       string
@@ -32,7 +15,7 @@ type availability struct {
 	Clock     clock.Clock
 	Client    *http.Client
 
-	resultSet *availabilityResultSet
+	resultSet *resultSet
 	stopChan  chan int
 }
 

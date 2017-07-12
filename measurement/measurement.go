@@ -22,6 +22,23 @@ type ResultSet interface {
 	Total() int
 }
 
+type resultSet struct {
+	successful int
+	failed     int
+}
+
+func (rs *resultSet) Successful() int {
+	return rs.successful
+}
+
+func (rs *resultSet) Failed() int {
+	return rs.failed
+}
+
+func (rs *resultSet) Total() int {
+	return rs.successful + rs.failed
+}
+
 func NewAvailability(url string, frequency time.Duration, clock clock.Clock, client *http.Client) Measurement {
 	return &availability{
 		name:      "HTTP availability",
@@ -29,7 +46,7 @@ func NewAvailability(url string, frequency time.Duration, clock clock.Clock, cli
 		Frequency: frequency,
 		Clock:     clock,
 		Client:    client,
-		resultSet: &availabilityResultSet{},
+		resultSet: &resultSet{},
 		stopChan:  make(chan int),
 	}
 }
