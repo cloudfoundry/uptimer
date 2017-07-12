@@ -118,6 +118,23 @@ var _ = Describe("Availability", func() {
 		})
 	})
 
+	Describe("Failed", func() {
+		It("returns false when the measurement has succeeded", func() {
+			am.Start()
+			mockClock.Add(3 * freq)
+
+			Expect(am.Failed()).To(BeFalse())
+		})
+
+		It("returns true when the measurement has failed", func() {
+			am.Start()
+			fakeRoundTripper.RoundTripReturns(failResponse, nil)
+			mockClock.Add(3 * freq)
+
+			Expect(am.Failed()).To(BeTrue())
+		})
+	})
+
 	Describe("Summary", func() {
 		It("returns a success summary if none failed", func() {
 			am.Start()

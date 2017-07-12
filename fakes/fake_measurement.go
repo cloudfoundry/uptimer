@@ -33,6 +33,12 @@ type FakeMeasurement struct {
 		result1 measurement.ResultSet
 		result2 error
 	}
+	FailedStub        func() bool
+	failedMutex       sync.RWMutex
+	failedArgsForCall []struct{}
+	failedReturns     struct {
+		result1 bool
+	}
 	SummaryStub        func() string
 	summaryMutex       sync.RWMutex
 	summaryArgsForCall []struct{}
@@ -136,6 +142,30 @@ func (fake *FakeMeasurement) ResultsReturns(result1 measurement.ResultSet, resul
 		result1 measurement.ResultSet
 		result2 error
 	}{result1, result2}
+}
+
+func (fake *FakeMeasurement) Failed() bool {
+	fake.failedMutex.Lock()
+	fake.failedArgsForCall = append(fake.failedArgsForCall, struct{}{})
+	fake.failedMutex.Unlock()
+	if fake.FailedStub != nil {
+		return fake.FailedStub()
+	} else {
+		return fake.failedReturns.result1
+	}
+}
+
+func (fake *FakeMeasurement) FailedCallCount() int {
+	fake.failedMutex.RLock()
+	defer fake.failedMutex.RUnlock()
+	return len(fake.failedArgsForCall)
+}
+
+func (fake *FakeMeasurement) FailedReturns(result1 bool) {
+	fake.FailedStub = nil
+	fake.failedReturns = struct {
+		result1 bool
+	}{result1}
 }
 
 func (fake *FakeMeasurement) Summary() string {

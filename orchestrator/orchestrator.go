@@ -13,7 +13,7 @@ import (
 
 type Orchestrator interface {
 	Setup() error
-	Run() error
+	Run() (int, error)
 	TearDown() error
 }
 
@@ -43,7 +43,8 @@ func (o *orchestrator) Setup() error {
 	return nil
 }
 
-func (o *orchestrator) Run() error {
+func (o *orchestrator) Run() (int, error) {
+	var exitCode int
 	for _, m := range o.Measurements {
 		o.Logger.Printf("Starting measurement: %s\n", m.Name())
 		go m.Start()
@@ -52,7 +53,7 @@ func (o *orchestrator) Run() error {
 	cmd := exec.Command(o.WhileConfig.Command, o.WhileConfig.CommandArgs...)
 	o.Logger.Printf("Running command: `%s %s`\n", o.WhileConfig.Command, strings.Join(o.WhileConfig.CommandArgs, " "))
 	if err := o.Runner.Run(cmd); err != nil {
-		return err
+		return exitCode, err
 	}
 	o.Logger.Println("Finished running command")
 
@@ -60,9 +61,12 @@ func (o *orchestrator) Run() error {
 	for _, m := range o.Measurements {
 		m.Stop()
 		o.Logger.Println(m.Summary())
+		if m.Failed() {
+			exitCode = 1
+		}
 	}
 
-	return nil
+	return exitCode, nil
 }
 
 func (o *orchestrator) TearDown() error {

@@ -76,6 +76,9 @@ func (a *availability) Results() (ResultSet, error) {
 	return a.resultSet, nil
 }
 
+func (a *availability) Failed() bool {
+	return a.resultSet.failed > 0
+}
 func (a *availability) Summary() string {
 	rs := a.resultSet
 	if rs.failed > 0 {

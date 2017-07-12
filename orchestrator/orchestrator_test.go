@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"time"
 
 	"github.com/cloudfoundry/uptimer/cmdRunner"
 	"github.com/cloudfoundry/uptimer/config"
@@ -79,7 +80,7 @@ var _ = Describe("Orchestrator", func() {
 
 	Describe("Run", func() {
 		It("runs the given command", func() {
-			err := orc.Run()
+			_, err := orc.Run()
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(fakeRunner.RunCallCount()).To(Equal(1))
@@ -89,7 +90,7 @@ var _ = Describe("Orchestrator", func() {
 		It("returns an error if the command errors", func() {
 			fakeRunner.RunReturns(fmt.Errorf("oh boy"))
 
-			err := orc.Run()
+			_, err := orc.Run()
 
 			Expect(err).To(MatchError("oh boy"))
 		})
@@ -104,8 +105,8 @@ var _ = Describe("Orchestrator", func() {
 		It("starts all the measurements once", func() {
 			orc.Run()
 
-			Expect(fakeMeasurement1.StartCallCount()).To(Equal(1))
-			Expect(fakeMeasurement2.StartCallCount()).To(Equal(1))
+			Eventually(fakeMeasurement1.StartCallCount(), 5*time.Second).Should(Equal(1))
+			Eventually(fakeMeasurement2.StartCallCount(), 5*time.Second).Should(Equal(1))
 		})
 
 		It("stops all the measurements once", func() {
@@ -126,6 +127,20 @@ var _ = Describe("Orchestrator", func() {
 			Expect(logBuf.String()).To(ContainSubstring("Measurement summaries:"))
 			Expect(logBuf.String()).To(ContainSubstring("summary1"))
 			Expect(logBuf.String()).To(ContainSubstring("summary2"))
+		})
+
+		It("returns an exit code of 0 when all measurements succeed", func() {
+			ec, _ := orc.Run()
+
+			Expect(ec).To(Equal(0))
+		})
+
+		It("returns an exit code of 1 when any measurement fails", func() {
+			fakeMeasurement1.FailedReturns(true)
+
+			ec, _ := orc.Run()
+
+			Expect(ec).To(Equal(1))
 		})
 	})
 

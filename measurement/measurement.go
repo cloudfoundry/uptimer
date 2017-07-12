@@ -12,6 +12,7 @@ type Measurement interface {
 	Start() error
 	Stop() error
 	Results() (ResultSet, error)
+	Failed() bool
 	Summary() string
 }
 

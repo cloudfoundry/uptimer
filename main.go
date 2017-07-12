@@ -50,20 +50,22 @@ func main() {
 	logger.Println("Setting up")
 	if err := orc.Setup(); err != nil {
 		logger.Println("Failed setup:", err)
-		TearDownAndExit(orc, logger)
+		TearDownAndExit(orc, logger, 1)
 	}
 
-	if err := orc.Run(); err != nil {
+	exitCode, err := orc.Run()
+	if err != nil {
 		logger.Println("Failed run:", err)
-		TearDownAndExit(orc, logger)
+		TearDownAndExit(orc, logger, 1)
 	}
 
-	TearDownAndExit(orc, logger)
+	TearDownAndExit(orc, logger, exitCode)
 }
 
-func TearDownAndExit(orc orchestrator.Orchestrator, logger *log.Logger) {
+func TearDownAndExit(orc orchestrator.Orchestrator, logger *log.Logger, exitCode int) {
 	logger.Println("Tearing down")
 	if err := orc.TearDown(); err != nil {
 		logger.Fatalln("Failed teardown:", err)
 	}
+	os.Exit(exitCode)
 }
