@@ -36,11 +36,7 @@ func New(whileConfig *config.CommandConfig, logger *log.Logger, workflow cfWorkf
 }
 
 func (o *orchestrator) Setup() error {
-	if err := o.Runner.RunInSequence(o.Workflow.Setup()...); err != nil {
-		return err
-	}
-
-	return nil
+	return o.Runner.RunInSequence(o.Workflow.Setup()...)
 }
 
 func (o *orchestrator) Run() (int, error) {
@@ -55,6 +51,8 @@ func (o *orchestrator) Run() (int, error) {
 	if err := o.Runner.Run(cmd); err != nil {
 		return exitCode, err
 	}
+	o.Logger.Println()
+
 	o.Logger.Println("Finished running command")
 
 	o.Logger.Println("Measurement summaries:")
@@ -70,9 +68,5 @@ func (o *orchestrator) Run() (int, error) {
 }
 
 func (o *orchestrator) TearDown() error {
-	if err := o.Runner.RunInSequence(o.Workflow.TearDown()...); err != nil {
-		return err
-	}
-
-	return nil
+	return o.Runner.RunInSequence(o.Workflow.TearDown()...)
 }
