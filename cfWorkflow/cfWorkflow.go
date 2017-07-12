@@ -11,15 +11,21 @@ import (
 )
 
 type CfWorkflow interface {
+	AppUrl() string
+
 	Setup() []cmdRunner.CmdStartWaiter
 	TearDown() []cmdRunner.CmdStartWaiter
-	AppUrl() string
+	RecentLogs() []cmdRunner.CmdStartWaiter
 }
 
 type cfWorkflow struct {
 	Cf             *config.CfConfig
 	CfCmdGenerator cfCmdGenerator.CfCmdGenerator
 	appUrl         string
+}
+
+func (c *cfWorkflow) AppUrl() string {
+	return c.appUrl
 }
 
 func New(cfConfig *config.CfConfig, cfCmdGenerator cfCmdGenerator.CfCmdGenerator) CfWorkflow {
@@ -62,6 +68,10 @@ func (c *cfWorkflow) TearDown() []cmdRunner.CmdStartWaiter {
 	}
 }
 
-func (c *cfWorkflow) AppUrl() string {
-	return c.appUrl
+func (c *cfWorkflow) RecentLogs() []cmdRunner.CmdStartWaiter {
+	return []cmdRunner.CmdStartWaiter{
+		c.CfCmdGenerator.Api(c.Cf.API),
+		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
+		c.CfCmdGenerator.RecentLogs(c.Cf.AppName),
+	}
 }
