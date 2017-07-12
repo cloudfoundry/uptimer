@@ -105,8 +105,8 @@ var _ = Describe("Orchestrator", func() {
 		It("starts all the measurements once", func() {
 			orc.Run()
 
-			Eventually(fakeMeasurement1.StartCallCount(), 5*time.Second).Should(Equal(1))
-			Eventually(fakeMeasurement2.StartCallCount(), 5*time.Second).Should(Equal(1))
+			Eventually(fakeMeasurement1.StartCallCount, 3*time.Second).Should(Equal(1))
+			Eventually(fakeMeasurement2.StartCallCount, 3*time.Second).Should(Equal(1))
 		})
 
 		It("stops all the measurements once", func() {
