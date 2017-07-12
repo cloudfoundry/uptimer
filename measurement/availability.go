@@ -1,6 +1,7 @@
 package measurement
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -25,6 +26,7 @@ func (rs *availabilityResultSet) Total() int {
 }
 
 type availability struct {
+	name      string
 	URL       string
 	Frequency time.Duration
 	Clock     clock.Clock
@@ -32,6 +34,10 @@ type availability struct {
 
 	resultSet *availabilityResultSet
 	stopChan  chan int
+}
+
+func (a *availability) Name() string {
+	return a.name
 }
 
 func (a *availability) Start() error {
@@ -68,4 +74,13 @@ func (a *availability) Stop() error {
 
 func (a *availability) Results() (ResultSet, error) {
 	return a.resultSet, nil
+}
+
+func (a *availability) Summary() string {
+	rs := a.resultSet
+	if rs.failed > 0 {
+		return fmt.Sprintf("FAILED(%s): %d of %d requests failed", a.name, rs.Failed(), rs.Total())
+	}
+
+	return fmt.Sprintf("SUCCESS(%s): All %d requests succeeded", a.name, rs.Total())
 }

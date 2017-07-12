@@ -8,9 +8,11 @@ import (
 )
 
 type Measurement interface {
+	Name() string
 	Start() error
 	Stop() error
 	Results() (ResultSet, error)
+	Summary() string
 }
 
 type ResultSet interface {
@@ -21,6 +23,7 @@ type ResultSet interface {
 
 func NewAvailability(url string, frequency time.Duration, clock clock.Clock, client *http.Client) Measurement {
 	return &availability{
+		name:      "HTTP availability",
 		URL:       url,
 		Frequency: frequency,
 		Clock:     clock,

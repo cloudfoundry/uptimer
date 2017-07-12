@@ -11,29 +11,39 @@ import (
 	"github.com/cloudfoundry/uptimer/fakes"
 	. "github.com/cloudfoundry/uptimer/orchestrator"
 
+	"github.com/cloudfoundry/uptimer/measurement"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Orchestrator", func() {
 	var (
-		wcfg         *config.CommandConfig
-		logBuf       *bytes.Buffer
-		logger       *log.Logger
-		fakeWorkflow *fakes.FakeCfWorkflow
-		fakeRunner   *fakes.FakeCmdRunner
+		wcfg             *config.CommandConfig
+		logBuf           *bytes.Buffer
+		logger           *log.Logger
+		fakeWorkflow     *fakes.FakeCfWorkflow
+		fakeRunner       *fakes.FakeCmdRunner
+		fakeMeasurement1 *fakes.FakeMeasurement
+		fakeMeasurement2 *fakes.FakeMeasurement
 
-		uptimer Orchestrator
+		orc Orchestrator
 	)
 
 	BeforeEach(func() {
-		wcfg = &config.CommandConfig{}
+		wcfg = &config.CommandConfig{
+			Command:     "sleep",
+			CommandArgs: []string{"10"},
+		}
 		logBuf = bytes.NewBuffer([]byte{})
 		logger = log.New(logBuf, "", 0)
 		fakeWorkflow = &fakes.FakeCfWorkflow{}
 		fakeRunner = &fakes.FakeCmdRunner{}
+		fakeMeasurement1 = &fakes.FakeMeasurement{}
+		fakeMeasurement1.NameReturns("name1")
+		fakeMeasurement2 = &fakes.FakeMeasurement{}
+		fakeMeasurement2.NameReturns("name2")
 
-		uptimer = New(wcfg, logger, fakeWorkflow, fakeRunner)
+		orc = New(wcfg, logger, fakeWorkflow, fakeRunner, []measurement.Measurement{fakeMeasurement1, fakeMeasurement2})
 	})
 
 	Describe("Setup", func() {
@@ -45,7 +55,7 @@ var _ = Describe("Orchestrator", func() {
 				},
 			)
 
-			err := uptimer.Setup()
+			err := orc.Setup()
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(fakeWorkflow.SetupCallCount()).To(Equal(1))
@@ -61,14 +71,62 @@ var _ = Describe("Orchestrator", func() {
 		It("Returns an error if runner returns an error", func() {
 			fakeRunner.RunInSequenceReturns(fmt.Errorf("uh oh"))
 
-			err := uptimer.Setup()
+			err := orc.Setup()
 
 			Expect(err).To(MatchError("uh oh"))
 		})
 	})
 
 	Describe("Run", func() {
-		PIt("runs a measurement and returns a report")
+		It("runs the given command", func() {
+			err := orc.Run()
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(fakeRunner.RunCallCount()).To(Equal(1))
+			Expect(fakeRunner.RunArgsForCall(0)).To(Equal(exec.Command("sleep", "10")))
+		})
+
+		It("returns an error if the command errors", func() {
+			fakeRunner.RunReturns(fmt.Errorf("oh boy"))
+
+			err := orc.Run()
+
+			Expect(err).To(MatchError("oh boy"))
+		})
+
+		It("prints a list of all measurements", func() {
+			orc.Run()
+
+			Expect(logBuf.String()).To(ContainSubstring("Starting measurement: name1"))
+			Expect(logBuf.String()).To(ContainSubstring("Starting measurement: name2"))
+		})
+
+		It("starts all the measurements once", func() {
+			orc.Run()
+
+			Expect(fakeMeasurement1.StartCallCount()).To(Equal(1))
+			Expect(fakeMeasurement2.StartCallCount()).To(Equal(1))
+		})
+
+		It("stops all the measurements once", func() {
+			orc.Run()
+
+			Expect(fakeMeasurement1.StopCallCount()).To(Equal(1))
+			Expect(fakeMeasurement2.StopCallCount()).To(Equal(1))
+		})
+
+		It("gathers the sumaries and prints them all with a header", func() {
+			fakeMeasurement1.SummaryReturns("summary1")
+			fakeMeasurement2.SummaryReturns("summary2")
+
+			orc.Run()
+
+			Expect(fakeMeasurement1.SummaryCallCount()).To(Equal(1))
+			Expect(fakeMeasurement2.SummaryCallCount()).To(Equal(1))
+			Expect(logBuf.String()).To(ContainSubstring("Measurement summaries:"))
+			Expect(logBuf.String()).To(ContainSubstring("summary1"))
+			Expect(logBuf.String()).To(ContainSubstring("summary2"))
+		})
 	})
 
 	Describe("TearDown", func() {
@@ -80,7 +138,7 @@ var _ = Describe("Orchestrator", func() {
 				},
 			)
 
-			err := uptimer.TearDown()
+			err := orc.TearDown()
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(fakeWorkflow.TearDownCallCount()).To(Equal(1))
@@ -96,7 +154,7 @@ var _ = Describe("Orchestrator", func() {
 		It("Returns an error if runner returns an error", func() {
 			fakeRunner.RunInSequenceReturns(fmt.Errorf("uh oh"))
 
-			err := uptimer.TearDown()
+			err := orc.TearDown()
 
 			Expect(err).To(MatchError("uh oh"))
 		})

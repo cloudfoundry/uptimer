@@ -38,7 +38,7 @@ func New(cfConfig *config.CfConfig, cfCmdGenerator cfCmdGenerator.CfCmdGenerator
 	return &cfWorkflow{
 		Cf:             cfConfig,
 		CfCmdGenerator: cfCmdGenerator,
-		appUrl:         fmt.Sprintf("%s.%s", cfConfig.AppName, cfConfig.AppDomain),
+		appUrl:         fmt.Sprintf("https://%s.%s", cfConfig.AppName, cfConfig.AppDomain),
 	}
 }
 

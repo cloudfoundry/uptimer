@@ -43,6 +43,12 @@ var _ = Describe("Availability", func() {
 		am = NewAvailability(url, freq, mockClock, client)
 	})
 
+	Describe("Name", func() {
+		It("returns the name", func() {
+			Expect(am.Name()).To(Equal("HTTP availability"))
+		})
+	})
+
 	Describe("Start", func() {
 		AfterEach(func() {
 			am.Stop()
@@ -109,6 +115,25 @@ var _ = Describe("Availability", func() {
 			mockClock.Add(3 * freq)
 
 			Expect(fakeRoundTripper.RoundTripCallCount()).To(Equal(4))
+		})
+	})
+
+	Describe("Summary", func() {
+		It("returns a success summary if none failed", func() {
+			am.Start()
+			mockClock.Add(3 * freq)
+			am.Stop()
+
+			Expect(am.Summary()).To(Equal(fmt.Sprintf("SUCCESS(%s): All %d requests succeeded", am.Name(), 4)))
+		})
+		It("returns a failed summary if there are failures", func() {
+			am.Start()
+			mockClock.Add(3 * freq)
+			fakeRoundTripper.RoundTripReturns(failResponse, nil)
+			mockClock.Add(3 * freq)
+			am.Stop()
+
+			Expect(am.Summary()).To(Equal(fmt.Sprintf("FAILED(%s): %d of %d requests failed", am.Name(), 3, 7)))
 		})
 	})
 })

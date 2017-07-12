@@ -36,7 +36,7 @@ var _ = Describe("CfWorkflow", func() {
 	})
 
 	It("has the correct app url", func() {
-		Expect(cw.AppUrl()).To(Equal("doraApp.app.jigglypuff.cf-app.com"))
+		Expect(cw.AppUrl()).To(Equal("https://doraApp.app.jigglypuff.cf-app.com"))
 	})
 
 	Describe("Setup", func() {
