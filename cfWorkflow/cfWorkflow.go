@@ -72,6 +72,7 @@ func (c *cfWorkflow) RecentLogs() []cmdRunner.CmdStartWaiter {
 	return []cmdRunner.CmdStartWaiter{
 		c.CfCmdGenerator.Api(c.Cf.API),
 		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
+		c.CfCmdGenerator.Target(c.Cf.Org, c.Cf.Space),
 		c.CfCmdGenerator.RecentLogs(c.Cf.AppName),
 	}
 }

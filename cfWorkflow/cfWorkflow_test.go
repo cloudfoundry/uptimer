@@ -128,6 +128,7 @@ var _ = Describe("CfWorkflow", func() {
 				[]cmdRunner.CmdStartWaiter{
 					ccg.Api("jigglypuff.cf-app.com"),
 					ccg.Auth("pika", "chu"),
+					ccg.Target("someOrg", "someSpace"),
 					ccg.RecentLogs("doraApp"),
 				},
 			))
