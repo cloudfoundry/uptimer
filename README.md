@@ -38,8 +38,7 @@ a `bosh deploy` command.
 You should pass the
 `api` endpoint,
 `apps_domain`,
-`admin` credentials,
-and the path to an app to push.
+and `admin` credentials.
 It requires an admin user because
 it will attempt
 to create an org and space
@@ -55,8 +54,7 @@ Here is an example `config.json`:
         "api": "api.my-cf.com",
         "app_domain": "my-cf.com",
         "admin_user": "admin",
-        "admin_password": "PASS",
-        "app_path": "/Users/somebody/workspace/my_app"
+        "admin_password": "PASS"
     }
 }
 ```

@@ -12,6 +12,7 @@ import (
 	"io/ioutil"
 
 	"github.com/benbjohnson/clock"
+	"github.com/cloudfoundry/uptimer/cfAppGenerator"
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
 	"github.com/cloudfoundry/uptimer/cfWorkflow"
 	"github.com/cloudfoundry/uptimer/cmdRunner"
@@ -36,7 +37,15 @@ func main() {
 	stdOutAndErrRunner := cmdRunner.New(os.Stdout, os.Stderr, io.Copy)
 	discardOutputRunner := cmdRunner.New(ioutil.Discard, ioutil.Discard, io.Copy)
 	cfCmdGenerator := cfCmdGenerator.New()
-	workflow := cfWorkflow.New(cfg.CF, cfCmdGenerator)
+
+	cfAppGenerator := cfAppGenerator.NewStaticApp(ioutil.TempDir, ioutil.WriteFile)
+	staticAppPath, err := cfAppGenerator.Path()
+	if err != nil {
+		logger.Println("Failed generating app:", err)
+		os.Exit(1)
+	}
+
+	workflow := cfWorkflow.New(cfg.CF, cfCmdGenerator, staticAppPath)
 	measurements := []measurement.Measurement{
 		measurement.NewAvailability(
 			workflow.AppUrl(),

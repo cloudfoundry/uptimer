@@ -22,13 +22,14 @@ type cfWorkflow struct {
 	Cf             *config.CfConfig
 	CfCmdGenerator cfCmdGenerator.CfCmdGenerator
 	appUrl         string
+	appPath        string
 }
 
 func (c *cfWorkflow) AppUrl() string {
 	return c.appUrl
 }
 
-func New(cfConfig *config.CfConfig, cfCmdGenerator cfCmdGenerator.CfCmdGenerator) CfWorkflow {
+func New(cfConfig *config.CfConfig, cfCmdGenerator cfCmdGenerator.CfCmdGenerator, appPath string) CfWorkflow {
 	if cfConfig.Org == "" {
 		cfConfig.Org = fmt.Sprintf("uptimer-org-%s", uuid.NewV4().String())
 	}
@@ -45,6 +46,7 @@ func New(cfConfig *config.CfConfig, cfCmdGenerator cfCmdGenerator.CfCmdGenerator
 		Cf:             cfConfig,
 		CfCmdGenerator: cfCmdGenerator,
 		appUrl:         fmt.Sprintf("https://%s.%s", cfConfig.AppName, cfConfig.AppDomain),
+		appPath:        appPath,
 	}
 }
 
@@ -55,7 +57,7 @@ func (c *cfWorkflow) Setup() []cmdRunner.CmdStartWaiter {
 		c.CfCmdGenerator.CreateOrg(c.Cf.Org),
 		c.CfCmdGenerator.CreateSpace(c.Cf.Org, c.Cf.Space),
 		c.CfCmdGenerator.Target(c.Cf.Org, c.Cf.Space),
-		c.CfCmdGenerator.Push(c.Cf.AppName, c.Cf.AppPath),
+		c.CfCmdGenerator.Push(c.Cf.AppName, c.appPath),
 	}
 }
 

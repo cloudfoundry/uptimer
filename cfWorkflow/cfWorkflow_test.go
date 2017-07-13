@@ -13,8 +13,9 @@ import (
 
 var _ = Describe("CfWorkflow", func() {
 	var (
-		cfc *config.CfConfig
-		ccg cfCmdGenerator.CfCmdGenerator
+		cfc     *config.CfConfig
+		ccg     cfCmdGenerator.CfCmdGenerator
+		appPath string
 
 		cw CfWorkflow
 	)
@@ -28,11 +29,11 @@ var _ = Describe("CfWorkflow", func() {
 			Org:           "someOrg",
 			Space:         "someSpace",
 			AppName:       "doraApp",
-			AppPath:       "doraPath",
 		}
 		ccg = cfCmdGenerator.New()
+		appPath = "this/is/an/app/path"
 
-		cw = New(cfc, ccg)
+		cw = New(cfc, ccg, appPath)
 	})
 
 	It("has the correct app url", func() {
@@ -50,7 +51,7 @@ var _ = Describe("CfWorkflow", func() {
 					ccg.CreateOrg("someOrg"),
 					ccg.CreateSpace("someOrg", "someSpace"),
 					ccg.Target("someOrg", "someSpace"),
-					ccg.Push("doraApp", "doraPath"),
+					ccg.Push("doraApp", "this/is/an/app/path"),
 				},
 			))
 		})
@@ -65,7 +66,6 @@ var _ = Describe("CfWorkflow", func() {
 					API:           "jigglypuff.cf-app.com",
 					AdminUser:     "pika",
 					AdminPassword: "chu",
-					AppPath:       "doraPath",
 				}
 				fakeCfCmdGenerator = &fakes.FakeCfCmdGenerator{
 					ApiStub:         ccg.Api,
@@ -76,7 +76,7 @@ var _ = Describe("CfWorkflow", func() {
 					PushStub:        ccg.Push,
 				}
 
-				cw = New(cfc, fakeCfCmdGenerator)
+				cw = New(cfc, fakeCfCmdGenerator, appPath)
 			})
 
 			It("generates identifiable but non-colliding names", func() {
@@ -98,7 +98,7 @@ var _ = Describe("CfWorkflow", func() {
 						ccg.CreateOrg(generatedOrg),
 						ccg.CreateSpace(generatedOrg, generatedSpace),
 						ccg.Target(generatedOrg, generatedSpace),
-						ccg.Push(generatedAppName, "doraPath"),
+						ccg.Push(generatedAppName, "this/is/an/app/path"),
 					},
 				))
 			})

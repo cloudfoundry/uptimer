@@ -24,7 +24,6 @@ type CfConfig struct {
 	Org     string `json:"org"`
 	Space   string `json:"space"`
 	AppName string `json:"app_name"`
-	AppPath string `json:"app_path"`
 }
 
 func Load(filename string) (*Config, error) {
