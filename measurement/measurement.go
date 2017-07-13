@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
+	"github.com/cloudfoundry/uptimer/cmdRunner"
 )
 
 type Measurement interface {
@@ -46,6 +47,18 @@ func NewAvailability(url string, frequency time.Duration, clock clock.Clock, cli
 		Frequency: frequency,
 		Clock:     clock,
 		Client:    client,
+		resultSet: &resultSet{},
+		stopChan:  make(chan int),
+	}
+}
+
+func NewRecentLogs(frequency time.Duration, clock clock.Clock, recentLogsCommandGeneratorFunc func() []cmdRunner.CmdStartWaiter, runner cmdRunner.CmdRunner) Measurement {
+	return &recentLogs{
+		name: "Recent logs fetching",
+		RecentLogsCommandGeneratorFunc: recentLogsCommandGeneratorFunc,
+		Runner:    runner,
+		Frequency: frequency,
+		Clock:     clock,
 		resultSet: &resultSet{},
 		stopChan:  make(chan int),
 	}

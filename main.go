@@ -9,6 +9,8 @@ import (
 	"os"
 	"time"
 
+	"io/ioutil"
+
 	"github.com/benbjohnson/clock"
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
 	"github.com/cloudfoundry/uptimer/cfWorkflow"
@@ -31,21 +33,30 @@ func main() {
 	}
 
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime|log.LUTC)
-	runner := cmdRunner.New(os.Stdout, os.Stderr, io.Copy)
+	stdOutAndErrRunner := cmdRunner.New(os.Stdout, os.Stderr, io.Copy)
+	discardOutputRunner := cmdRunner.New(ioutil.Discard, ioutil.Discard, io.Copy)
 	cfCmdGenerator := cfCmdGenerator.New()
 	workflow := cfWorkflow.New(cfg.CF, cfCmdGenerator)
-	availabilityMeasurement := measurement.NewAvailability(
-		workflow.AppUrl(),
-		time.Second,
-		clock.New(),
-		&http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	measurements := []measurement.Measurement{
+		measurement.NewAvailability(
+			workflow.AppUrl(),
+			time.Second,
+			clock.New(),
+			&http.Client{
+				Transport: &http.Transport{
+					TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+				},
 			},
-		},
-	)
+		),
+		measurement.NewRecentLogs(
+			10*time.Second,
+			clock.New(),
+			workflow.RecentLogs,
+			discardOutputRunner,
+		),
+	}
 
-	orc := orchestrator.New(cfg.While, logger, workflow, runner, []measurement.Measurement{availabilityMeasurement})
+	orc := orchestrator.New(cfg.While, logger, workflow, stdOutAndErrRunner, measurements)
 
 	logger.Println("Setting up")
 	if err := orc.Setup(); err != nil {
