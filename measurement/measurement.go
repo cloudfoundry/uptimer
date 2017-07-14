@@ -4,7 +4,10 @@ import (
 	"net/http"
 	"time"
 
+	"bytes"
+
 	"github.com/benbjohnson/clock"
+	"github.com/cloudfoundry/uptimer/appLogValidator"
 	"github.com/cloudfoundry/uptimer/cmdRunner"
 )
 
@@ -52,14 +55,16 @@ func NewAvailability(url string, frequency time.Duration, clock clock.Clock, cli
 	}
 }
 
-func NewRecentLogs(frequency time.Duration, clock clock.Clock, recentLogsCommandGeneratorFunc func() []cmdRunner.CmdStartWaiter, runner cmdRunner.CmdRunner) Measurement {
+func NewRecentLogs(frequency time.Duration, clock clock.Clock, recentLogsCommandGeneratorFunc func() []cmdRunner.CmdStartWaiter, runner cmdRunner.CmdRunner, logBuf *bytes.Buffer, appLogValidator appLogValidator.AppLogValidator) Measurement {
 	return &recentLogs{
 		name: "Recent logs fetching",
 		RecentLogsCommandGeneratorFunc: recentLogsCommandGeneratorFunc,
-		Runner:    runner,
-		Frequency: frequency,
-		Clock:     clock,
-		resultSet: &resultSet{},
-		stopChan:  make(chan int),
+		Runner:          runner,
+		LogBuf:          logBuf,
+		appLogValidator: appLogValidator,
+		Frequency:       frequency,
+		Clock:           clock,
+		resultSet:       &resultSet{},
+		stopChan:        make(chan int),
 	}
 }

@@ -1,22 +1,29 @@
 package measurement
 
 import (
+	"bytes"
 	"fmt"
 	"time"
 
 	"github.com/benbjohnson/clock"
+
+	"github.com/cloudfoundry/uptimer/appLogValidator"
 	"github.com/cloudfoundry/uptimer/cmdRunner"
 )
 
 type recentLogs struct {
 	RecentLogsCommandGeneratorFunc func() []cmdRunner.CmdStartWaiter
 	Runner                         cmdRunner.CmdRunner
+	LogBuf                         *bytes.Buffer
 	Frequency                      time.Duration
 	Clock                          clock.Clock
+	appLogValidator                appLogValidator.AppLogValidator
 
 	name      string
 	resultSet *resultSet
 	stopChan  chan int
+
+	lastAppNumber int
 }
 
 func (r *recentLogs) Name() string {
@@ -44,9 +51,17 @@ func (r *recentLogs) Start() error {
 func (r *recentLogs) getRecentLogs() {
 	if err := r.Runner.RunInSequence(r.RecentLogsCommandGeneratorFunc()...); err != nil {
 		r.resultSet.failed++
-	} else {
-		r.resultSet.successful++
+		return
 	}
+
+	logIsNewer, err := r.appLogValidator.IsNewer(r.LogBuf.String())
+	r.LogBuf.Reset()
+	if err != nil || !logIsNewer {
+		r.resultSet.failed++
+		return
+	}
+
+	r.resultSet.successful++
 }
 
 func (r *recentLogs) Stop() error {
