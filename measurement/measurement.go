@@ -68,3 +68,15 @@ func NewRecentLogs(frequency time.Duration, clock clock.Clock, recentLogsCommand
 		stopChan:        make(chan int),
 	}
 }
+
+func NewPushability(frequency time.Duration, clock clock.Clock, pushAndDeleteAppCommandGeneratorFunc func() []cmdRunner.CmdStartWaiter, runner cmdRunner.CmdRunner) Measurement {
+	return &pushability{
+		name: "App pushability",
+		PushAndDeleteAppCommandGeneratorFunc: pushAndDeleteAppCommandGeneratorFunc,
+		Runner:    runner,
+		Frequency: frequency,
+		Clock:     clock,
+		resultSet: &resultSet{},
+		stopChan:  make(chan int),
+	}
+}

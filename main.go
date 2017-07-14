@@ -9,12 +9,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path"
 	"time"
 
 	"github.com/benbjohnson/clock"
-
-	"os/exec"
 
 	"github.com/cloudfoundry/uptimer/appLogValidator"
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
@@ -55,6 +54,27 @@ func main() {
 	bufferRunner := cmdRunner.New(recentLogsBuf, ioutil.Discard, io.Copy)
 	appLogValidator := appLogValidator.New()
 
+	// We are copying values from the cfg object so that this workflow generates its own
+	// org, space, and app names
+	pushWorkflow := cfWorkflow.New(
+		&config.CfConfig{
+			API:           cfg.CF.API,
+			AppDomain:     cfg.CF.AppDomain,
+			AdminUser:     cfg.CF.AdminUser,
+			AdminPassword: cfg.CF.AdminPassword,
+		},
+		cfCmdGenerator,
+		appPath,
+	)
+	discardRunner := cmdRunner.New(ioutil.Discard, ioutil.Discard, io.Copy)
+	if err := discardRunner.RunInSequence(pushWorkflow.Setup()...); err != nil {
+		logger.Println("Failed push workflow setup: ", err)
+		if err := discardRunner.RunInSequence(pushWorkflow.TearDown()...); err != nil {
+			logger.Println("Failed push workflow teardown: ", err)
+		}
+		os.Exit(1)
+	}
+
 	measurements := []measurement.Measurement{
 		measurement.NewAvailability(
 			workflow.AppUrl(),
@@ -74,6 +94,17 @@ func main() {
 			recentLogsBuf,
 			appLogValidator,
 		),
+		measurement.NewPushability(
+			time.Minute,
+			clock.New(),
+			func() []cmdRunner.CmdStartWaiter {
+				cmds := pushWorkflow.Push()
+				// Add a sleep here to allow cf route state to steady
+				cmds = append(cmds, exec.Command("sleep", "10"))
+				return append(cmds, pushWorkflow.Delete()...)
+			},
+			discardRunner,
+		),
 	}
 
 	orc := orchestrator.New(cfg.While, logger, workflow, stdOutAndErrRunner, measurements)
@@ -81,22 +112,27 @@ func main() {
 	logger.Println("Setting up")
 	if err := orc.Setup(); err != nil {
 		logger.Println("Failed setup:", err)
-		TearDownAndExit(orc, logger, 1)
+		TearDownAndExit(orc, logger, pushWorkflow, stdOutAndErrRunner, 1)
 	}
 
 	exitCode, err := orc.Run()
 	if err != nil {
 		logger.Println("Failed run:", err)
-		TearDownAndExit(orc, logger, 1)
+		TearDownAndExit(orc, logger, pushWorkflow, stdOutAndErrRunner, 1)
 	}
 
-	TearDownAndExit(orc, logger, exitCode)
+	TearDownAndExit(orc, logger, pushWorkflow, stdOutAndErrRunner, exitCode)
 }
 
-func TearDownAndExit(orc orchestrator.Orchestrator, logger *log.Logger, exitCode int) {
+func TearDownAndExit(orc orchestrator.Orchestrator, logger *log.Logger, pushWorkflow cfWorkflow.CfWorkflow, runner cmdRunner.CmdRunner, exitCode int) {
 	logger.Println("Tearing down")
 	if err := orc.TearDown(); err != nil {
-		logger.Fatalln("Failed teardown:", err)
+		logger.Fatalln("Failed main teardown:", err)
 	}
+	if err := runner.RunInSequence(pushWorkflow.TearDown()...); err != nil {
+		logger.Println("Failed push workflow teardown: ", err)
+		exitCode = 1
+	}
+
 	os.Exit(exitCode)
 }
