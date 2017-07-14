@@ -31,7 +31,7 @@ var _ = Describe("CfWorkflow", func() {
 			Space:         "someSpace",
 			AppName:       "doraApp",
 		}
-		ccg = cfCmdGenerator.New()
+		ccg = cfCmdGenerator.New("/cfhome")
 		appPath = "this/is/an/app/path"
 		guidMatchingRegex = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}"
 

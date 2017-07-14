@@ -1,6 +1,7 @@
 package cfCmdGenerator
 
 import (
+	"fmt"
 	"os/exec"
 
 	"github.com/cloudfoundry/uptimer/cmdRunner"
@@ -19,52 +20,59 @@ type CfCmdGenerator interface {
 	RecentLogs(appName string) cmdRunner.CmdStartWaiter
 }
 
-type cfCmdGenerator struct{}
+type cfCmdGenerator struct {
+	cfHome string
+}
 
-func New() CfCmdGenerator {
-	return &cfCmdGenerator{}
+func New(cfHome string) CfCmdGenerator {
+	return &cfCmdGenerator{cfHome: cfHome}
+}
+
+func (c *cfCmdGenerator) addCfHome(cmd *exec.Cmd) cmdRunner.CmdStartWaiter {
+	cmd.Env = []string{fmt.Sprintf("CF_HOME=%s", c.cfHome)}
+	return cmd
 }
 
 func (c *cfCmdGenerator) Api(url string) cmdRunner.CmdStartWaiter {
-	return exec.Command("cf", "api", url, "--skip-ssl-validation")
+	return c.addCfHome(exec.Command("cf", "api", url, "--skip-ssl-validation"))
 }
 
 func (c *cfCmdGenerator) Auth(username string, password string) cmdRunner.CmdStartWaiter {
-	return exec.Command("cf", "auth", username, password)
+	return c.addCfHome(exec.Command("cf", "auth", username, password))
 }
 
 func (c *cfCmdGenerator) CreateOrg(org string) cmdRunner.CmdStartWaiter {
-	return exec.Command("cf", "create-org", org)
+	return c.addCfHome(exec.Command("cf", "create-org", org))
 }
 
 func (c *cfCmdGenerator) CreateSpace(org string, space string) cmdRunner.CmdStartWaiter {
-	return exec.Command("cf", "create-space", space, "-o", org)
+	return c.addCfHome(exec.Command("cf", "create-space", space, "-o", org))
 }
 
 func (c *cfCmdGenerator) Target(org string, space string) cmdRunner.CmdStartWaiter {
-	return exec.Command("cf", "target", "-o", org, "-s", space)
+	return c.addCfHome(exec.Command("cf", "target", "-o", org, "-s", space))
 }
 
 func (c *cfCmdGenerator) Push(name string, path string) cmdRunner.CmdStartWaiter {
-	return exec.Command(
+	return c.addCfHome(exec.Command(
 		"cf", "push", name,
 		"-p", path,
 		"-b", "binary_buildpack",
-		"-c", "./app")
+		"-c", "./app"))
 }
 
 func (c *cfCmdGenerator) Delete(name string) cmdRunner.CmdStartWaiter {
-	return exec.Command("cf", "delete", name, "-f", "-r")
+	return c.addCfHome(exec.Command("cf", "delete", name, "-f", "-r"))
 }
 
 func (c *cfCmdGenerator) DeleteOrg(org string) cmdRunner.CmdStartWaiter {
-	return exec.Command("cf", "delete-org", org, "-f")
+	return c.addCfHome(exec.Command("cf", "delete-org", org, "-f"))
 }
 
 func (c *cfCmdGenerator) LogOut() cmdRunner.CmdStartWaiter {
-	return exec.Command("cf", "logout")
+	return c.addCfHome(exec.Command("cf", "logout"))
 }
 
 func (c *cfCmdGenerator) RecentLogs(appName string) cmdRunner.CmdStartWaiter {
-	return exec.Command("cf", "logs", appName, "--recent")
+	return c.addCfHome(exec.Command("cf", "logs", appName, "--recent"))
 }

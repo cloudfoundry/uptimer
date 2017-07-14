@@ -1,9 +1,10 @@
 package cfCmdGenerator_test
 
 import (
-	. "github.com/cloudfoundry/uptimer/cfCmdGenerator"
-
+	"fmt"
 	"os/exec"
+
+	. "github.com/cloudfoundry/uptimer/cfCmdGenerator"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -11,16 +12,21 @@ import (
 
 var _ = Describe("CfCmdGenerator", func() {
 	var (
+		cfHome string
+
 		generator CfCmdGenerator
 	)
 
 	BeforeEach(func() {
-		generator = New()
+		cfHome = "/on/the/range"
+
+		generator = New(cfHome)
 	})
 
 	Describe("Api", func() {
 		It("Generates the correct command skipping ssl validation", func() {
 			expectedCmd := exec.Command("cf", "api", "api.example.com", "--skip-ssl-validation")
+			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
 
 			cmd := generator.Api("api.example.com")
 
@@ -31,6 +37,7 @@ var _ = Describe("CfCmdGenerator", func() {
 	Describe("Auth", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "auth", "user44", "pass55")
+			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
 
 			cmd := generator.Auth("user44", "pass55")
 
@@ -41,6 +48,7 @@ var _ = Describe("CfCmdGenerator", func() {
 	Describe("CreateOrg", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "create-org", "someOrg")
+			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
 
 			cmd := generator.CreateOrg("someOrg")
 
@@ -51,6 +59,7 @@ var _ = Describe("CfCmdGenerator", func() {
 	Describe("CreateSpace", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "create-space", "someSpace", "-o", "someOrg")
+			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
 
 			cmd := generator.CreateSpace("someOrg", "someSpace")
 
@@ -61,6 +70,7 @@ var _ = Describe("CfCmdGenerator", func() {
 	Describe("Target", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "target", "-o", "someOrg", "-s", "someSpace")
+			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
 
 			cmd := generator.Target("someOrg", "someSpace")
 
@@ -71,6 +81,7 @@ var _ = Describe("CfCmdGenerator", func() {
 	Describe("Push", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "push", "appName", "-p", "path/to/app", "-b", "binary_buildpack", "-c", "./app")
+			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
 
 			cmd := generator.Push("appName", "path/to/app")
 
@@ -81,6 +92,7 @@ var _ = Describe("CfCmdGenerator", func() {
 	Describe("Delete", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "delete", "appName", "-f", "-r")
+			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
 
 			cmd := generator.Delete("appName")
 
@@ -91,6 +103,7 @@ var _ = Describe("CfCmdGenerator", func() {
 	Describe("DeleteOrg", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "delete-org", "orgName", "-f")
+			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
 
 			cmd := generator.DeleteOrg("orgName")
 
@@ -101,6 +114,7 @@ var _ = Describe("CfCmdGenerator", func() {
 	Describe("LogOut", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "logout")
+			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
 
 			cmd := generator.LogOut()
 
@@ -111,6 +125,7 @@ var _ = Describe("CfCmdGenerator", func() {
 	Describe("RecentLogs", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "logs", "appName", "--recent")
+			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
 
 			cmd := generator.RecentLogs("appName")
 
