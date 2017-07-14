@@ -27,6 +27,15 @@ type FakeCfWorkflow struct {
 	setupReturnsOnCall map[int]struct {
 		result1 []cmdRunner.CmdStartWaiter
 	}
+	PushStub        func() []cmdRunner.CmdStartWaiter
+	pushMutex       sync.RWMutex
+	pushArgsForCall []struct{}
+	pushReturns     struct {
+		result1 []cmdRunner.CmdStartWaiter
+	}
+	pushReturnsOnCall map[int]struct {
+		result1 []cmdRunner.CmdStartWaiter
+	}
 	TearDownStub        func() []cmdRunner.CmdStartWaiter
 	tearDownMutex       sync.RWMutex
 	tearDownArgsForCall []struct{}
@@ -129,6 +138,46 @@ func (fake *FakeCfWorkflow) SetupReturnsOnCall(i int, result1 []cmdRunner.CmdSta
 	}{result1}
 }
 
+func (fake *FakeCfWorkflow) Push() []cmdRunner.CmdStartWaiter {
+	fake.pushMutex.Lock()
+	ret, specificReturn := fake.pushReturnsOnCall[len(fake.pushArgsForCall)]
+	fake.pushArgsForCall = append(fake.pushArgsForCall, struct{}{})
+	fake.recordInvocation("Push", []interface{}{})
+	fake.pushMutex.Unlock()
+	if fake.PushStub != nil {
+		return fake.PushStub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.pushReturns.result1
+}
+
+func (fake *FakeCfWorkflow) PushCallCount() int {
+	fake.pushMutex.RLock()
+	defer fake.pushMutex.RUnlock()
+	return len(fake.pushArgsForCall)
+}
+
+func (fake *FakeCfWorkflow) PushReturns(result1 []cmdRunner.CmdStartWaiter) {
+	fake.PushStub = nil
+	fake.pushReturns = struct {
+		result1 []cmdRunner.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfWorkflow) PushReturnsOnCall(i int, result1 []cmdRunner.CmdStartWaiter) {
+	fake.PushStub = nil
+	if fake.pushReturnsOnCall == nil {
+		fake.pushReturnsOnCall = make(map[int]struct {
+			result1 []cmdRunner.CmdStartWaiter
+		})
+	}
+	fake.pushReturnsOnCall[i] = struct {
+		result1 []cmdRunner.CmdStartWaiter
+	}{result1}
+}
+
 func (fake *FakeCfWorkflow) TearDown() []cmdRunner.CmdStartWaiter {
 	fake.tearDownMutex.Lock()
 	ret, specificReturn := fake.tearDownReturnsOnCall[len(fake.tearDownArgsForCall)]
@@ -216,6 +265,8 @@ func (fake *FakeCfWorkflow) Invocations() map[string][][]interface{} {
 	defer fake.appUrlMutex.RUnlock()
 	fake.setupMutex.RLock()
 	defer fake.setupMutex.RUnlock()
+	fake.pushMutex.RLock()
+	defer fake.pushMutex.RUnlock()
 	fake.tearDownMutex.RLock()
 	defer fake.tearDownMutex.RUnlock()
 	fake.recentLogsMutex.RLock()

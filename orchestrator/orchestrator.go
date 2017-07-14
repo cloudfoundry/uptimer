@@ -36,7 +36,7 @@ func New(whileConfig *config.CommandConfig, logger *log.Logger, workflow cfWorkf
 }
 
 func (o *orchestrator) Setup() error {
-	return o.Runner.RunInSequence(o.Workflow.Setup()...)
+	return o.Runner.RunInSequence(append(o.Workflow.Setup(), o.Workflow.Push()...)...)
 }
 
 func (o *orchestrator) Run() (int, error) {

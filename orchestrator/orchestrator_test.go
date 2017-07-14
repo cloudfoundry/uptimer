@@ -48,11 +48,16 @@ var _ = Describe("Orchestrator", func() {
 	})
 
 	Describe("Setup", func() {
-		It("calls workflow to get setup stuff and runs it", func() {
+		It("calls workflow to get setup and push stuff and runs it", func() {
 			fakeWorkflow.SetupReturns(
 				[]cmdRunner.CmdStartWaiter{
 					exec.Command("ls"),
 					exec.Command("whoami"),
+				},
+			)
+			fakeWorkflow.PushReturns(
+				[]cmdRunner.CmdStartWaiter{
+					exec.Command("push", "an", "app"),
 				},
 			)
 
@@ -60,11 +65,13 @@ var _ = Describe("Orchestrator", func() {
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(fakeWorkflow.SetupCallCount()).To(Equal(1))
+			Expect(fakeWorkflow.PushCallCount()).To(Equal(1))
 			Expect(fakeRunner.RunInSequenceCallCount()).To(Equal(1))
 			Expect(fakeRunner.RunInSequenceArgsForCall(0)).To(Equal(
 				[]cmdRunner.CmdStartWaiter{
 					exec.Command("ls"),
 					exec.Command("whoami"),
+					exec.Command("push", "an", "app"),
 				},
 			))
 		})
