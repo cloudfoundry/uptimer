@@ -45,7 +45,11 @@ func (c *cfCmdGenerator) Target(org string, space string) cmdRunner.CmdStartWait
 }
 
 func (c *cfCmdGenerator) Push(name string, path string) cmdRunner.CmdStartWaiter {
-	return exec.Command("cf", "push", name, "-p", path)
+	return exec.Command(
+		"cf", "push", name,
+		"-p", path,
+		"-b", "binary_buildpack",
+		"-c", "./app")
 }
 
 func (c *cfCmdGenerator) DeleteOrg(org string) cmdRunner.CmdStartWaiter {

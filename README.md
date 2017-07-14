@@ -34,7 +34,7 @@ you may wish to configure
 the while_command to be
 a `bosh deploy` command.
 
-## You will also need to configure it with credentials and an app to use
+## You will also need to configure it with credentials
 You should pass the
 `api` endpoint,
 `apps_domain`,
@@ -42,7 +42,7 @@ and `admin` credentials.
 It requires an admin user because
 it will attempt
 to create an org and space
-and push the configured app to that space. 
+and push an app to that space. 
 Here is an example `config.json`:
 ```
 {
@@ -59,9 +59,16 @@ Here is an example `config.json`:
 }
 ```
 
-# To use this in CI, you will need to create your own concourse task
-We have not implemented
+## You will need to compile the asset app to be pushed
+Something like this will do:
+```
+pushd app
+  GOOS=linux GOARCH=amd64 go build main.go
+popd 
+```
+
+# CI
+We have not finished
 a concourse task
 to run uptimer ourselves yet,
-and we are not sure yet
-if such a task would useful enough to publish.
+but should have one soon.

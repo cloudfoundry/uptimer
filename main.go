@@ -38,9 +38,9 @@ func main() {
 	discardOutputRunner := cmdRunner.New(ioutil.Discard, ioutil.Discard, io.Copy)
 	cfCmdGenerator := cfCmdGenerator.New()
 
-	staticAppPath := fmt.Sprintf("%s%s", os.Getenv("GOPATH"), "/src/github.com/cloudfoundry/uptimer/app")
+	appPath := fmt.Sprintf("%s%s", os.Getenv("GOPATH"), "/src/github.com/cloudfoundry/uptimer/app")
 
-	workflow := cfWorkflow.New(cfg.CF, cfCmdGenerator, staticAppPath)
+	workflow := cfWorkflow.New(cfg.CF, cfCmdGenerator, appPath)
 	measurements := []measurement.Measurement{
 		measurement.NewAvailability(
 			workflow.AppUrl(),
