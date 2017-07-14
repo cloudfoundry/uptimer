@@ -2,29 +2,32 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 	"os"
 	"time"
 )
 
 func main() {
-	http.HandleFunc("/", hello)
 	fmt.Println("logging...")
-	go log(1 * time.Second)
+	go periodicallyLog(1 * time.Second)
+
 	fmt.Println("listening...")
-	err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
-	if err != nil {
-		panic(err)
-	}
+	http.HandleFunc("/", hello)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), nil))
 }
 
 func hello(res http.ResponseWriter, req *http.Request) {
-	fmt.Fprintln(res, "<strong>Hello!</strong>")
+	io.WriteString(res, "<strong>Hello!</strong>")
 }
 
-func log(fre time.Duration) {
+func periodicallyLog(fre time.Duration) {
+	ticker := time.NewTicker(fre)
 	for {
-		time.Sleep(fre)
-		fmt.Printf("%d\n", time.Now().Unix())
+		select {
+		case t := <-ticker.C:
+			fmt.Println(t.Unix())
+		}
 	}
 }
