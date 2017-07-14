@@ -78,6 +78,16 @@ var _ = Describe("CfCmdGenerator", func() {
 		})
 	})
 
+	Describe("Delete", func() {
+		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "delete", "appName", "-f", "-r")
+
+			cmd := generator.Delete("appName")
+
+			Expect(cmd).To(Equal(expectedCmd))
+		})
+	})
+
 	Describe("DeleteOrg", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "delete-org", "orgName", "-f")

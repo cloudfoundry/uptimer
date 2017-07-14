@@ -13,6 +13,7 @@ type CfCmdGenerator interface {
 	CreateSpace(org, space string) cmdRunner.CmdStartWaiter
 	Target(org, space string) cmdRunner.CmdStartWaiter
 	Push(name, path string) cmdRunner.CmdStartWaiter
+	Delete(name string) cmdRunner.CmdStartWaiter
 	DeleteOrg(org string) cmdRunner.CmdStartWaiter
 	LogOut() cmdRunner.CmdStartWaiter
 	RecentLogs(appName string) cmdRunner.CmdStartWaiter
@@ -50,6 +51,10 @@ func (c *cfCmdGenerator) Push(name string, path string) cmdRunner.CmdStartWaiter
 		"-p", path,
 		"-b", "binary_buildpack",
 		"-c", "./app")
+}
+
+func (c *cfCmdGenerator) Delete(name string) cmdRunner.CmdStartWaiter {
+	return exec.Command("cf", "delete", name, "-f", "-r")
 }
 
 func (c *cfCmdGenerator) DeleteOrg(org string) cmdRunner.CmdStartWaiter {

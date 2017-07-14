@@ -79,6 +79,17 @@ type FakeCfCmdGenerator struct {
 	pushReturnsOnCall map[int]struct {
 		result1 cmdRunner.CmdStartWaiter
 	}
+	DeleteStub        func(name string) cmdRunner.CmdStartWaiter
+	deleteMutex       sync.RWMutex
+	deleteArgsForCall []struct {
+		name string
+	}
+	deleteReturns struct {
+		result1 cmdRunner.CmdStartWaiter
+	}
+	deleteReturnsOnCall map[int]struct {
+		result1 cmdRunner.CmdStartWaiter
+	}
 	DeleteOrgStub        func(org string) cmdRunner.CmdStartWaiter
 	deleteOrgMutex       sync.RWMutex
 	deleteOrgArgsForCall []struct {
@@ -406,6 +417,54 @@ func (fake *FakeCfCmdGenerator) PushReturnsOnCall(i int, result1 cmdRunner.CmdSt
 	}{result1}
 }
 
+func (fake *FakeCfCmdGenerator) Delete(name string) cmdRunner.CmdStartWaiter {
+	fake.deleteMutex.Lock()
+	ret, specificReturn := fake.deleteReturnsOnCall[len(fake.deleteArgsForCall)]
+	fake.deleteArgsForCall = append(fake.deleteArgsForCall, struct {
+		name string
+	}{name})
+	fake.recordInvocation("Delete", []interface{}{name})
+	fake.deleteMutex.Unlock()
+	if fake.DeleteStub != nil {
+		return fake.DeleteStub(name)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.deleteReturns.result1
+}
+
+func (fake *FakeCfCmdGenerator) DeleteCallCount() int {
+	fake.deleteMutex.RLock()
+	defer fake.deleteMutex.RUnlock()
+	return len(fake.deleteArgsForCall)
+}
+
+func (fake *FakeCfCmdGenerator) DeleteArgsForCall(i int) string {
+	fake.deleteMutex.RLock()
+	defer fake.deleteMutex.RUnlock()
+	return fake.deleteArgsForCall[i].name
+}
+
+func (fake *FakeCfCmdGenerator) DeleteReturns(result1 cmdRunner.CmdStartWaiter) {
+	fake.DeleteStub = nil
+	fake.deleteReturns = struct {
+		result1 cmdRunner.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfCmdGenerator) DeleteReturnsOnCall(i int, result1 cmdRunner.CmdStartWaiter) {
+	fake.DeleteStub = nil
+	if fake.deleteReturnsOnCall == nil {
+		fake.deleteReturnsOnCall = make(map[int]struct {
+			result1 cmdRunner.CmdStartWaiter
+		})
+	}
+	fake.deleteReturnsOnCall[i] = struct {
+		result1 cmdRunner.CmdStartWaiter
+	}{result1}
+}
+
 func (fake *FakeCfCmdGenerator) DeleteOrg(org string) cmdRunner.CmdStartWaiter {
 	fake.deleteOrgMutex.Lock()
 	ret, specificReturn := fake.deleteOrgReturnsOnCall[len(fake.deleteOrgArgsForCall)]
@@ -557,6 +616,8 @@ func (fake *FakeCfCmdGenerator) Invocations() map[string][][]interface{} {
 	defer fake.targetMutex.RUnlock()
 	fake.pushMutex.RLock()
 	defer fake.pushMutex.RUnlock()
+	fake.deleteMutex.RLock()
+	defer fake.deleteMutex.RUnlock()
 	fake.deleteOrgMutex.RLock()
 	defer fake.deleteOrgMutex.RUnlock()
 	fake.logOutMutex.RLock()

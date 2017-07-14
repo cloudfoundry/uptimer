@@ -15,6 +15,7 @@ type CfWorkflow interface {
 
 	Setup() []cmdRunner.CmdStartWaiter
 	Push() []cmdRunner.CmdStartWaiter
+	Delete() []cmdRunner.CmdStartWaiter
 	TearDown() []cmdRunner.CmdStartWaiter
 	RecentLogs() []cmdRunner.CmdStartWaiter
 }
@@ -66,6 +67,15 @@ func (c *cfWorkflow) Push() []cmdRunner.CmdStartWaiter {
 		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
 		c.CfCmdGenerator.Target(c.Cf.Org, c.Cf.Space),
 		c.CfCmdGenerator.Push(c.Cf.AppName, c.appPath),
+	}
+}
+
+func (c *cfWorkflow) Delete() []cmdRunner.CmdStartWaiter {
+	return []cmdRunner.CmdStartWaiter{
+		c.CfCmdGenerator.Api(c.Cf.API),
+		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
+		c.CfCmdGenerator.Target(c.Cf.Org, c.Cf.Space),
+		c.CfCmdGenerator.Delete(c.Cf.AppName),
 	}
 }
 

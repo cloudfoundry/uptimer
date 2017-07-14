@@ -55,6 +55,7 @@ var _ = Describe("CfWorkflow", func() {
 				},
 			))
 		})
+
 		Context("when the cf name data isn't provided in the config", func() {
 			var (
 				fakeCfCmdGenerator *fakes.FakeCfCmdGenerator
@@ -96,6 +97,22 @@ var _ = Describe("CfWorkflow", func() {
 			})
 		})
 	})
+
+	Describe("Delete", func() {
+		It("returns a series of commands to delete an app", func() {
+			cmds := cw.Delete()
+
+			Expect(cmds).To(Equal(
+				[]cmdRunner.CmdStartWaiter{
+					ccg.Api("jigglypuff.cf-app.com"),
+					ccg.Auth("pika", "chu"),
+					ccg.Target("someOrg", "someSpace"),
+					ccg.Delete("doraApp"),
+				},
+			))
+		})
+	})
+
 	Describe("Setup", func() {
 		It("returns a series of commands to create a new org and space", func() {
 			cmds := cw.Setup()

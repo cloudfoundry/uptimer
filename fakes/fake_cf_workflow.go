@@ -36,6 +36,15 @@ type FakeCfWorkflow struct {
 	pushReturnsOnCall map[int]struct {
 		result1 []cmdRunner.CmdStartWaiter
 	}
+	DeleteStub        func() []cmdRunner.CmdStartWaiter
+	deleteMutex       sync.RWMutex
+	deleteArgsForCall []struct{}
+	deleteReturns     struct {
+		result1 []cmdRunner.CmdStartWaiter
+	}
+	deleteReturnsOnCall map[int]struct {
+		result1 []cmdRunner.CmdStartWaiter
+	}
 	TearDownStub        func() []cmdRunner.CmdStartWaiter
 	tearDownMutex       sync.RWMutex
 	tearDownArgsForCall []struct{}
@@ -178,6 +187,46 @@ func (fake *FakeCfWorkflow) PushReturnsOnCall(i int, result1 []cmdRunner.CmdStar
 	}{result1}
 }
 
+func (fake *FakeCfWorkflow) Delete() []cmdRunner.CmdStartWaiter {
+	fake.deleteMutex.Lock()
+	ret, specificReturn := fake.deleteReturnsOnCall[len(fake.deleteArgsForCall)]
+	fake.deleteArgsForCall = append(fake.deleteArgsForCall, struct{}{})
+	fake.recordInvocation("Delete", []interface{}{})
+	fake.deleteMutex.Unlock()
+	if fake.DeleteStub != nil {
+		return fake.DeleteStub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.deleteReturns.result1
+}
+
+func (fake *FakeCfWorkflow) DeleteCallCount() int {
+	fake.deleteMutex.RLock()
+	defer fake.deleteMutex.RUnlock()
+	return len(fake.deleteArgsForCall)
+}
+
+func (fake *FakeCfWorkflow) DeleteReturns(result1 []cmdRunner.CmdStartWaiter) {
+	fake.DeleteStub = nil
+	fake.deleteReturns = struct {
+		result1 []cmdRunner.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfWorkflow) DeleteReturnsOnCall(i int, result1 []cmdRunner.CmdStartWaiter) {
+	fake.DeleteStub = nil
+	if fake.deleteReturnsOnCall == nil {
+		fake.deleteReturnsOnCall = make(map[int]struct {
+			result1 []cmdRunner.CmdStartWaiter
+		})
+	}
+	fake.deleteReturnsOnCall[i] = struct {
+		result1 []cmdRunner.CmdStartWaiter
+	}{result1}
+}
+
 func (fake *FakeCfWorkflow) TearDown() []cmdRunner.CmdStartWaiter {
 	fake.tearDownMutex.Lock()
 	ret, specificReturn := fake.tearDownReturnsOnCall[len(fake.tearDownArgsForCall)]
@@ -267,6 +316,8 @@ func (fake *FakeCfWorkflow) Invocations() map[string][][]interface{} {
 	defer fake.setupMutex.RUnlock()
 	fake.pushMutex.RLock()
 	defer fake.pushMutex.RUnlock()
+	fake.deleteMutex.RLock()
+	defer fake.deleteMutex.RUnlock()
 	fake.tearDownMutex.RLock()
 	defer fake.tearDownMutex.RUnlock()
 	fake.recentLogsMutex.RLock()
