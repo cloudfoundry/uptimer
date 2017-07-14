@@ -10,10 +10,8 @@ import (
 )
 
 func main() {
-	fmt.Println("logging...")
 	go periodicallyLog(1 * time.Second)
 
-	fmt.Println("listening...")
 	http.HandleFunc("/", hello)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), nil))
 }

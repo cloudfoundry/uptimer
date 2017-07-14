@@ -14,6 +14,8 @@ import (
 
 	"github.com/benbjohnson/clock"
 
+	"os/exec"
+
 	"github.com/cloudfoundry/uptimer/appLogValidator"
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
 	"github.com/cloudfoundry/uptimer/cfWorkflow"
@@ -40,6 +42,12 @@ func main() {
 	cfCmdGenerator := cfCmdGenerator.New()
 
 	appPath := path.Join(os.Getenv("GOPATH"), "/src/github.com/cloudfoundry/uptimer/app")
+	buildCmd := exec.Command("go", "build")
+	buildCmd.Dir = appPath
+	buildCmd.Env = []string{"GOOS=linux", "GOARCH=amd64"}
+	if err := buildCmd.Run(); err != nil {
+		logger.Println("Failed to build included app: ", err)
+	}
 
 	workflow := cfWorkflow.New(cfg.CF, cfCmdGenerator, appPath)
 
