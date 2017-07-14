@@ -3,16 +3,16 @@ package main
 import (
 	"crypto/tls"
 	"flag"
-	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"time"
 
-	"io/ioutil"
-
 	"github.com/benbjohnson/clock"
+
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
 	"github.com/cloudfoundry/uptimer/cfWorkflow"
 	"github.com/cloudfoundry/uptimer/cmdRunner"
@@ -38,7 +38,7 @@ func main() {
 	discardOutputRunner := cmdRunner.New(ioutil.Discard, ioutil.Discard, io.Copy)
 	cfCmdGenerator := cfCmdGenerator.New()
 
-	appPath := fmt.Sprintf("%s%s", os.Getenv("GOPATH"), "/src/github.com/cloudfoundry/uptimer/app")
+	appPath := path.Join(os.Getenv("GOPATH"), "/src/github.com/cloudfoundry/uptimer/app")
 
 	workflow := cfWorkflow.New(cfg.CF, cfCmdGenerator, appPath)
 	measurements := []measurement.Measurement{
