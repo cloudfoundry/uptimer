@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -12,7 +13,6 @@ import (
 	"io/ioutil"
 
 	"github.com/benbjohnson/clock"
-	"github.com/cloudfoundry/uptimer/cfAppGenerator"
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
 	"github.com/cloudfoundry/uptimer/cfWorkflow"
 	"github.com/cloudfoundry/uptimer/cmdRunner"
@@ -38,12 +38,7 @@ func main() {
 	discardOutputRunner := cmdRunner.New(ioutil.Discard, ioutil.Discard, io.Copy)
 	cfCmdGenerator := cfCmdGenerator.New()
 
-	cfAppGenerator := cfAppGenerator.NewStaticApp(ioutil.TempDir, ioutil.WriteFile)
-	staticAppPath, err := cfAppGenerator.Path()
-	if err != nil {
-		logger.Println("Failed generating app:", err)
-		os.Exit(1)
-	}
+	staticAppPath := fmt.Sprintf("%s%s", os.Getenv("GOPATH"), "/src/github.com/cloudfoundry/uptimer/app")
 
 	workflow := cfWorkflow.New(cfg.CF, cfCmdGenerator, staticAppPath)
 	measurements := []measurement.Measurement{
