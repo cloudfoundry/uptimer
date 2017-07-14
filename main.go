@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/tls"
 	"flag"
 	"io"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/benbjohnson/clock"
 
+	"github.com/cloudfoundry/uptimer/appLogValidator"
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
 	"github.com/cloudfoundry/uptimer/cfWorkflow"
 	"github.com/cloudfoundry/uptimer/cmdRunner"
@@ -35,12 +37,16 @@ func main() {
 
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime|log.LUTC)
 	stdOutAndErrRunner := cmdRunner.New(os.Stdout, os.Stderr, io.Copy)
-	discardOutputRunner := cmdRunner.New(ioutil.Discard, ioutil.Discard, io.Copy)
 	cfCmdGenerator := cfCmdGenerator.New()
 
 	appPath := path.Join(os.Getenv("GOPATH"), "/src/github.com/cloudfoundry/uptimer/app")
 
 	workflow := cfWorkflow.New(cfg.CF, cfCmdGenerator, appPath)
+
+	var recentLogsBuf = bytes.NewBuffer([]byte{})
+	bufferRunner := cmdRunner.New(recentLogsBuf, ioutil.Discard, io.Copy)
+	appLogValidator := appLogValidator.New()
+
 	measurements := []measurement.Measurement{
 		measurement.NewAvailability(
 			workflow.AppUrl(),
@@ -56,7 +62,9 @@ func main() {
 			10*time.Second,
 			clock.New(),
 			workflow.RecentLogs,
-			discardOutputRunner,
+			bufferRunner,
+			recentLogsBuf,
+			appLogValidator,
 		),
 	}
 

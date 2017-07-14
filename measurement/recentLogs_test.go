@@ -1,6 +1,7 @@
 package measurement_test
 
 import (
+	"bytes"
 	"fmt"
 	"time"
 
@@ -20,6 +21,8 @@ var _ = Describe("RecentLogs", func() {
 		freq                 time.Duration
 		mockClock            *clock.Mock
 		commands             []cmdRunner.CmdStartWaiter
+		logBuf               *bytes.Buffer
+		fakeAppLogValidator  *fakes.FakeAppLogValidator
 		fakeCmdGeneratorFunc func() []cmdRunner.CmdStartWaiter
 		fakeCommandRunner    *fakes.FakeCmdRunner
 
@@ -29,12 +32,17 @@ var _ = Describe("RecentLogs", func() {
 	BeforeEach(func() {
 		freq = time.Second
 		mockClock = clock.NewMock()
+		logBuf = bytes.NewBuffer([]byte{})
+
+		fakeAppLogValidator = &fakes.FakeAppLogValidator{}
+		fakeAppLogValidator.IsNewerReturns(true, nil)
+
 		fakeCommandRunner = &fakes.FakeCmdRunner{}
 		fakeCmdGeneratorFunc = func() []cmdRunner.CmdStartWaiter {
 			return commands
 		}
 
-		rlm = NewRecentLogs(freq, mockClock, fakeCmdGeneratorFunc, fakeCommandRunner)
+		rlm = NewRecentLogs(freq, mockClock, fakeCmdGeneratorFunc, fakeCommandRunner, logBuf, fakeAppLogValidator)
 	})
 
 	Describe("Name", func() {
@@ -79,6 +87,26 @@ var _ = Describe("RecentLogs", func() {
 
 			rs, _ := rlm.Results()
 			Expect(rs.Successful()).To(Equal(4))
+		})
+
+		It("records failure when the app logs are not in order", func() {
+			fakeAppLogValidator.IsNewerReturns(false, nil)
+
+			rlm.Start()
+			mockClock.Add(freq - time.Nanosecond)
+
+			rs, _ := rlm.Results()
+			Expect(rs.Failed()).To(Equal(1))
+		})
+
+		It("records failure when the app log validator returns an error", func() {
+			fakeAppLogValidator.IsNewerReturns(true, fmt.Errorf("oh totally bad news"))
+
+			rlm.Start()
+			mockClock.Add(freq - time.Nanosecond)
+
+			rs, _ := rlm.Results()
+			Expect(rs.Failed()).To(Equal(1))
 		})
 
 		It("records the commands that run with error as failed", func() {
