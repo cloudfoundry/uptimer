@@ -17,6 +17,7 @@ func main() {
 }
 
 func hello(res http.ResponseWriter, req *http.Request) {
+	res.Header().Add("content-type", "text/html")
 	io.WriteString(res, "<strong>Hello!</strong>")
 }
 
