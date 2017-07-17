@@ -20,13 +20,13 @@ type Orchestrator interface {
 
 type orchestrator struct {
 	Logger       *log.Logger
-	WhileConfig  *config.CommandConfig
+	WhileConfig  []*config.CommandConfig
 	Workflow     cfWorkflow.CfWorkflow
 	Runner       cmdRunner.CmdRunner
 	Measurements []measurement.Measurement
 }
 
-func New(whileConfig *config.CommandConfig, logger *log.Logger, workflow cfWorkflow.CfWorkflow, runner cmdRunner.CmdRunner, measurements []measurement.Measurement) Orchestrator {
+func New(whileConfig []*config.CommandConfig, logger *log.Logger, workflow cfWorkflow.CfWorkflow, runner cmdRunner.CmdRunner, measurements []measurement.Measurement) Orchestrator {
 	return &orchestrator{
 		Logger:       logger,
 		WhileConfig:  whileConfig,
@@ -47,8 +47,8 @@ func (o *orchestrator) Run() (int, error) {
 		go m.Start()
 	}
 
-	cmd := cmdStartWaiter.New(exec.Command(o.WhileConfig.Command, o.WhileConfig.CommandArgs...))
-	o.Logger.Printf("Running command: `%s %s`\n", o.WhileConfig.Command, strings.Join(o.WhileConfig.CommandArgs, " "))
+	cmd := cmdStartWaiter.New(exec.Command(o.WhileConfig[0].Command, o.WhileConfig[0].CommandArgs...))
+	o.Logger.Printf("Running command: `%s %s`\n", o.WhileConfig[0].Command, strings.Join(o.WhileConfig[0].CommandArgs, " "))
 	if err := o.Runner.Run(cmd); err != nil {
 		return 64, err
 	}

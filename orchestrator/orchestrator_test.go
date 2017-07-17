@@ -44,7 +44,7 @@ var _ = Describe("Orchestrator", func() {
 		fakeMeasurement2 = &fakes.FakeMeasurement{}
 		fakeMeasurement2.NameReturns("name2")
 
-		orc = New(wcfg, logger, fakeWorkflow, fakeRunner, []measurement.Measurement{fakeMeasurement1, fakeMeasurement2})
+		orc = New([]*config.CommandConfig{wcfg}, logger, fakeWorkflow, fakeRunner, []measurement.Measurement{fakeMeasurement1, fakeMeasurement2})
 	})
 
 	Describe("Setup", func() {

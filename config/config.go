@@ -6,8 +6,8 @@ import (
 )
 
 type Config struct {
-	While *CommandConfig `json:"while"`
-	CF    *CfConfig      `json:"cf"`
+	While []*CommandConfig `json:"while"`
+	CF    *CfConfig        `json:"cf"`
 }
 
 type CommandConfig struct {
