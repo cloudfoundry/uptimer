@@ -20,6 +20,7 @@ import (
 var _ = Describe("Orchestrator", func() {
 	var (
 		wcfg             *config.CommandConfig
+		wcfg1            *config.CommandConfig
 		logBuf           *bytes.Buffer
 		logger           *log.Logger
 		fakeWorkflow     *fakes.FakeCfWorkflow
@@ -35,6 +36,10 @@ var _ = Describe("Orchestrator", func() {
 			Command:     "sleep",
 			CommandArgs: []string{"10"},
 		}
+		wcfg1 = &config.CommandConfig{
+			Command:     "sleep",
+			CommandArgs: []string{"15"},
+		}
 		logBuf = bytes.NewBuffer([]byte{})
 		logger = log.New(logBuf, "", 0)
 		fakeWorkflow = &fakes.FakeCfWorkflow{}
@@ -44,7 +49,7 @@ var _ = Describe("Orchestrator", func() {
 		fakeMeasurement2 = &fakes.FakeMeasurement{}
 		fakeMeasurement2.NameReturns("name2")
 
-		orc = New([]*config.CommandConfig{wcfg}, logger, fakeWorkflow, fakeRunner, []measurement.Measurement{fakeMeasurement1, fakeMeasurement2})
+		orc = New([]*config.CommandConfig{wcfg, wcfg1}, logger, fakeWorkflow, fakeRunner, []measurement.Measurement{fakeMeasurement1, fakeMeasurement2})
 	})
 
 	Describe("Setup", func() {
@@ -86,21 +91,42 @@ var _ = Describe("Orchestrator", func() {
 	})
 
 	Describe("Run", func() {
-		It("runs the given command", func() {
-			_, err := orc.Run()
+		Context("when all the while commands pass", func() {
+			It("runs all the given while commands", func() {
+				_, err := orc.Run()
 
-			Expect(err).NotTo(HaveOccurred())
-			Expect(fakeRunner.RunCallCount()).To(Equal(1))
-			Expect(fakeRunner.RunArgsForCall(0)).To(Equal(cmdStartWaiter.New(exec.Command("sleep", "10"))))
+				Expect(err).NotTo(HaveOccurred())
+				Expect(fakeRunner.RunCallCount()).To(Equal(2))
+				Expect(fakeRunner.RunArgsForCall(0)).To(Equal(cmdStartWaiter.New(exec.Command("sleep", "10"))))
+				Expect(fakeRunner.RunArgsForCall(1)).To(Equal(cmdStartWaiter.New(exec.Command("sleep", "15"))))
+			})
 		})
 
-		It("returns an error with exit code 64 if the command errors", func() {
-			fakeRunner.RunReturns(fmt.Errorf("oh boy"))
+		Context("when the first while command fails", func() {
+			It("returns an error with exit code 64 and doesn't run the second command", func() {
+				fakeRunner.RunReturns(fmt.Errorf("oh boy"))
 
-			exitCode, err := orc.Run()
+				exitCode, err := orc.Run()
 
-			Expect(exitCode).To(Equal(64))
-			Expect(err).To(MatchError("oh boy"))
+				Expect(fakeRunner.RunArgsForCall(0)).To(Equal(cmdStartWaiter.New(exec.Command("sleep", "10"))))
+				Expect(fakeRunner.RunCallCount()).To(Equal(1))
+				Expect(exitCode).To(Equal(64))
+				Expect(err).To(MatchError("oh boy"))
+			})
+		})
+
+		Context("when the second command fails", func() {
+			It("returns an error with exit code 64", func() {
+				fakeRunner.RunReturnsOnCall(1, fmt.Errorf("oh boy"))
+
+				exitCode, err := orc.Run()
+
+				Expect(fakeRunner.RunArgsForCall(0)).To(Equal(cmdStartWaiter.New(exec.Command("sleep", "10"))))
+				Expect(fakeRunner.RunArgsForCall(1)).To(Equal(cmdStartWaiter.New(exec.Command("sleep", "15"))))
+				Expect(fakeRunner.RunCallCount()).To(Equal(2))
+				Expect(exitCode).To(Equal(64))
+				Expect(err).To(MatchError("oh boy"))
+			})
 		})
 
 		It("prints a list of all measurements", func() {

@@ -47,14 +47,10 @@ func (o *orchestrator) Run() (int, error) {
 		go m.Start()
 	}
 
-	cmd := cmdStartWaiter.New(exec.Command(o.WhileConfig[0].Command, o.WhileConfig[0].CommandArgs...))
-	o.Logger.Printf("Running command: `%s %s`\n", o.WhileConfig[0].Command, strings.Join(o.WhileConfig[0].CommandArgs, " "))
-	if err := o.Runner.Run(cmd); err != nil {
-		return 64, err
+	exitCode, err := o.runWhileCommands()
+	if err != nil {
+		return exitCode, err
 	}
-	o.Logger.Println()
-
-	o.Logger.Println("Finished running command")
 
 	o.Logger.Println("Measurement summaries:")
 	for _, m := range o.Measurements {
@@ -70,4 +66,18 @@ func (o *orchestrator) Run() (int, error) {
 
 func (o *orchestrator) TearDown() error {
 	return o.Runner.RunInSequence(o.Workflow.TearDown()...)
+}
+
+func (o *orchestrator) runWhileCommands() (int, error) {
+	for _, cfg := range o.WhileConfig {
+		cmd := cmdStartWaiter.New(exec.Command(cfg.Command, cfg.CommandArgs...))
+		o.Logger.Printf("Running command: `%s %s`\n", o.WhileConfig[0].Command, strings.Join(o.WhileConfig[0].CommandArgs, " "))
+		if err := o.Runner.Run(cmd); err != nil {
+			return 64, err
+		}
+		o.Logger.Println()
+
+		o.Logger.Println("Finished running command")
+	}
+	return 0, nil
 }
