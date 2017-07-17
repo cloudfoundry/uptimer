@@ -49,7 +49,7 @@ func (o *orchestrator) Run() (int, error) {
 	cmd := exec.Command(o.WhileConfig.Command, o.WhileConfig.CommandArgs...)
 	o.Logger.Printf("Running command: `%s %s`\n", o.WhileConfig.Command, strings.Join(o.WhileConfig.CommandArgs, " "))
 	if err := o.Runner.Run(cmd); err != nil {
-		return exitCode, err
+		return 64, err
 	}
 	o.Logger.Println()
 

@@ -94,11 +94,12 @@ var _ = Describe("Orchestrator", func() {
 			Expect(fakeRunner.RunArgsForCall(0)).To(Equal(exec.Command("sleep", "10")))
 		})
 
-		It("returns an error if the command errors", func() {
+		It("returns an error with exit code 64 if the command errors", func() {
 			fakeRunner.RunReturns(fmt.Errorf("oh boy"))
 
-			_, err := orc.Run()
+			exitCode, err := orc.Run()
 
+			Expect(exitCode).To(Equal(64))
 			Expect(err).To(MatchError("oh boy"))
 		})
 
