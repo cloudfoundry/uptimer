@@ -6,11 +6,12 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/cloudfoundry/uptimer/cmdRunner"
+	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 )
 
 type pushability struct {
 	name                                 string
-	PushAndDeleteAppCommandGeneratorFunc func() []cmdRunner.CmdStartWaiter
+	PushAndDeleteAppCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
 	Runner                               cmdRunner.CmdRunner
 	Frequency                            time.Duration
 	Clock                                clock.Clock

@@ -3,10 +3,10 @@ package cfWorkflow_test
 import (
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
 	. "github.com/cloudfoundry/uptimer/cfWorkflow"
+	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	"github.com/cloudfoundry/uptimer/config"
 	"github.com/cloudfoundry/uptimer/fakes"
 
-	"github.com/cloudfoundry/uptimer/cmdRunner"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -47,7 +47,7 @@ var _ = Describe("CfWorkflow", func() {
 			cmds := cw.Push()
 
 			Expect(cmds).To(Equal(
-				[]cmdRunner.CmdStartWaiter{
+				[]cmdStartWaiter.CmdStartWaiter{
 					ccg.Api("jigglypuff.cf-app.com"),
 					ccg.Auth("pika", "chu"),
 					ccg.Target("someOrg", "someSpace"),
@@ -87,7 +87,7 @@ var _ = Describe("CfWorkflow", func() {
 				generatedAppName, _ := fakeCfCmdGenerator.PushArgsForCall(0)
 				Expect(generatedAppName).To(MatchRegexp("^uptimer-app-%s$", guidMatchingRegex))
 				Expect(cmds).To(Equal(
-					[]cmdRunner.CmdStartWaiter{
+					[]cmdStartWaiter.CmdStartWaiter{
 						ccg.Api("jigglypuff.cf-app.com"),
 						ccg.Auth("pika", "chu"),
 						ccg.Target("someOrg", "someSpace"),
@@ -103,7 +103,7 @@ var _ = Describe("CfWorkflow", func() {
 			cmds := cw.Delete()
 
 			Expect(cmds).To(Equal(
-				[]cmdRunner.CmdStartWaiter{
+				[]cmdStartWaiter.CmdStartWaiter{
 					ccg.Api("jigglypuff.cf-app.com"),
 					ccg.Auth("pika", "chu"),
 					ccg.Target("someOrg", "someSpace"),
@@ -118,7 +118,7 @@ var _ = Describe("CfWorkflow", func() {
 			cmds := cw.Setup()
 
 			Expect(cmds).To(Equal(
-				[]cmdRunner.CmdStartWaiter{
+				[]cmdStartWaiter.CmdStartWaiter{
 					ccg.Api("jigglypuff.cf-app.com"),
 					ccg.Auth("pika", "chu"),
 					ccg.CreateOrg("someOrg"),
@@ -160,7 +160,7 @@ var _ = Describe("CfWorkflow", func() {
 				Expect(generatedSpace).To(MatchRegexp("^uptimer-space-%s$", guidMatchingRegex))
 
 				Expect(cmds).To(Equal(
-					[]cmdRunner.CmdStartWaiter{
+					[]cmdStartWaiter.CmdStartWaiter{
 						ccg.Api("jigglypuff.cf-app.com"),
 						ccg.Auth("pika", "chu"),
 						ccg.CreateOrg(generatedOrg),
@@ -176,7 +176,7 @@ var _ = Describe("CfWorkflow", func() {
 			cmds := cw.TearDown()
 
 			Expect(cmds).To(Equal(
-				[]cmdRunner.CmdStartWaiter{
+				[]cmdStartWaiter.CmdStartWaiter{
 					ccg.Api("jigglypuff.cf-app.com"),
 					ccg.Auth("pika", "chu"),
 					ccg.DeleteOrg("someOrg"),
@@ -191,7 +191,7 @@ var _ = Describe("CfWorkflow", func() {
 			cmds := cw.RecentLogs()
 
 			Expect(cmds).To(Equal(
-				[]cmdRunner.CmdStartWaiter{
+				[]cmdStartWaiter.CmdStartWaiter{
 					ccg.Api("jigglypuff.cf-app.com"),
 					ccg.Auth("pika", "chu"),
 					ccg.Target("someOrg", "someSpace"),

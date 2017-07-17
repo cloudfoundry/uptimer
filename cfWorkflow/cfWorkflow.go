@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
-	"github.com/cloudfoundry/uptimer/cmdRunner"
+	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	"github.com/cloudfoundry/uptimer/config"
 
 	"github.com/satori/go.uuid"
@@ -13,11 +13,11 @@ import (
 type CfWorkflow interface {
 	AppUrl() string
 
-	Setup() []cmdRunner.CmdStartWaiter
-	Push() []cmdRunner.CmdStartWaiter
-	Delete() []cmdRunner.CmdStartWaiter
-	TearDown() []cmdRunner.CmdStartWaiter
-	RecentLogs() []cmdRunner.CmdStartWaiter
+	Setup() []cmdStartWaiter.CmdStartWaiter
+	Push() []cmdStartWaiter.CmdStartWaiter
+	Delete() []cmdStartWaiter.CmdStartWaiter
+	TearDown() []cmdStartWaiter.CmdStartWaiter
+	RecentLogs() []cmdStartWaiter.CmdStartWaiter
 }
 
 type cfWorkflow struct {
@@ -52,8 +52,8 @@ func New(cfConfig *config.CfConfig, cfCmdGenerator cfCmdGenerator.CfCmdGenerator
 	}
 }
 
-func (c *cfWorkflow) Setup() []cmdRunner.CmdStartWaiter {
-	return []cmdRunner.CmdStartWaiter{
+func (c *cfWorkflow) Setup() []cmdStartWaiter.CmdStartWaiter {
+	return []cmdStartWaiter.CmdStartWaiter{
 		c.CfCmdGenerator.Api(c.Cf.API),
 		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
 		c.CfCmdGenerator.CreateOrg(c.Cf.Org),
@@ -61,8 +61,8 @@ func (c *cfWorkflow) Setup() []cmdRunner.CmdStartWaiter {
 	}
 }
 
-func (c *cfWorkflow) Push() []cmdRunner.CmdStartWaiter {
-	return []cmdRunner.CmdStartWaiter{
+func (c *cfWorkflow) Push() []cmdStartWaiter.CmdStartWaiter {
+	return []cmdStartWaiter.CmdStartWaiter{
 		c.CfCmdGenerator.Api(c.Cf.API),
 		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
 		c.CfCmdGenerator.Target(c.Cf.Org, c.Cf.Space),
@@ -70,8 +70,8 @@ func (c *cfWorkflow) Push() []cmdRunner.CmdStartWaiter {
 	}
 }
 
-func (c *cfWorkflow) Delete() []cmdRunner.CmdStartWaiter {
-	return []cmdRunner.CmdStartWaiter{
+func (c *cfWorkflow) Delete() []cmdStartWaiter.CmdStartWaiter {
+	return []cmdStartWaiter.CmdStartWaiter{
 		c.CfCmdGenerator.Api(c.Cf.API),
 		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
 		c.CfCmdGenerator.Target(c.Cf.Org, c.Cf.Space),
@@ -79,8 +79,8 @@ func (c *cfWorkflow) Delete() []cmdRunner.CmdStartWaiter {
 	}
 }
 
-func (c *cfWorkflow) TearDown() []cmdRunner.CmdStartWaiter {
-	return []cmdRunner.CmdStartWaiter{
+func (c *cfWorkflow) TearDown() []cmdStartWaiter.CmdStartWaiter {
+	return []cmdStartWaiter.CmdStartWaiter{
 		c.CfCmdGenerator.Api(c.Cf.API),
 		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
 		c.CfCmdGenerator.DeleteOrg(c.Cf.Org),
@@ -88,8 +88,8 @@ func (c *cfWorkflow) TearDown() []cmdRunner.CmdStartWaiter {
 	}
 }
 
-func (c *cfWorkflow) RecentLogs() []cmdRunner.CmdStartWaiter {
-	return []cmdRunner.CmdStartWaiter{
+func (c *cfWorkflow) RecentLogs() []cmdStartWaiter.CmdStartWaiter {
+	return []cmdStartWaiter.CmdStartWaiter{
 		c.CfCmdGenerator.Api(c.Cf.API),
 		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
 		c.CfCmdGenerator.Target(c.Cf.Org, c.Cf.Space),

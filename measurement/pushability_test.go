@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
-	"github.com/cloudfoundry/uptimer/cmdRunner"
+	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	"github.com/cloudfoundry/uptimer/fakes"
 	. "github.com/cloudfoundry/uptimer/measurement"
 
@@ -18,8 +18,8 @@ var _ = Describe("Pushability", func() {
 	var (
 		freq                 time.Duration
 		mockClock            *clock.Mock
-		commands             []cmdRunner.CmdStartWaiter
-		fakeCmdGeneratorFunc func() []cmdRunner.CmdStartWaiter
+		commands             []cmdStartWaiter.CmdStartWaiter
+		fakeCmdGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
 		fakeCommandRunner    *fakes.FakeCmdRunner
 
 		pm Measurement
@@ -29,7 +29,7 @@ var _ = Describe("Pushability", func() {
 		freq = time.Second
 		mockClock = clock.NewMock()
 		fakeCommandRunner = &fakes.FakeCmdRunner{}
-		fakeCmdGeneratorFunc = func() []cmdRunner.CmdStartWaiter {
+		fakeCmdGeneratorFunc = func() []cmdStartWaiter.CmdStartWaiter {
 			return commands
 		}
 
@@ -48,9 +48,9 @@ var _ = Describe("Pushability", func() {
 		})
 
 		It("runs the generated app push and delete", func() {
-			commands = []cmdRunner.CmdStartWaiter{
-				exec.Command("foo"),
-				exec.Command("bar"),
+			commands = []cmdStartWaiter.CmdStartWaiter{
+				cmdStartWaiter.New(exec.Command("foo")),
+				cmdStartWaiter.New(exec.Command("bar")),
 			}
 			err := pm.Start()
 			mockClock.Add(freq)
@@ -58,9 +58,9 @@ var _ = Describe("Pushability", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(fakeCommandRunner.RunInSequenceCallCount()).To(BeNumerically(">=", 1))
 			Expect(fakeCommandRunner.RunInSequenceArgsForCall(0)).To(Equal(
-				[]cmdRunner.CmdStartWaiter{
-					exec.Command("foo"),
-					exec.Command("bar"),
+				[]cmdStartWaiter.CmdStartWaiter{
+					cmdStartWaiter.New(exec.Command("foo")),
+					cmdStartWaiter.New(exec.Command("bar")),
 				},
 			))
 		})

@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/cloudfoundry/uptimer/cfWorkflow"
-	"github.com/cloudfoundry/uptimer/cmdRunner"
+	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 )
 
 type FakeCfWorkflow struct {
@@ -18,50 +18,50 @@ type FakeCfWorkflow struct {
 	appUrlReturnsOnCall map[int]struct {
 		result1 string
 	}
-	SetupStub        func() []cmdRunner.CmdStartWaiter
+	SetupStub        func() []cmdStartWaiter.CmdStartWaiter
 	setupMutex       sync.RWMutex
 	setupArgsForCall []struct{}
 	setupReturns     struct {
-		result1 []cmdRunner.CmdStartWaiter
+		result1 []cmdStartWaiter.CmdStartWaiter
 	}
 	setupReturnsOnCall map[int]struct {
-		result1 []cmdRunner.CmdStartWaiter
+		result1 []cmdStartWaiter.CmdStartWaiter
 	}
-	PushStub        func() []cmdRunner.CmdStartWaiter
+	PushStub        func() []cmdStartWaiter.CmdStartWaiter
 	pushMutex       sync.RWMutex
 	pushArgsForCall []struct{}
 	pushReturns     struct {
-		result1 []cmdRunner.CmdStartWaiter
+		result1 []cmdStartWaiter.CmdStartWaiter
 	}
 	pushReturnsOnCall map[int]struct {
-		result1 []cmdRunner.CmdStartWaiter
+		result1 []cmdStartWaiter.CmdStartWaiter
 	}
-	DeleteStub        func() []cmdRunner.CmdStartWaiter
+	DeleteStub        func() []cmdStartWaiter.CmdStartWaiter
 	deleteMutex       sync.RWMutex
 	deleteArgsForCall []struct{}
 	deleteReturns     struct {
-		result1 []cmdRunner.CmdStartWaiter
+		result1 []cmdStartWaiter.CmdStartWaiter
 	}
 	deleteReturnsOnCall map[int]struct {
-		result1 []cmdRunner.CmdStartWaiter
+		result1 []cmdStartWaiter.CmdStartWaiter
 	}
-	TearDownStub        func() []cmdRunner.CmdStartWaiter
+	TearDownStub        func() []cmdStartWaiter.CmdStartWaiter
 	tearDownMutex       sync.RWMutex
 	tearDownArgsForCall []struct{}
 	tearDownReturns     struct {
-		result1 []cmdRunner.CmdStartWaiter
+		result1 []cmdStartWaiter.CmdStartWaiter
 	}
 	tearDownReturnsOnCall map[int]struct {
-		result1 []cmdRunner.CmdStartWaiter
+		result1 []cmdStartWaiter.CmdStartWaiter
 	}
-	RecentLogsStub        func() []cmdRunner.CmdStartWaiter
+	RecentLogsStub        func() []cmdStartWaiter.CmdStartWaiter
 	recentLogsMutex       sync.RWMutex
 	recentLogsArgsForCall []struct{}
 	recentLogsReturns     struct {
-		result1 []cmdRunner.CmdStartWaiter
+		result1 []cmdStartWaiter.CmdStartWaiter
 	}
 	recentLogsReturnsOnCall map[int]struct {
-		result1 []cmdRunner.CmdStartWaiter
+		result1 []cmdStartWaiter.CmdStartWaiter
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
@@ -107,7 +107,7 @@ func (fake *FakeCfWorkflow) AppUrlReturnsOnCall(i int, result1 string) {
 	}{result1}
 }
 
-func (fake *FakeCfWorkflow) Setup() []cmdRunner.CmdStartWaiter {
+func (fake *FakeCfWorkflow) Setup() []cmdStartWaiter.CmdStartWaiter {
 	fake.setupMutex.Lock()
 	ret, specificReturn := fake.setupReturnsOnCall[len(fake.setupArgsForCall)]
 	fake.setupArgsForCall = append(fake.setupArgsForCall, struct{}{})
@@ -128,26 +128,26 @@ func (fake *FakeCfWorkflow) SetupCallCount() int {
 	return len(fake.setupArgsForCall)
 }
 
-func (fake *FakeCfWorkflow) SetupReturns(result1 []cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfWorkflow) SetupReturns(result1 []cmdStartWaiter.CmdStartWaiter) {
 	fake.SetupStub = nil
 	fake.setupReturns = struct {
-		result1 []cmdRunner.CmdStartWaiter
+		result1 []cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfWorkflow) SetupReturnsOnCall(i int, result1 []cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfWorkflow) SetupReturnsOnCall(i int, result1 []cmdStartWaiter.CmdStartWaiter) {
 	fake.SetupStub = nil
 	if fake.setupReturnsOnCall == nil {
 		fake.setupReturnsOnCall = make(map[int]struct {
-			result1 []cmdRunner.CmdStartWaiter
+			result1 []cmdStartWaiter.CmdStartWaiter
 		})
 	}
 	fake.setupReturnsOnCall[i] = struct {
-		result1 []cmdRunner.CmdStartWaiter
+		result1 []cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfWorkflow) Push() []cmdRunner.CmdStartWaiter {
+func (fake *FakeCfWorkflow) Push() []cmdStartWaiter.CmdStartWaiter {
 	fake.pushMutex.Lock()
 	ret, specificReturn := fake.pushReturnsOnCall[len(fake.pushArgsForCall)]
 	fake.pushArgsForCall = append(fake.pushArgsForCall, struct{}{})
@@ -168,26 +168,26 @@ func (fake *FakeCfWorkflow) PushCallCount() int {
 	return len(fake.pushArgsForCall)
 }
 
-func (fake *FakeCfWorkflow) PushReturns(result1 []cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfWorkflow) PushReturns(result1 []cmdStartWaiter.CmdStartWaiter) {
 	fake.PushStub = nil
 	fake.pushReturns = struct {
-		result1 []cmdRunner.CmdStartWaiter
+		result1 []cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfWorkflow) PushReturnsOnCall(i int, result1 []cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfWorkflow) PushReturnsOnCall(i int, result1 []cmdStartWaiter.CmdStartWaiter) {
 	fake.PushStub = nil
 	if fake.pushReturnsOnCall == nil {
 		fake.pushReturnsOnCall = make(map[int]struct {
-			result1 []cmdRunner.CmdStartWaiter
+			result1 []cmdStartWaiter.CmdStartWaiter
 		})
 	}
 	fake.pushReturnsOnCall[i] = struct {
-		result1 []cmdRunner.CmdStartWaiter
+		result1 []cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfWorkflow) Delete() []cmdRunner.CmdStartWaiter {
+func (fake *FakeCfWorkflow) Delete() []cmdStartWaiter.CmdStartWaiter {
 	fake.deleteMutex.Lock()
 	ret, specificReturn := fake.deleteReturnsOnCall[len(fake.deleteArgsForCall)]
 	fake.deleteArgsForCall = append(fake.deleteArgsForCall, struct{}{})
@@ -208,26 +208,26 @@ func (fake *FakeCfWorkflow) DeleteCallCount() int {
 	return len(fake.deleteArgsForCall)
 }
 
-func (fake *FakeCfWorkflow) DeleteReturns(result1 []cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfWorkflow) DeleteReturns(result1 []cmdStartWaiter.CmdStartWaiter) {
 	fake.DeleteStub = nil
 	fake.deleteReturns = struct {
-		result1 []cmdRunner.CmdStartWaiter
+		result1 []cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfWorkflow) DeleteReturnsOnCall(i int, result1 []cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfWorkflow) DeleteReturnsOnCall(i int, result1 []cmdStartWaiter.CmdStartWaiter) {
 	fake.DeleteStub = nil
 	if fake.deleteReturnsOnCall == nil {
 		fake.deleteReturnsOnCall = make(map[int]struct {
-			result1 []cmdRunner.CmdStartWaiter
+			result1 []cmdStartWaiter.CmdStartWaiter
 		})
 	}
 	fake.deleteReturnsOnCall[i] = struct {
-		result1 []cmdRunner.CmdStartWaiter
+		result1 []cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfWorkflow) TearDown() []cmdRunner.CmdStartWaiter {
+func (fake *FakeCfWorkflow) TearDown() []cmdStartWaiter.CmdStartWaiter {
 	fake.tearDownMutex.Lock()
 	ret, specificReturn := fake.tearDownReturnsOnCall[len(fake.tearDownArgsForCall)]
 	fake.tearDownArgsForCall = append(fake.tearDownArgsForCall, struct{}{})
@@ -248,26 +248,26 @@ func (fake *FakeCfWorkflow) TearDownCallCount() int {
 	return len(fake.tearDownArgsForCall)
 }
 
-func (fake *FakeCfWorkflow) TearDownReturns(result1 []cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfWorkflow) TearDownReturns(result1 []cmdStartWaiter.CmdStartWaiter) {
 	fake.TearDownStub = nil
 	fake.tearDownReturns = struct {
-		result1 []cmdRunner.CmdStartWaiter
+		result1 []cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfWorkflow) TearDownReturnsOnCall(i int, result1 []cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfWorkflow) TearDownReturnsOnCall(i int, result1 []cmdStartWaiter.CmdStartWaiter) {
 	fake.TearDownStub = nil
 	if fake.tearDownReturnsOnCall == nil {
 		fake.tearDownReturnsOnCall = make(map[int]struct {
-			result1 []cmdRunner.CmdStartWaiter
+			result1 []cmdStartWaiter.CmdStartWaiter
 		})
 	}
 	fake.tearDownReturnsOnCall[i] = struct {
-		result1 []cmdRunner.CmdStartWaiter
+		result1 []cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfWorkflow) RecentLogs() []cmdRunner.CmdStartWaiter {
+func (fake *FakeCfWorkflow) RecentLogs() []cmdStartWaiter.CmdStartWaiter {
 	fake.recentLogsMutex.Lock()
 	ret, specificReturn := fake.recentLogsReturnsOnCall[len(fake.recentLogsArgsForCall)]
 	fake.recentLogsArgsForCall = append(fake.recentLogsArgsForCall, struct{}{})
@@ -288,22 +288,22 @@ func (fake *FakeCfWorkflow) RecentLogsCallCount() int {
 	return len(fake.recentLogsArgsForCall)
 }
 
-func (fake *FakeCfWorkflow) RecentLogsReturns(result1 []cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfWorkflow) RecentLogsReturns(result1 []cmdStartWaiter.CmdStartWaiter) {
 	fake.RecentLogsStub = nil
 	fake.recentLogsReturns = struct {
-		result1 []cmdRunner.CmdStartWaiter
+		result1 []cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfWorkflow) RecentLogsReturnsOnCall(i int, result1 []cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfWorkflow) RecentLogsReturnsOnCall(i int, result1 []cmdStartWaiter.CmdStartWaiter) {
 	fake.RecentLogsStub = nil
 	if fake.recentLogsReturnsOnCall == nil {
 		fake.recentLogsReturnsOnCall = make(map[int]struct {
-			result1 []cmdRunner.CmdStartWaiter
+			result1 []cmdStartWaiter.CmdStartWaiter
 		})
 	}
 	fake.recentLogsReturnsOnCall[i] = struct {
-		result1 []cmdRunner.CmdStartWaiter
+		result1 []cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 

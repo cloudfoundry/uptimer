@@ -19,6 +19,7 @@ import (
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
 	"github.com/cloudfoundry/uptimer/cfWorkflow"
 	"github.com/cloudfoundry/uptimer/cmdRunner"
+	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	"github.com/cloudfoundry/uptimer/config"
 	"github.com/cloudfoundry/uptimer/measurement"
 	"github.com/cloudfoundry/uptimer/orchestrator"
@@ -109,7 +110,7 @@ func main() {
 		measurement.NewPushability(
 			time.Minute,
 			clock.New(),
-			func() []cmdRunner.CmdStartWaiter {
+			func() []cmdStartWaiter.CmdStartWaiter {
 				return append(pushWorkflow.Push(), pushWorkflow.Delete()...)
 			},
 			discardRunner,

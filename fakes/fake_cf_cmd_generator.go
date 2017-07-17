@@ -5,127 +5,127 @@ import (
 	"sync"
 
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
-	"github.com/cloudfoundry/uptimer/cmdRunner"
+	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 )
 
 type FakeCfCmdGenerator struct {
-	ApiStub        func(url string) cmdRunner.CmdStartWaiter
+	ApiStub        func(url string) cmdStartWaiter.CmdStartWaiter
 	apiMutex       sync.RWMutex
 	apiArgsForCall []struct {
 		url string
 	}
 	apiReturns struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}
 	apiReturnsOnCall map[int]struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	AuthStub        func(username, password string) cmdRunner.CmdStartWaiter
+	AuthStub        func(username, password string) cmdStartWaiter.CmdStartWaiter
 	authMutex       sync.RWMutex
 	authArgsForCall []struct {
 		username string
 		password string
 	}
 	authReturns struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}
 	authReturnsOnCall map[int]struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	CreateOrgStub        func(org string) cmdRunner.CmdStartWaiter
+	CreateOrgStub        func(org string) cmdStartWaiter.CmdStartWaiter
 	createOrgMutex       sync.RWMutex
 	createOrgArgsForCall []struct {
 		org string
 	}
 	createOrgReturns struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}
 	createOrgReturnsOnCall map[int]struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	CreateSpaceStub        func(org, space string) cmdRunner.CmdStartWaiter
+	CreateSpaceStub        func(org, space string) cmdStartWaiter.CmdStartWaiter
 	createSpaceMutex       sync.RWMutex
 	createSpaceArgsForCall []struct {
 		org   string
 		space string
 	}
 	createSpaceReturns struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}
 	createSpaceReturnsOnCall map[int]struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	TargetStub        func(org, space string) cmdRunner.CmdStartWaiter
+	TargetStub        func(org, space string) cmdStartWaiter.CmdStartWaiter
 	targetMutex       sync.RWMutex
 	targetArgsForCall []struct {
 		org   string
 		space string
 	}
 	targetReturns struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}
 	targetReturnsOnCall map[int]struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	PushStub        func(name, path string) cmdRunner.CmdStartWaiter
+	PushStub        func(name, path string) cmdStartWaiter.CmdStartWaiter
 	pushMutex       sync.RWMutex
 	pushArgsForCall []struct {
 		name string
 		path string
 	}
 	pushReturns struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}
 	pushReturnsOnCall map[int]struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	DeleteStub        func(name string) cmdRunner.CmdStartWaiter
+	DeleteStub        func(name string) cmdStartWaiter.CmdStartWaiter
 	deleteMutex       sync.RWMutex
 	deleteArgsForCall []struct {
 		name string
 	}
 	deleteReturns struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}
 	deleteReturnsOnCall map[int]struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	DeleteOrgStub        func(org string) cmdRunner.CmdStartWaiter
+	DeleteOrgStub        func(org string) cmdStartWaiter.CmdStartWaiter
 	deleteOrgMutex       sync.RWMutex
 	deleteOrgArgsForCall []struct {
 		org string
 	}
 	deleteOrgReturns struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}
 	deleteOrgReturnsOnCall map[int]struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	LogOutStub        func() cmdRunner.CmdStartWaiter
+	LogOutStub        func() cmdStartWaiter.CmdStartWaiter
 	logOutMutex       sync.RWMutex
 	logOutArgsForCall []struct{}
 	logOutReturns     struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}
 	logOutReturnsOnCall map[int]struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	RecentLogsStub        func(appName string) cmdRunner.CmdStartWaiter
+	RecentLogsStub        func(appName string) cmdStartWaiter.CmdStartWaiter
 	recentLogsMutex       sync.RWMutex
 	recentLogsArgsForCall []struct {
 		appName string
 	}
 	recentLogsReturns struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}
 	recentLogsReturnsOnCall map[int]struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeCfCmdGenerator) Api(url string) cmdRunner.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) Api(url string) cmdStartWaiter.CmdStartWaiter {
 	fake.apiMutex.Lock()
 	ret, specificReturn := fake.apiReturnsOnCall[len(fake.apiArgsForCall)]
 	fake.apiArgsForCall = append(fake.apiArgsForCall, struct {
@@ -154,26 +154,26 @@ func (fake *FakeCfCmdGenerator) ApiArgsForCall(i int) string {
 	return fake.apiArgsForCall[i].url
 }
 
-func (fake *FakeCfCmdGenerator) ApiReturns(result1 cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) ApiReturns(result1 cmdStartWaiter.CmdStartWaiter) {
 	fake.ApiStub = nil
 	fake.apiReturns = struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) ApiReturnsOnCall(i int, result1 cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) ApiReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
 	fake.ApiStub = nil
 	if fake.apiReturnsOnCall == nil {
 		fake.apiReturnsOnCall = make(map[int]struct {
-			result1 cmdRunner.CmdStartWaiter
+			result1 cmdStartWaiter.CmdStartWaiter
 		})
 	}
 	fake.apiReturnsOnCall[i] = struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) Auth(username string, password string) cmdRunner.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) Auth(username string, password string) cmdStartWaiter.CmdStartWaiter {
 	fake.authMutex.Lock()
 	ret, specificReturn := fake.authReturnsOnCall[len(fake.authArgsForCall)]
 	fake.authArgsForCall = append(fake.authArgsForCall, struct {
@@ -203,26 +203,26 @@ func (fake *FakeCfCmdGenerator) AuthArgsForCall(i int) (string, string) {
 	return fake.authArgsForCall[i].username, fake.authArgsForCall[i].password
 }
 
-func (fake *FakeCfCmdGenerator) AuthReturns(result1 cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) AuthReturns(result1 cmdStartWaiter.CmdStartWaiter) {
 	fake.AuthStub = nil
 	fake.authReturns = struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) AuthReturnsOnCall(i int, result1 cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) AuthReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
 	fake.AuthStub = nil
 	if fake.authReturnsOnCall == nil {
 		fake.authReturnsOnCall = make(map[int]struct {
-			result1 cmdRunner.CmdStartWaiter
+			result1 cmdStartWaiter.CmdStartWaiter
 		})
 	}
 	fake.authReturnsOnCall[i] = struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) CreateOrg(org string) cmdRunner.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) CreateOrg(org string) cmdStartWaiter.CmdStartWaiter {
 	fake.createOrgMutex.Lock()
 	ret, specificReturn := fake.createOrgReturnsOnCall[len(fake.createOrgArgsForCall)]
 	fake.createOrgArgsForCall = append(fake.createOrgArgsForCall, struct {
@@ -251,26 +251,26 @@ func (fake *FakeCfCmdGenerator) CreateOrgArgsForCall(i int) string {
 	return fake.createOrgArgsForCall[i].org
 }
 
-func (fake *FakeCfCmdGenerator) CreateOrgReturns(result1 cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) CreateOrgReturns(result1 cmdStartWaiter.CmdStartWaiter) {
 	fake.CreateOrgStub = nil
 	fake.createOrgReturns = struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) CreateOrgReturnsOnCall(i int, result1 cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) CreateOrgReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
 	fake.CreateOrgStub = nil
 	if fake.createOrgReturnsOnCall == nil {
 		fake.createOrgReturnsOnCall = make(map[int]struct {
-			result1 cmdRunner.CmdStartWaiter
+			result1 cmdStartWaiter.CmdStartWaiter
 		})
 	}
 	fake.createOrgReturnsOnCall[i] = struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) CreateSpace(org string, space string) cmdRunner.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) CreateSpace(org string, space string) cmdStartWaiter.CmdStartWaiter {
 	fake.createSpaceMutex.Lock()
 	ret, specificReturn := fake.createSpaceReturnsOnCall[len(fake.createSpaceArgsForCall)]
 	fake.createSpaceArgsForCall = append(fake.createSpaceArgsForCall, struct {
@@ -300,26 +300,26 @@ func (fake *FakeCfCmdGenerator) CreateSpaceArgsForCall(i int) (string, string) {
 	return fake.createSpaceArgsForCall[i].org, fake.createSpaceArgsForCall[i].space
 }
 
-func (fake *FakeCfCmdGenerator) CreateSpaceReturns(result1 cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) CreateSpaceReturns(result1 cmdStartWaiter.CmdStartWaiter) {
 	fake.CreateSpaceStub = nil
 	fake.createSpaceReturns = struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) CreateSpaceReturnsOnCall(i int, result1 cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) CreateSpaceReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
 	fake.CreateSpaceStub = nil
 	if fake.createSpaceReturnsOnCall == nil {
 		fake.createSpaceReturnsOnCall = make(map[int]struct {
-			result1 cmdRunner.CmdStartWaiter
+			result1 cmdStartWaiter.CmdStartWaiter
 		})
 	}
 	fake.createSpaceReturnsOnCall[i] = struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) Target(org string, space string) cmdRunner.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) Target(org string, space string) cmdStartWaiter.CmdStartWaiter {
 	fake.targetMutex.Lock()
 	ret, specificReturn := fake.targetReturnsOnCall[len(fake.targetArgsForCall)]
 	fake.targetArgsForCall = append(fake.targetArgsForCall, struct {
@@ -349,26 +349,26 @@ func (fake *FakeCfCmdGenerator) TargetArgsForCall(i int) (string, string) {
 	return fake.targetArgsForCall[i].org, fake.targetArgsForCall[i].space
 }
 
-func (fake *FakeCfCmdGenerator) TargetReturns(result1 cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) TargetReturns(result1 cmdStartWaiter.CmdStartWaiter) {
 	fake.TargetStub = nil
 	fake.targetReturns = struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) TargetReturnsOnCall(i int, result1 cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) TargetReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
 	fake.TargetStub = nil
 	if fake.targetReturnsOnCall == nil {
 		fake.targetReturnsOnCall = make(map[int]struct {
-			result1 cmdRunner.CmdStartWaiter
+			result1 cmdStartWaiter.CmdStartWaiter
 		})
 	}
 	fake.targetReturnsOnCall[i] = struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) Push(name string, path string) cmdRunner.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) Push(name string, path string) cmdStartWaiter.CmdStartWaiter {
 	fake.pushMutex.Lock()
 	ret, specificReturn := fake.pushReturnsOnCall[len(fake.pushArgsForCall)]
 	fake.pushArgsForCall = append(fake.pushArgsForCall, struct {
@@ -398,26 +398,26 @@ func (fake *FakeCfCmdGenerator) PushArgsForCall(i int) (string, string) {
 	return fake.pushArgsForCall[i].name, fake.pushArgsForCall[i].path
 }
 
-func (fake *FakeCfCmdGenerator) PushReturns(result1 cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) PushReturns(result1 cmdStartWaiter.CmdStartWaiter) {
 	fake.PushStub = nil
 	fake.pushReturns = struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) PushReturnsOnCall(i int, result1 cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) PushReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
 	fake.PushStub = nil
 	if fake.pushReturnsOnCall == nil {
 		fake.pushReturnsOnCall = make(map[int]struct {
-			result1 cmdRunner.CmdStartWaiter
+			result1 cmdStartWaiter.CmdStartWaiter
 		})
 	}
 	fake.pushReturnsOnCall[i] = struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) Delete(name string) cmdRunner.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) Delete(name string) cmdStartWaiter.CmdStartWaiter {
 	fake.deleteMutex.Lock()
 	ret, specificReturn := fake.deleteReturnsOnCall[len(fake.deleteArgsForCall)]
 	fake.deleteArgsForCall = append(fake.deleteArgsForCall, struct {
@@ -446,26 +446,26 @@ func (fake *FakeCfCmdGenerator) DeleteArgsForCall(i int) string {
 	return fake.deleteArgsForCall[i].name
 }
 
-func (fake *FakeCfCmdGenerator) DeleteReturns(result1 cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) DeleteReturns(result1 cmdStartWaiter.CmdStartWaiter) {
 	fake.DeleteStub = nil
 	fake.deleteReturns = struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) DeleteReturnsOnCall(i int, result1 cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) DeleteReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
 	fake.DeleteStub = nil
 	if fake.deleteReturnsOnCall == nil {
 		fake.deleteReturnsOnCall = make(map[int]struct {
-			result1 cmdRunner.CmdStartWaiter
+			result1 cmdStartWaiter.CmdStartWaiter
 		})
 	}
 	fake.deleteReturnsOnCall[i] = struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) DeleteOrg(org string) cmdRunner.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) DeleteOrg(org string) cmdStartWaiter.CmdStartWaiter {
 	fake.deleteOrgMutex.Lock()
 	ret, specificReturn := fake.deleteOrgReturnsOnCall[len(fake.deleteOrgArgsForCall)]
 	fake.deleteOrgArgsForCall = append(fake.deleteOrgArgsForCall, struct {
@@ -494,26 +494,26 @@ func (fake *FakeCfCmdGenerator) DeleteOrgArgsForCall(i int) string {
 	return fake.deleteOrgArgsForCall[i].org
 }
 
-func (fake *FakeCfCmdGenerator) DeleteOrgReturns(result1 cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) DeleteOrgReturns(result1 cmdStartWaiter.CmdStartWaiter) {
 	fake.DeleteOrgStub = nil
 	fake.deleteOrgReturns = struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) DeleteOrgReturnsOnCall(i int, result1 cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) DeleteOrgReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
 	fake.DeleteOrgStub = nil
 	if fake.deleteOrgReturnsOnCall == nil {
 		fake.deleteOrgReturnsOnCall = make(map[int]struct {
-			result1 cmdRunner.CmdStartWaiter
+			result1 cmdStartWaiter.CmdStartWaiter
 		})
 	}
 	fake.deleteOrgReturnsOnCall[i] = struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) LogOut() cmdRunner.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) LogOut() cmdStartWaiter.CmdStartWaiter {
 	fake.logOutMutex.Lock()
 	ret, specificReturn := fake.logOutReturnsOnCall[len(fake.logOutArgsForCall)]
 	fake.logOutArgsForCall = append(fake.logOutArgsForCall, struct{}{})
@@ -534,26 +534,26 @@ func (fake *FakeCfCmdGenerator) LogOutCallCount() int {
 	return len(fake.logOutArgsForCall)
 }
 
-func (fake *FakeCfCmdGenerator) LogOutReturns(result1 cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) LogOutReturns(result1 cmdStartWaiter.CmdStartWaiter) {
 	fake.LogOutStub = nil
 	fake.logOutReturns = struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) LogOutReturnsOnCall(i int, result1 cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) LogOutReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
 	fake.LogOutStub = nil
 	if fake.logOutReturnsOnCall == nil {
 		fake.logOutReturnsOnCall = make(map[int]struct {
-			result1 cmdRunner.CmdStartWaiter
+			result1 cmdStartWaiter.CmdStartWaiter
 		})
 	}
 	fake.logOutReturnsOnCall[i] = struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) RecentLogs(appName string) cmdRunner.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) RecentLogs(appName string) cmdStartWaiter.CmdStartWaiter {
 	fake.recentLogsMutex.Lock()
 	ret, specificReturn := fake.recentLogsReturnsOnCall[len(fake.recentLogsArgsForCall)]
 	fake.recentLogsArgsForCall = append(fake.recentLogsArgsForCall, struct {
@@ -582,22 +582,22 @@ func (fake *FakeCfCmdGenerator) RecentLogsArgsForCall(i int) string {
 	return fake.recentLogsArgsForCall[i].appName
 }
 
-func (fake *FakeCfCmdGenerator) RecentLogsReturns(result1 cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) RecentLogsReturns(result1 cmdStartWaiter.CmdStartWaiter) {
 	fake.RecentLogsStub = nil
 	fake.recentLogsReturns = struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) RecentLogsReturnsOnCall(i int, result1 cmdRunner.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) RecentLogsReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
 	fake.RecentLogsStub = nil
 	if fake.recentLogsReturnsOnCall == nil {
 		fake.recentLogsReturnsOnCall = make(map[int]struct {
-			result1 cmdRunner.CmdStartWaiter
+			result1 cmdStartWaiter.CmdStartWaiter
 		})
 	}
 	fake.recentLogsReturnsOnCall[i] = struct {
-		result1 cmdRunner.CmdStartWaiter
+		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 

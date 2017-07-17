@@ -6,12 +6,12 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
+	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	"github.com/cloudfoundry/uptimer/fakes"
 	. "github.com/cloudfoundry/uptimer/measurement"
 
 	"os/exec"
 
-	"github.com/cloudfoundry/uptimer/cmdRunner"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -20,10 +20,10 @@ var _ = Describe("RecentLogs", func() {
 	var (
 		freq                 time.Duration
 		mockClock            *clock.Mock
-		commands             []cmdRunner.CmdStartWaiter
+		commands             []cmdStartWaiter.CmdStartWaiter
 		logBuf               *bytes.Buffer
 		fakeAppLogValidator  *fakes.FakeAppLogValidator
-		fakeCmdGeneratorFunc func() []cmdRunner.CmdStartWaiter
+		fakeCmdGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
 		fakeCommandRunner    *fakes.FakeCmdRunner
 
 		rlm Measurement
@@ -38,7 +38,7 @@ var _ = Describe("RecentLogs", func() {
 		fakeAppLogValidator.IsNewerReturns(true, nil)
 
 		fakeCommandRunner = &fakes.FakeCmdRunner{}
-		fakeCmdGeneratorFunc = func() []cmdRunner.CmdStartWaiter {
+		fakeCmdGeneratorFunc = func() []cmdStartWaiter.CmdStartWaiter {
 			return commands
 		}
 
@@ -57,9 +57,9 @@ var _ = Describe("RecentLogs", func() {
 		})
 
 		It("runs the generated recent logs commands", func() {
-			commands = []cmdRunner.CmdStartWaiter{
-				exec.Command("foo"),
-				exec.Command("bar"),
+			commands = []cmdStartWaiter.CmdStartWaiter{
+				cmdStartWaiter.New(exec.Command("foo")),
+				cmdStartWaiter.New(exec.Command("bar")),
 			}
 			err := rlm.Start()
 			mockClock.Add(freq)
@@ -67,9 +67,9 @@ var _ = Describe("RecentLogs", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(fakeCommandRunner.RunInSequenceCallCount()).To(BeNumerically(">=", 1))
 			Expect(fakeCommandRunner.RunInSequenceArgsForCall(0)).To(Equal(
-				[]cmdRunner.CmdStartWaiter{
-					exec.Command("foo"),
-					exec.Command("bar"),
+				[]cmdStartWaiter.CmdStartWaiter{
+					cmdStartWaiter.New(exec.Command("foo")),
+					cmdStartWaiter.New(exec.Command("bar")),
 				},
 			))
 		})

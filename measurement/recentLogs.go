@@ -9,10 +9,11 @@ import (
 
 	"github.com/cloudfoundry/uptimer/appLogValidator"
 	"github.com/cloudfoundry/uptimer/cmdRunner"
+	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 )
 
 type recentLogs struct {
-	RecentLogsCommandGeneratorFunc func() []cmdRunner.CmdStartWaiter
+	RecentLogsCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
 	Runner                         cmdRunner.CmdRunner
 	LogBuf                         *bytes.Buffer
 	Frequency                      time.Duration

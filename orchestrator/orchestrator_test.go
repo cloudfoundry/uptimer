@@ -7,11 +7,11 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/cloudfoundry/uptimer/cmdRunner"
 	"github.com/cloudfoundry/uptimer/config"
 	"github.com/cloudfoundry/uptimer/fakes"
 	. "github.com/cloudfoundry/uptimer/orchestrator"
 
+	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	"github.com/cloudfoundry/uptimer/measurement"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -50,14 +50,14 @@ var _ = Describe("Orchestrator", func() {
 	Describe("Setup", func() {
 		It("calls workflow to get setup and push stuff and runs it", func() {
 			fakeWorkflow.SetupReturns(
-				[]cmdRunner.CmdStartWaiter{
-					exec.Command("ls"),
-					exec.Command("whoami"),
+				[]cmdStartWaiter.CmdStartWaiter{
+					cmdStartWaiter.New(exec.Command("ls")),
+					cmdStartWaiter.New(exec.Command("whoami")),
 				},
 			)
 			fakeWorkflow.PushReturns(
-				[]cmdRunner.CmdStartWaiter{
-					exec.Command("push", "an", "app"),
+				[]cmdStartWaiter.CmdStartWaiter{
+					cmdStartWaiter.New(exec.Command("push", "an", "app")),
 				},
 			)
 
@@ -68,10 +68,10 @@ var _ = Describe("Orchestrator", func() {
 			Expect(fakeWorkflow.PushCallCount()).To(Equal(1))
 			Expect(fakeRunner.RunInSequenceCallCount()).To(Equal(1))
 			Expect(fakeRunner.RunInSequenceArgsForCall(0)).To(Equal(
-				[]cmdRunner.CmdStartWaiter{
-					exec.Command("ls"),
-					exec.Command("whoami"),
-					exec.Command("push", "an", "app"),
+				[]cmdStartWaiter.CmdStartWaiter{
+					cmdStartWaiter.New(exec.Command("ls")),
+					cmdStartWaiter.New(exec.Command("whoami")),
+					cmdStartWaiter.New(exec.Command("push", "an", "app")),
 				},
 			))
 		})
@@ -91,7 +91,7 @@ var _ = Describe("Orchestrator", func() {
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(fakeRunner.RunCallCount()).To(Equal(1))
-			Expect(fakeRunner.RunArgsForCall(0)).To(Equal(exec.Command("sleep", "10")))
+			Expect(fakeRunner.RunArgsForCall(0)).To(Equal(cmdStartWaiter.New(exec.Command("sleep", "10"))))
 		})
 
 		It("returns an error with exit code 64 if the command errors", func() {
@@ -155,9 +155,9 @@ var _ = Describe("Orchestrator", func() {
 	Describe("TearDown", func() {
 		It("calls workflow to get teardown stuff and runs it", func() {
 			fakeWorkflow.TearDownReturns(
-				[]cmdRunner.CmdStartWaiter{
-					exec.Command("ls"),
-					exec.Command("whoami"),
+				[]cmdStartWaiter.CmdStartWaiter{
+					cmdStartWaiter.New(exec.Command("ls")),
+					cmdStartWaiter.New(exec.Command("whoami")),
 				},
 			)
 
@@ -167,9 +167,9 @@ var _ = Describe("Orchestrator", func() {
 			Expect(fakeWorkflow.TearDownCallCount()).To(Equal(1))
 			Expect(fakeRunner.RunInSequenceCallCount()).To(Equal(1))
 			Expect(fakeRunner.RunInSequenceArgsForCall(0)).To(Equal(
-				[]cmdRunner.CmdStartWaiter{
-					exec.Command("ls"),
-					exec.Command("whoami"),
+				[]cmdStartWaiter.CmdStartWaiter{
+					cmdStartWaiter.New(exec.Command("ls")),
+					cmdStartWaiter.New(exec.Command("whoami")),
 				},
 			))
 		})

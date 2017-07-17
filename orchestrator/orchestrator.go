@@ -7,6 +7,7 @@ import (
 
 	"github.com/cloudfoundry/uptimer/cfWorkflow"
 	"github.com/cloudfoundry/uptimer/cmdRunner"
+	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	"github.com/cloudfoundry/uptimer/config"
 	"github.com/cloudfoundry/uptimer/measurement"
 )
@@ -46,7 +47,7 @@ func (o *orchestrator) Run() (int, error) {
 		go m.Start()
 	}
 
-	cmd := exec.Command(o.WhileConfig.Command, o.WhileConfig.CommandArgs...)
+	cmd := cmdStartWaiter.New(exec.Command(o.WhileConfig.Command, o.WhileConfig.CommandArgs...))
 	o.Logger.Printf("Running command: `%s %s`\n", o.WhileConfig.Command, strings.Join(o.WhileConfig.CommandArgs, " "))
 	if err := o.Runner.Run(cmd); err != nil {
 		return 64, err

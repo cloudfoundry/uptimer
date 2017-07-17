@@ -2,19 +2,13 @@ package cmdRunner
 
 import (
 	"io"
+
+	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 )
 
-// CmdStartWaiter is a subset of the interface satisfied by exec.Cmd
-type CmdStartWaiter interface {
-	Start() error
-	Wait() error
-	StdoutPipe() (io.ReadCloser, error)
-	StderrPipe() (io.ReadCloser, error)
-}
-
 type CmdRunner interface {
-	Run(cmdStartWaiter CmdStartWaiter) error
-	RunInSequence(cmdStartWaiters ...CmdStartWaiter) error
+	Run(cmdStartWaiter cmdStartWaiter.CmdStartWaiter) error
+	RunInSequence(cmdStartWaiters ...cmdStartWaiter.CmdStartWaiter) error
 }
 
 type cmdRunner struct {
@@ -33,7 +27,7 @@ func New(outWriter, errWriter io.Writer, copyFunc copyFunc) CmdRunner {
 	}
 }
 
-func (r *cmdRunner) Run(csw CmdStartWaiter) error {
+func (r *cmdRunner) Run(csw cmdStartWaiter.CmdStartWaiter) error {
 	stdoutPipe, err := csw.StdoutPipe()
 	if err != nil {
 		return err
@@ -63,7 +57,7 @@ func (r *cmdRunner) Run(csw CmdStartWaiter) error {
 	return nil
 }
 
-func (r *cmdRunner) RunInSequence(csws ...CmdStartWaiter) error {
+func (r *cmdRunner) RunInSequence(csws ...cmdStartWaiter.CmdStartWaiter) error {
 	for _, cmd := range csws {
 		if err := r.Run(cmd); err != nil {
 			return err
