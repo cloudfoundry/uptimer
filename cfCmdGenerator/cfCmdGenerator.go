@@ -20,6 +20,7 @@ type CfCmdGenerator interface {
 	Push(name, path string) cmdStartWaiter.CmdStartWaiter
 	Delete(name string) cmdStartWaiter.CmdStartWaiter
 	DeleteOrg(org string) cmdStartWaiter.CmdStartWaiter
+	DeleteQuota(quota string) cmdStartWaiter.CmdStartWaiter
 	LogOut() cmdStartWaiter.CmdStartWaiter
 	RecentLogs(appName string) cmdStartWaiter.CmdStartWaiter
 	StreamLogs(ctx context.Context, appName string) cmdStartWaiter.CmdStartWaiter
@@ -80,6 +81,10 @@ func (c *cfCmdGenerator) Delete(name string) cmdStartWaiter.CmdStartWaiter {
 
 func (c *cfCmdGenerator) DeleteOrg(org string) cmdStartWaiter.CmdStartWaiter {
 	return c.addCfHome(exec.Command("cf", "delete-org", org, "-f"))
+}
+
+func (c *cfCmdGenerator) DeleteQuota(quota string) cmdStartWaiter.CmdStartWaiter {
+	return c.addCfHome(exec.Command("cf", "delete-quota", quota, "-f"))
 }
 
 func (c *cfCmdGenerator) LogOut() cmdStartWaiter.CmdStartWaiter {

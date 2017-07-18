@@ -135,6 +135,17 @@ var _ = Describe("CfCmdGenerator", func() {
 		})
 	})
 
+	Describe("DeleteQuota", func() {
+		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "delete-quota", "quotaName", "-f")
+			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
+
+			cmd := generator.DeleteQuota("quotaName")
+
+			Expect(cmd).To(Equal(expectedCmd))
+		})
+	})
+
 	Describe("LogOut", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "logout")

@@ -125,6 +125,17 @@ type FakeCfCmdGenerator struct {
 	deleteOrgReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
+	DeleteQuotaStub        func(quota string) cmdStartWaiter.CmdStartWaiter
+	deleteQuotaMutex       sync.RWMutex
+	deleteQuotaArgsForCall []struct {
+		quota string
+	}
+	deleteQuotaReturns struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
+	deleteQuotaReturnsOnCall map[int]struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
 	LogOutStub        func() cmdStartWaiter.CmdStartWaiter
 	logOutMutex       sync.RWMutex
 	logOutArgsForCall []struct{}
@@ -646,6 +657,54 @@ func (fake *FakeCfCmdGenerator) DeleteOrgReturnsOnCall(i int, result1 cmdStartWa
 	}{result1}
 }
 
+func (fake *FakeCfCmdGenerator) DeleteQuota(quota string) cmdStartWaiter.CmdStartWaiter {
+	fake.deleteQuotaMutex.Lock()
+	ret, specificReturn := fake.deleteQuotaReturnsOnCall[len(fake.deleteQuotaArgsForCall)]
+	fake.deleteQuotaArgsForCall = append(fake.deleteQuotaArgsForCall, struct {
+		quota string
+	}{quota})
+	fake.recordInvocation("DeleteQuota", []interface{}{quota})
+	fake.deleteQuotaMutex.Unlock()
+	if fake.DeleteQuotaStub != nil {
+		return fake.DeleteQuotaStub(quota)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.deleteQuotaReturns.result1
+}
+
+func (fake *FakeCfCmdGenerator) DeleteQuotaCallCount() int {
+	fake.deleteQuotaMutex.RLock()
+	defer fake.deleteQuotaMutex.RUnlock()
+	return len(fake.deleteQuotaArgsForCall)
+}
+
+func (fake *FakeCfCmdGenerator) DeleteQuotaArgsForCall(i int) string {
+	fake.deleteQuotaMutex.RLock()
+	defer fake.deleteQuotaMutex.RUnlock()
+	return fake.deleteQuotaArgsForCall[i].quota
+}
+
+func (fake *FakeCfCmdGenerator) DeleteQuotaReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.DeleteQuotaStub = nil
+	fake.deleteQuotaReturns = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfCmdGenerator) DeleteQuotaReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.DeleteQuotaStub = nil
+	if fake.deleteQuotaReturnsOnCall == nil {
+		fake.deleteQuotaReturnsOnCall = make(map[int]struct {
+			result1 cmdStartWaiter.CmdStartWaiter
+		})
+	}
+	fake.deleteQuotaReturnsOnCall[i] = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
 func (fake *FakeCfCmdGenerator) LogOut() cmdStartWaiter.CmdStartWaiter {
 	fake.logOutMutex.Lock()
 	ret, specificReturn := fake.logOutReturnsOnCall[len(fake.logOutArgsForCall)]
@@ -806,6 +865,8 @@ func (fake *FakeCfCmdGenerator) Invocations() map[string][][]interface{} {
 	defer fake.deleteMutex.RUnlock()
 	fake.deleteOrgMutex.RLock()
 	defer fake.deleteOrgMutex.RUnlock()
+	fake.deleteQuotaMutex.RLock()
+	defer fake.deleteQuotaMutex.RUnlock()
 	fake.logOutMutex.RLock()
 	defer fake.logOutMutex.RUnlock()
 	fake.recentLogsMutex.RLock()
