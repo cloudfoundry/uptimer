@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
-	"github.com/cloudfoundry/uptimer/cfCmdGenerator/cfCmdGeneratorfakes"
 	. "github.com/cloudfoundry/uptimer/cfWorkflow"
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	"github.com/cloudfoundry/uptimer/config"
@@ -16,10 +15,12 @@ import (
 
 var _ = Describe("CfWorkflow", func() {
 	var (
-		cfc               *config.CfConfig
-		ccg               cfCmdGenerator.CfCmdGenerator
-		appPath           string
-		guidMatchingRegex string
+		cfc     *config.CfConfig
+		ccg     cfCmdGenerator.CfCmdGenerator
+		org     string
+		space   string
+		appName string
+		appPath string
 
 		cw CfWorkflow
 	)
@@ -30,15 +31,14 @@ var _ = Describe("CfWorkflow", func() {
 			AppDomain:     "app.jigglypuff.cf-app.com",
 			AdminUser:     "pika",
 			AdminPassword: "chu",
-			Org:           "someOrg",
-			Space:         "someSpace",
-			AppName:       "doraApp",
 		}
 		ccg = cfCmdGenerator.New("/cfhome")
+		org = "someOrg"
+		space = "someSpace"
+		appName = "doraApp"
 		appPath = "this/is/an/app/path"
-		guidMatchingRegex = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}"
 
-		cw = New(cfc, ccg, appPath)
+		cw = New(cfc, ccg, org, space, appName, appPath)
 	})
 
 	It("has the correct app url", func() {
@@ -57,47 +57,6 @@ var _ = Describe("CfWorkflow", func() {
 					ccg.Push("doraApp", "this/is/an/app/path"),
 				},
 			))
-		})
-
-		Context("when the cf name data isn't provided in the config", func() {
-			var (
-				fakeCfCmdGenerator *cfCmdGeneratorfakes.FakeCfCmdGenerator
-			)
-
-			BeforeEach(func() {
-				cfc = &config.CfConfig{
-					API:           "jigglypuff.cf-app.com",
-					AdminUser:     "pika",
-					AdminPassword: "chu",
-					Org:           "someOrg",
-					Space:         "someSpace",
-				}
-				fakeCfCmdGenerator = &cfCmdGeneratorfakes.FakeCfCmdGenerator{
-					ApiStub:         ccg.Api,
-					AuthStub:        ccg.Auth,
-					CreateOrgStub:   ccg.CreateOrg,
-					CreateSpaceStub: ccg.CreateSpace,
-					TargetStub:      ccg.Target,
-					PushStub:        ccg.Push,
-				}
-
-				cw = New(cfc, fakeCfCmdGenerator, appPath)
-			})
-
-			It("generates a unique appName", func() {
-				cmds := cw.Push()
-
-				generatedAppName, _ := fakeCfCmdGenerator.PushArgsForCall(0)
-				Expect(generatedAppName).To(MatchRegexp("^uptimer-app-%s$", guidMatchingRegex))
-				Expect(cmds).To(Equal(
-					[]cmdStartWaiter.CmdStartWaiter{
-						ccg.Api("jigglypuff.cf-app.com"),
-						ccg.Auth("pika", "chu"),
-						ccg.Target("someOrg", "someSpace"),
-						ccg.Push(generatedAppName, "this/is/an/app/path"),
-					},
-				))
-			})
 		})
 	})
 
@@ -128,49 +87,6 @@ var _ = Describe("CfWorkflow", func() {
 					ccg.CreateSpace("someOrg", "someSpace"),
 				},
 			))
-		})
-
-		Context("when the cf name data isn't provided in the config", func() {
-			var (
-				fakeCfCmdGenerator *cfCmdGeneratorfakes.FakeCfCmdGenerator
-			)
-
-			BeforeEach(func() {
-				cfc = &config.CfConfig{
-					API:           "jigglypuff.cf-app.com",
-					AdminUser:     "pika",
-					AdminPassword: "chu",
-				}
-				fakeCfCmdGenerator = &cfCmdGeneratorfakes.FakeCfCmdGenerator{
-					ApiStub:         ccg.Api,
-					AuthStub:        ccg.Auth,
-					CreateOrgStub:   ccg.CreateOrg,
-					CreateSpaceStub: ccg.CreateSpace,
-					TargetStub:      ccg.Target,
-					PushStub:        ccg.Push,
-				}
-
-				cw = New(cfc, fakeCfCmdGenerator, appPath)
-			})
-
-			It("generates identifiable but non-colliding names", func() {
-				cmds := cw.Setup()
-
-				generatedOrg := fakeCfCmdGenerator.CreateOrgArgsForCall(0)
-				_, generatedSpace := fakeCfCmdGenerator.CreateSpaceArgsForCall(0)
-
-				Expect(generatedOrg).To(MatchRegexp("^uptimer-org-%s$", guidMatchingRegex))
-				Expect(generatedSpace).To(MatchRegexp("^uptimer-space-%s$", guidMatchingRegex))
-
-				Expect(cmds).To(Equal(
-					[]cmdStartWaiter.CmdStartWaiter{
-						ccg.Api("jigglypuff.cf-app.com"),
-						ccg.Auth("pika", "chu"),
-						ccg.CreateOrg(generatedOrg),
-						ccg.CreateSpace(generatedOrg, generatedSpace),
-					},
-				))
-			})
 		})
 	})
 

@@ -20,10 +20,6 @@ type CfConfig struct {
 	AppDomain     string `json:"app_domain"`
 	AdminUser     string `json:"admin_user"`
 	AdminPassword string `json:"admin_password"`
-
-	Org     string `json:"org"`
-	Space   string `json:"space"`
-	AppName string `json:"app_name"`
 }
 
 func Load(filename string) (*Config, error) {

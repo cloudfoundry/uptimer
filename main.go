@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/tls"
 	"flag"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -15,6 +16,7 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/cloudfoundry/uptimer/appLogValidator"
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
@@ -59,7 +61,14 @@ func main() {
 	}
 	logger.Println("Finished building included app")
 
-	workflow := cfWorkflow.New(cfg.CF, baseCfCmdGenerator, appPath)
+	workflow := cfWorkflow.New(
+		cfg.CF,
+		baseCfCmdGenerator,
+		fmt.Sprintf("uptimer-org-%s", uuid.NewV4().String()),
+		fmt.Sprintf("uptimer-space-%s", uuid.NewV4().String()),
+		fmt.Sprintf("uptimer-app-%s", uuid.NewV4().String()),
+		appPath,
+	)
 
 	var recentLogsBuf = bytes.NewBuffer([]byte{})
 	recentLogsBufferRunner := cmdRunner.New(recentLogsBuf, ioutil.Discard, io.Copy)
@@ -83,6 +92,9 @@ func main() {
 			AdminPassword: cfg.CF.AdminPassword,
 		},
 		pushCfCmdGenerator,
+		fmt.Sprintf("uptimer-org-%s", uuid.NewV4().String()),
+		fmt.Sprintf("uptimer-space-%s", uuid.NewV4().String()),
+		fmt.Sprintf("uptimer-app-%s", uuid.NewV4().String()),
 		appPath,
 	)
 	discardRunner := cmdRunner.New(ioutil.Discard, ioutil.Discard, io.Copy)
