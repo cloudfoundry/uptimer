@@ -1,6 +1,7 @@
 package cfWorkflow
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
@@ -18,6 +19,7 @@ type CfWorkflow interface {
 	Delete() []cmdStartWaiter.CmdStartWaiter
 	TearDown() []cmdStartWaiter.CmdStartWaiter
 	RecentLogs() []cmdStartWaiter.CmdStartWaiter
+	StreamLogs(ctx context.Context) []cmdStartWaiter.CmdStartWaiter
 }
 
 type cfWorkflow struct {
@@ -94,5 +96,14 @@ func (c *cfWorkflow) RecentLogs() []cmdStartWaiter.CmdStartWaiter {
 		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
 		c.CfCmdGenerator.Target(c.Cf.Org, c.Cf.Space),
 		c.CfCmdGenerator.RecentLogs(c.Cf.AppName),
+	}
+}
+
+func (c *cfWorkflow) StreamLogs(ctx context.Context) []cmdStartWaiter.CmdStartWaiter {
+	return []cmdStartWaiter.CmdStartWaiter{
+		c.CfCmdGenerator.Api(c.Cf.API),
+		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
+		c.CfCmdGenerator.Target(c.Cf.Org, c.Cf.Space),
+		c.CfCmdGenerator.StreamLogs(ctx, c.Cf.AppName),
 	}
 }

@@ -56,7 +56,14 @@ func NewAvailability(url string, frequency time.Duration, clock clock.Clock, cli
 	}
 }
 
-func NewRecentLogs(frequency time.Duration, clock clock.Clock, recentLogsCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter, runner cmdRunner.CmdRunner, logBuf *bytes.Buffer, appLogValidator appLogValidator.AppLogValidator) Measurement {
+func NewRecentLogs(
+	frequency time.Duration,
+	clock clock.Clock,
+	recentLogsCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter,
+	runner cmdRunner.CmdRunner,
+	logBuf *bytes.Buffer,
+	appLogValidator appLogValidator.AppLogValidator,
+) Measurement {
 	return &recentLogs{
 		name: "Recent logs fetching",
 		RecentLogsCommandGeneratorFunc: recentLogsCommandGeneratorFunc,
@@ -70,7 +77,12 @@ func NewRecentLogs(frequency time.Duration, clock clock.Clock, recentLogsCommand
 	}
 }
 
-func NewPushability(frequency time.Duration, clock clock.Clock, pushAndDeleteAppCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter, runner cmdRunner.CmdRunner) Measurement {
+func NewPushability(
+	frequency time.Duration,
+	clock clock.Clock,
+	pushAndDeleteAppCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter,
+	runner cmdRunner.CmdRunner,
+) Measurement {
 	return &pushability{
 		name: "App pushability",
 		PushAndDeleteAppCommandGeneratorFunc: pushAndDeleteAppCommandGeneratorFunc,

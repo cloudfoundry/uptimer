@@ -49,8 +49,8 @@ var _ = Describe("Pushability", func() {
 
 		It("runs the generated app push and delete", func() {
 			commands = []cmdStartWaiter.CmdStartWaiter{
-				cmdStartWaiter.New(exec.Command("foo")),
-				cmdStartWaiter.New(exec.Command("bar")),
+				exec.Command("foo"),
+				exec.Command("bar"),
 			}
 			err := pm.Start()
 			mockClock.Add(freq)
@@ -59,8 +59,8 @@ var _ = Describe("Pushability", func() {
 			Expect(fakeCommandRunner.RunInSequenceCallCount()).To(BeNumerically(">=", 1))
 			Expect(fakeCommandRunner.RunInSequenceArgsForCall(0)).To(Equal(
 				[]cmdStartWaiter.CmdStartWaiter{
-					cmdStartWaiter.New(exec.Command("foo")),
-					cmdStartWaiter.New(exec.Command("bar")),
+					exec.Command("foo"),
+					exec.Command("bar"),
 				},
 			))
 		})

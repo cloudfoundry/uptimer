@@ -56,13 +56,13 @@ var _ = Describe("Orchestrator", func() {
 		It("calls workflow to get setup and push stuff and runs it", func() {
 			fakeWorkflow.SetupReturns(
 				[]cmdStartWaiter.CmdStartWaiter{
-					cmdStartWaiter.New(exec.Command("ls")),
-					cmdStartWaiter.New(exec.Command("whoami")),
+					exec.Command("ls"),
+					exec.Command("whoami"),
 				},
 			)
 			fakeWorkflow.PushReturns(
 				[]cmdStartWaiter.CmdStartWaiter{
-					cmdStartWaiter.New(exec.Command("push", "an", "app")),
+					exec.Command("push", "an", "app"),
 				},
 			)
 
@@ -74,9 +74,9 @@ var _ = Describe("Orchestrator", func() {
 			Expect(fakeRunner.RunInSequenceCallCount()).To(Equal(1))
 			Expect(fakeRunner.RunInSequenceArgsForCall(0)).To(Equal(
 				[]cmdStartWaiter.CmdStartWaiter{
-					cmdStartWaiter.New(exec.Command("ls")),
-					cmdStartWaiter.New(exec.Command("whoami")),
-					cmdStartWaiter.New(exec.Command("push", "an", "app")),
+					exec.Command("ls"),
+					exec.Command("whoami"),
+					exec.Command("push", "an", "app"),
 				},
 			))
 		})
@@ -97,8 +97,8 @@ var _ = Describe("Orchestrator", func() {
 
 				Expect(err).NotTo(HaveOccurred())
 				Expect(fakeRunner.RunCallCount()).To(Equal(2))
-				Expect(fakeRunner.RunArgsForCall(0)).To(Equal(cmdStartWaiter.New(exec.Command("sleep", "10"))))
-				Expect(fakeRunner.RunArgsForCall(1)).To(Equal(cmdStartWaiter.New(exec.Command("sleep", "15"))))
+				Expect(fakeRunner.RunArgsForCall(0)).To(Equal(exec.Command("sleep", "10")))
+				Expect(fakeRunner.RunArgsForCall(1)).To(Equal(exec.Command("sleep", "15")))
 			})
 		})
 
@@ -108,7 +108,7 @@ var _ = Describe("Orchestrator", func() {
 
 				exitCode, err := orc.Run()
 
-				Expect(fakeRunner.RunArgsForCall(0)).To(Equal(cmdStartWaiter.New(exec.Command("sleep", "10"))))
+				Expect(fakeRunner.RunArgsForCall(0)).To(Equal(exec.Command("sleep", "10")))
 				Expect(fakeRunner.RunCallCount()).To(Equal(1))
 				Expect(exitCode).To(Equal(64))
 				Expect(err).To(MatchError("oh boy"))
@@ -121,8 +121,8 @@ var _ = Describe("Orchestrator", func() {
 
 				exitCode, err := orc.Run()
 
-				Expect(fakeRunner.RunArgsForCall(0)).To(Equal(cmdStartWaiter.New(exec.Command("sleep", "10"))))
-				Expect(fakeRunner.RunArgsForCall(1)).To(Equal(cmdStartWaiter.New(exec.Command("sleep", "15"))))
+				Expect(fakeRunner.RunArgsForCall(0)).To(Equal(exec.Command("sleep", "10")))
+				Expect(fakeRunner.RunArgsForCall(1)).To(Equal(exec.Command("sleep", "15")))
 				Expect(fakeRunner.RunCallCount()).To(Equal(2))
 				Expect(exitCode).To(Equal(64))
 				Expect(err).To(MatchError("oh boy"))
@@ -182,8 +182,8 @@ var _ = Describe("Orchestrator", func() {
 		It("calls workflow to get teardown stuff and runs it", func() {
 			fakeWorkflow.TearDownReturns(
 				[]cmdStartWaiter.CmdStartWaiter{
-					cmdStartWaiter.New(exec.Command("ls")),
-					cmdStartWaiter.New(exec.Command("whoami")),
+					exec.Command("ls"),
+					exec.Command("whoami"),
 				},
 			)
 
@@ -194,8 +194,8 @@ var _ = Describe("Orchestrator", func() {
 			Expect(fakeRunner.RunInSequenceCallCount()).To(Equal(1))
 			Expect(fakeRunner.RunInSequenceArgsForCall(0)).To(Equal(
 				[]cmdStartWaiter.CmdStartWaiter{
-					cmdStartWaiter.New(exec.Command("ls")),
-					cmdStartWaiter.New(exec.Command("whoami")),
+					exec.Command("ls"),
+					exec.Command("whoami"),
 				},
 			))
 		})

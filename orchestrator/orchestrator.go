@@ -7,7 +7,6 @@ import (
 
 	"github.com/cloudfoundry/uptimer/cfWorkflow"
 	"github.com/cloudfoundry/uptimer/cmdRunner"
-	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	"github.com/cloudfoundry/uptimer/config"
 	"github.com/cloudfoundry/uptimer/measurement"
 )
@@ -70,7 +69,7 @@ func (o *orchestrator) TearDown() error {
 
 func (o *orchestrator) runWhileCommands() (int, error) {
 	for _, cfg := range o.WhileConfig {
-		cmd := cmdStartWaiter.New(exec.Command(cfg.Command, cfg.CommandArgs...))
+		cmd := exec.Command(cfg.Command, cfg.CommandArgs...)
 		o.Logger.Printf("Running command: `%s %s`\n", o.WhileConfig[0].Command, strings.Join(o.WhileConfig[0].CommandArgs, " "))
 		if err := o.Runner.Run(cmd); err != nil {
 			return 64, err

@@ -2,6 +2,7 @@
 package fakes
 
 import (
+	"context"
 	"sync"
 
 	"github.com/cloudfoundry/uptimer/cmdRunner"
@@ -29,6 +30,30 @@ type FakeCmdRunner struct {
 		result1 error
 	}
 	runInSequenceReturnsOnCall map[int]struct {
+		result1 error
+	}
+	RunWithContextStub        func(ctx context.Context, cmdStartWaiter cmdStartWaiter.CmdStartWaiter) error
+	runWithContextMutex       sync.RWMutex
+	runWithContextArgsForCall []struct {
+		ctx            context.Context
+		cmdStartWaiter cmdStartWaiter.CmdStartWaiter
+	}
+	runWithContextReturns struct {
+		result1 error
+	}
+	runWithContextReturnsOnCall map[int]struct {
+		result1 error
+	}
+	RunInSequenceWithContextStub        func(ctx context.Context, cmdStartWaiters ...cmdStartWaiter.CmdStartWaiter) error
+	runInSequenceWithContextMutex       sync.RWMutex
+	runInSequenceWithContextArgsForCall []struct {
+		ctx             context.Context
+		cmdStartWaiters []cmdStartWaiter.CmdStartWaiter
+	}
+	runInSequenceWithContextReturns struct {
+		result1 error
+	}
+	runInSequenceWithContextReturnsOnCall map[int]struct {
 		result1 error
 	}
 	invocations      map[string][][]interface{}
@@ -131,6 +156,104 @@ func (fake *FakeCmdRunner) RunInSequenceReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
+func (fake *FakeCmdRunner) RunWithContext(ctx context.Context, csw cmdStartWaiter.CmdStartWaiter) error {
+	fake.runWithContextMutex.Lock()
+	ret, specificReturn := fake.runWithContextReturnsOnCall[len(fake.runWithContextArgsForCall)]
+	fake.runWithContextArgsForCall = append(fake.runWithContextArgsForCall, struct {
+		ctx            context.Context
+		cmdStartWaiter cmdStartWaiter.CmdStartWaiter
+	}{ctx, csw})
+	fake.recordInvocation("RunWithContext", []interface{}{ctx, csw})
+	fake.runWithContextMutex.Unlock()
+	if fake.RunWithContextStub != nil {
+		return fake.RunWithContextStub(ctx, csw)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.runWithContextReturns.result1
+}
+
+func (fake *FakeCmdRunner) RunWithContextCallCount() int {
+	fake.runWithContextMutex.RLock()
+	defer fake.runWithContextMutex.RUnlock()
+	return len(fake.runWithContextArgsForCall)
+}
+
+func (fake *FakeCmdRunner) RunWithContextArgsForCall(i int) (context.Context, cmdStartWaiter.CmdStartWaiter) {
+	fake.runWithContextMutex.RLock()
+	defer fake.runWithContextMutex.RUnlock()
+	return fake.runWithContextArgsForCall[i].ctx, fake.runWithContextArgsForCall[i].cmdStartWaiter
+}
+
+func (fake *FakeCmdRunner) RunWithContextReturns(result1 error) {
+	fake.RunWithContextStub = nil
+	fake.runWithContextReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeCmdRunner) RunWithContextReturnsOnCall(i int, result1 error) {
+	fake.RunWithContextStub = nil
+	if fake.runWithContextReturnsOnCall == nil {
+		fake.runWithContextReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.runWithContextReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeCmdRunner) RunInSequenceWithContext(ctx context.Context, cmdStartWaiters ...cmdStartWaiter.CmdStartWaiter) error {
+	fake.runInSequenceWithContextMutex.Lock()
+	ret, specificReturn := fake.runInSequenceWithContextReturnsOnCall[len(fake.runInSequenceWithContextArgsForCall)]
+	fake.runInSequenceWithContextArgsForCall = append(fake.runInSequenceWithContextArgsForCall, struct {
+		ctx             context.Context
+		cmdStartWaiters []cmdStartWaiter.CmdStartWaiter
+	}{ctx, cmdStartWaiters})
+	fake.recordInvocation("RunInSequenceWithContext", []interface{}{ctx, cmdStartWaiters})
+	fake.runInSequenceWithContextMutex.Unlock()
+	if fake.RunInSequenceWithContextStub != nil {
+		return fake.RunInSequenceWithContextStub(ctx, cmdStartWaiters...)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.runInSequenceWithContextReturns.result1
+}
+
+func (fake *FakeCmdRunner) RunInSequenceWithContextCallCount() int {
+	fake.runInSequenceWithContextMutex.RLock()
+	defer fake.runInSequenceWithContextMutex.RUnlock()
+	return len(fake.runInSequenceWithContextArgsForCall)
+}
+
+func (fake *FakeCmdRunner) RunInSequenceWithContextArgsForCall(i int) (context.Context, []cmdStartWaiter.CmdStartWaiter) {
+	fake.runInSequenceWithContextMutex.RLock()
+	defer fake.runInSequenceWithContextMutex.RUnlock()
+	return fake.runInSequenceWithContextArgsForCall[i].ctx, fake.runInSequenceWithContextArgsForCall[i].cmdStartWaiters
+}
+
+func (fake *FakeCmdRunner) RunInSequenceWithContextReturns(result1 error) {
+	fake.RunInSequenceWithContextStub = nil
+	fake.runInSequenceWithContextReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeCmdRunner) RunInSequenceWithContextReturnsOnCall(i int, result1 error) {
+	fake.RunInSequenceWithContextStub = nil
+	if fake.runInSequenceWithContextReturnsOnCall == nil {
+		fake.runInSequenceWithContextReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.runInSequenceWithContextReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeCmdRunner) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -138,6 +261,10 @@ func (fake *FakeCmdRunner) Invocations() map[string][][]interface{} {
 	defer fake.runMutex.RUnlock()
 	fake.runInSequenceMutex.RLock()
 	defer fake.runInSequenceMutex.RUnlock()
+	fake.runWithContextMutex.RLock()
+	defer fake.runWithContextMutex.RUnlock()
+	fake.runInSequenceWithContextMutex.RLock()
+	defer fake.runInSequenceWithContextMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

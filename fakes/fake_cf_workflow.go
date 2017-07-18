@@ -2,6 +2,7 @@
 package fakes
 
 import (
+	"context"
 	"sync"
 
 	"github.com/cloudfoundry/uptimer/cfWorkflow"
@@ -61,6 +62,17 @@ type FakeCfWorkflow struct {
 		result1 []cmdStartWaiter.CmdStartWaiter
 	}
 	recentLogsReturnsOnCall map[int]struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}
+	StreamLogsStub        func(ctx context.Context) []cmdStartWaiter.CmdStartWaiter
+	streamLogsMutex       sync.RWMutex
+	streamLogsArgsForCall []struct {
+		ctx context.Context
+	}
+	streamLogsReturns struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}
+	streamLogsReturnsOnCall map[int]struct {
 		result1 []cmdStartWaiter.CmdStartWaiter
 	}
 	invocations      map[string][][]interface{}
@@ -307,6 +319,54 @@ func (fake *FakeCfWorkflow) RecentLogsReturnsOnCall(i int, result1 []cmdStartWai
 	}{result1}
 }
 
+func (fake *FakeCfWorkflow) StreamLogs(ctx context.Context) []cmdStartWaiter.CmdStartWaiter {
+	fake.streamLogsMutex.Lock()
+	ret, specificReturn := fake.streamLogsReturnsOnCall[len(fake.streamLogsArgsForCall)]
+	fake.streamLogsArgsForCall = append(fake.streamLogsArgsForCall, struct {
+		ctx context.Context
+	}{ctx})
+	fake.recordInvocation("StreamLogs", []interface{}{ctx})
+	fake.streamLogsMutex.Unlock()
+	if fake.StreamLogsStub != nil {
+		return fake.StreamLogsStub(ctx)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.streamLogsReturns.result1
+}
+
+func (fake *FakeCfWorkflow) StreamLogsCallCount() int {
+	fake.streamLogsMutex.RLock()
+	defer fake.streamLogsMutex.RUnlock()
+	return len(fake.streamLogsArgsForCall)
+}
+
+func (fake *FakeCfWorkflow) StreamLogsArgsForCall(i int) context.Context {
+	fake.streamLogsMutex.RLock()
+	defer fake.streamLogsMutex.RUnlock()
+	return fake.streamLogsArgsForCall[i].ctx
+}
+
+func (fake *FakeCfWorkflow) StreamLogsReturns(result1 []cmdStartWaiter.CmdStartWaiter) {
+	fake.StreamLogsStub = nil
+	fake.streamLogsReturns = struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfWorkflow) StreamLogsReturnsOnCall(i int, result1 []cmdStartWaiter.CmdStartWaiter) {
+	fake.StreamLogsStub = nil
+	if fake.streamLogsReturnsOnCall == nil {
+		fake.streamLogsReturnsOnCall = make(map[int]struct {
+			result1 []cmdStartWaiter.CmdStartWaiter
+		})
+	}
+	fake.streamLogsReturnsOnCall[i] = struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
 func (fake *FakeCfWorkflow) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -322,6 +382,8 @@ func (fake *FakeCfWorkflow) Invocations() map[string][][]interface{} {
 	defer fake.tearDownMutex.RUnlock()
 	fake.recentLogsMutex.RLock()
 	defer fake.recentLogsMutex.RUnlock()
+	fake.streamLogsMutex.RLock()
+	defer fake.streamLogsMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

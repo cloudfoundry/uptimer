@@ -1,6 +1,9 @@
 package cfWorkflow_test
 
 import (
+	"context"
+	"time"
+
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
 	. "github.com/cloudfoundry/uptimer/cfWorkflow"
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
@@ -196,6 +199,22 @@ var _ = Describe("CfWorkflow", func() {
 					ccg.Auth("pika", "chu"),
 					ccg.Target("someOrg", "someSpace"),
 					ccg.RecentLogs("doraApp"),
+				},
+			))
+		})
+	})
+
+	Describe("StreamLogs", func() {
+		It("returns a set of commands to stream logs for an app", func() {
+			ctx, _ := context.WithTimeout(context.Background(), time.Second)
+			cmds := cw.StreamLogs(ctx)
+
+			Expect(cmds).To(Equal(
+				[]cmdStartWaiter.CmdStartWaiter{
+					ccg.Api("jigglypuff.cf-app.com"),
+					ccg.Auth("pika", "chu"),
+					ccg.Target("someOrg", "someSpace"),
+					ccg.StreamLogs(ctx, "doraApp"),
 				},
 			))
 		})

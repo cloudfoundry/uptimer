@@ -51,9 +51,12 @@ func main() {
 	buildCmd := exec.Command("go", "build")
 	buildCmd.Dir = appPath
 	buildCmd.Env = []string{"GOOS=linux", "GOARCH=amd64"}
+	logger.Println("Building included app")
 	if err := buildCmd.Run(); err != nil {
 		logger.Println("Failed to build included app: ", err)
+		os.Exit(1)
 	}
+	logger.Println("Finished building included app")
 
 	workflow := cfWorkflow.New(cfg.CF, baseCfCmdGenerator, appPath)
 

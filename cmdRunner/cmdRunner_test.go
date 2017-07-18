@@ -2,9 +2,11 @@ package cmdRunner_test
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"time"
 
 	. "github.com/cloudfoundry/uptimer/cmdRunner"
 	"github.com/cloudfoundry/uptimer/fakes"
@@ -119,6 +121,37 @@ var _ = Describe("CmdRunner", func() {
 			err := runner.Run(fakeCmdStartWaiter)
 
 			Expect(err).To(MatchError("i failed on second copyfunc"))
+		})
+	})
+
+	Describe("RunWithContext", func() {
+		It("doesn't return an error when the context is canceled", func() {
+			ctx, cancelFunc := context.WithCancel(context.Background())
+			cancelFunc()
+			fakeCmdStartWaiter.WaitReturns(context.Canceled)
+
+			err := runner.RunWithContext(ctx, fakeCmdStartWaiter)
+
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("doesn't return an error when the context times out", func() {
+			ctx, _ := context.WithTimeout(context.Background(), time.Nanosecond)
+			time.Sleep(time.Millisecond)
+			fakeCmdStartWaiter.WaitReturns(context.DeadlineExceeded)
+
+			err := runner.RunWithContext(ctx, fakeCmdStartWaiter)
+
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("returns an error if the context was not canceled or timed out", func() {
+			ctx := context.Background()
+			fakeCmdStartWaiter.WaitReturns(fmt.Errorf("some error dude"))
+
+			err := runner.RunWithContext(ctx, fakeCmdStartWaiter)
+
+			Expect(err).To(MatchError("some error dude"))
 		})
 	})
 

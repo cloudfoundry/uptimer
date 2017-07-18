@@ -1,6 +1,7 @@
 package cfCmdGenerator
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
 
@@ -18,6 +19,7 @@ type CfCmdGenerator interface {
 	DeleteOrg(org string) cmdStartWaiter.CmdStartWaiter
 	LogOut() cmdStartWaiter.CmdStartWaiter
 	RecentLogs(appName string) cmdStartWaiter.CmdStartWaiter
+	StreamLogs(ctx context.Context, appName string) cmdStartWaiter.CmdStartWaiter
 }
 
 type cfCmdGenerator struct {
@@ -30,7 +32,7 @@ func New(cfHome string) CfCmdGenerator {
 
 func (c *cfCmdGenerator) addCfHome(cmd *exec.Cmd) cmdStartWaiter.CmdStartWaiter {
 	cmd.Env = []string{fmt.Sprintf("CF_HOME=%s", c.cfHome)}
-	return cmdStartWaiter.New(cmd)
+	return cmd
 }
 
 func (c *cfCmdGenerator) Api(url string) cmdStartWaiter.CmdStartWaiter {
@@ -77,6 +79,6 @@ func (c *cfCmdGenerator) RecentLogs(appName string) cmdStartWaiter.CmdStartWaite
 	return c.addCfHome(exec.Command("cf", "logs", appName, "--recent"))
 }
 
-func (c *cfCmdGenerator) StreamLogs(appName string) cmdStartWaiter.CmdStartWaiter {
-	return c.addCfHome(exec.Command("cf", "logs", appName))
+func (c *cfCmdGenerator) StreamLogs(ctx context.Context, appName string) cmdStartWaiter.CmdStartWaiter {
+	return c.addCfHome(exec.CommandContext(ctx, "cf", "logs", appName))
 }

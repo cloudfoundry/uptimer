@@ -58,8 +58,8 @@ var _ = Describe("RecentLogs", func() {
 
 		It("runs the generated recent logs commands", func() {
 			commands = []cmdStartWaiter.CmdStartWaiter{
-				cmdStartWaiter.New(exec.Command("foo")),
-				cmdStartWaiter.New(exec.Command("bar")),
+				exec.Command("foo"),
+				exec.Command("bar"),
 			}
 			err := rlm.Start()
 			mockClock.Add(freq)
@@ -68,8 +68,8 @@ var _ = Describe("RecentLogs", func() {
 			Expect(fakeCommandRunner.RunInSequenceCallCount()).To(BeNumerically(">=", 1))
 			Expect(fakeCommandRunner.RunInSequenceArgsForCall(0)).To(Equal(
 				[]cmdStartWaiter.CmdStartWaiter{
-					cmdStartWaiter.New(exec.Command("foo")),
-					cmdStartWaiter.New(exec.Command("bar")),
+					exec.Command("foo"),
+					exec.Command("bar"),
 				},
 			))
 		})

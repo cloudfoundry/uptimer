@@ -1,6 +1,7 @@
 package cmdRunner
 
 import (
+	"context"
 	"io"
 
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
@@ -9,6 +10,9 @@ import (
 type CmdRunner interface {
 	Run(cmdStartWaiter cmdStartWaiter.CmdStartWaiter) error
 	RunInSequence(cmdStartWaiters ...cmdStartWaiter.CmdStartWaiter) error
+
+	RunWithContext(ctx context.Context, cmdStartWaiter cmdStartWaiter.CmdStartWaiter) error
+	RunInSequenceWithContext(ctx context.Context, cmdStartWaiters ...cmdStartWaiter.CmdStartWaiter) error
 }
 
 type cmdRunner struct {
@@ -27,7 +31,24 @@ func New(outWriter, errWriter io.Writer, copyFunc copyFunc) CmdRunner {
 	}
 }
 
-func (r *cmdRunner) Run(csw cmdStartWaiter.CmdStartWaiter) error {
+func (r *cmdRunner) Run(cmdStartWaiter cmdStartWaiter.CmdStartWaiter) error {
+	return r.RunWithContext(context.TODO(), cmdStartWaiter)
+}
+func (r *cmdRunner) RunInSequence(cmdStartWaiters ...cmdStartWaiter.CmdStartWaiter) error {
+	return r.RunInSequenceWithContext(context.TODO(), cmdStartWaiters...)
+}
+
+func (r *cmdRunner) RunInSequenceWithContext(ctx context.Context, csws ...cmdStartWaiter.CmdStartWaiter) error {
+	for _, cmd := range csws {
+		if err := r.RunWithContext(ctx, cmd); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (r *cmdRunner) RunWithContext(ctx context.Context, csw cmdStartWaiter.CmdStartWaiter) error {
 	stdoutPipe, err := csw.StdoutPipe()
 	if err != nil {
 		return err
@@ -50,19 +71,14 @@ func (r *cmdRunner) Run(csw cmdStartWaiter.CmdStartWaiter) error {
 		return err
 	}
 
-	if err := csw.Wait(); err != nil {
+	// Ignore error due to context cancelation/timeout
+	if err = csw.Wait(); err != nil && !wasCanceledOrTimedOut(ctx) {
 		return err
 	}
 
 	return nil
 }
 
-func (r *cmdRunner) RunInSequence(csws ...cmdStartWaiter.CmdStartWaiter) error {
-	for _, cmd := range csws {
-		if err := r.Run(cmd); err != nil {
-			return err
-		}
-	}
-
-	return nil
+func wasCanceledOrTimedOut(ctx context.Context) bool {
+	return ctx != context.TODO() && (ctx.Err() == context.Canceled || ctx.Err() == context.DeadlineExceeded)
 }
