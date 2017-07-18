@@ -12,6 +12,8 @@ import (
 type CfCmdGenerator interface {
 	Api(url string) cmdStartWaiter.CmdStartWaiter
 	Auth(username, password string) cmdStartWaiter.CmdStartWaiter
+	CreateQuota(quota string) cmdStartWaiter.CmdStartWaiter
+	SetQuota(org, quota string) cmdStartWaiter.CmdStartWaiter
 	CreateOrg(org string) cmdStartWaiter.CmdStartWaiter
 	CreateSpace(org, space string) cmdStartWaiter.CmdStartWaiter
 	Target(org, space string) cmdStartWaiter.CmdStartWaiter
@@ -42,6 +44,14 @@ func (c *cfCmdGenerator) Api(url string) cmdStartWaiter.CmdStartWaiter {
 
 func (c *cfCmdGenerator) Auth(username string, password string) cmdStartWaiter.CmdStartWaiter {
 	return c.addCfHome(exec.Command("cf", "auth", username, password))
+}
+
+func (c *cfCmdGenerator) CreateQuota(quota string) cmdStartWaiter.CmdStartWaiter {
+	return c.addCfHome(exec.Command("cf", "create-quota", quota, "-m", "10G", "-i", "-l", "-r", "1000", "-a", "-s", "100"))
+}
+
+func (c *cfCmdGenerator) SetQuota(org, quota string) cmdStartWaiter.CmdStartWaiter {
+	return c.addCfHome(exec.Command("cf", "set-quota", org, quota))
 }
 
 func (c *cfCmdGenerator) CreateOrg(org string) cmdStartWaiter.CmdStartWaiter {

@@ -58,6 +58,28 @@ var _ = Describe("CfCmdGenerator", func() {
 		})
 	})
 
+	Describe("CreateQuota", func() {
+		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "create-quota", "someQuota", "-m", "10G", "-i", "-l", "-r", "1000", "-a", "-s", "100")
+			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
+
+			cmd := generator.CreateQuota("someQuota")
+
+			Expect(cmd).To(Equal(expectedCmd))
+		})
+	})
+
+	Describe("SetQuota", func() {
+		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "set-quota", "someQuota", "someOrg")
+			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
+
+			cmd := generator.SetQuota("someQuota", "someOrg")
+
+			Expect(cmd).To(Equal(expectedCmd))
+		})
+	})
+
 	Describe("CreateSpace", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "create-space", "someSpace", "-o", "someOrg")
