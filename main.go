@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"flag"
 	"io"
@@ -61,7 +62,9 @@ func main() {
 	workflow := cfWorkflow.New(cfg.CF, baseCfCmdGenerator, appPath)
 
 	var recentLogsBuf = bytes.NewBuffer([]byte{})
-	bufferRunner := cmdRunner.New(recentLogsBuf, ioutil.Discard, io.Copy)
+	recentLogsBufferRunner := cmdRunner.New(recentLogsBuf, ioutil.Discard, io.Copy)
+	var streamLogsBuf = bytes.NewBuffer([]byte{})
+	streamLogsBufferRunner := cmdRunner.New(streamLogsBuf, ioutil.Discard, io.Copy)
 	appLogValidator := appLogValidator.New()
 
 	// We are copying values from the cfg object so that this workflow generates its own
@@ -106,7 +109,7 @@ func main() {
 			10*time.Second,
 			clock.New(),
 			workflow.RecentLogs,
-			bufferRunner,
+			recentLogsBufferRunner,
 			recentLogsBuf,
 			appLogValidator,
 		),
@@ -117,6 +120,17 @@ func main() {
 				return append(pushWorkflow.Push(), pushWorkflow.Delete()...)
 			},
 			discardRunner,
+		),
+		measurement.NewStreamLogs(
+			30*time.Second,
+			clock.New(),
+			func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter) {
+				ctx, cancelFunc := context.WithTimeout(context.Background(), 15*time.Second)
+				return ctx, cancelFunc, workflow.StreamLogs(ctx)
+			},
+			streamLogsBufferRunner,
+			streamLogsBuf,
+			appLogValidator,
 		),
 	}
 

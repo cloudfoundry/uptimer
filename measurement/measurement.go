@@ -2,6 +2,7 @@ package measurement
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"time"
 
@@ -93,5 +94,26 @@ func NewPushability(
 		Clock:     clock,
 		resultSet: &resultSet{},
 		stopChan:  make(chan int),
+	}
+}
+
+func NewStreamLogs(
+	frequency time.Duration,
+	clock clock.Clock,
+	streamLogsCommandGeneratorFunc func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter),
+	runner cmdRunner.CmdRunner,
+	logBuf *bytes.Buffer,
+	appLogValidator appLogValidator.AppLogValidator,
+) Measurement {
+	return &streamLogs{
+		name: "Streaming logs",
+		StreamLogsCommandGeneratorFunc: streamLogsCommandGeneratorFunc,
+		Runner:          runner,
+		LogBuf:          logBuf,
+		appLogValidator: appLogValidator,
+		Frequency:       frequency,
+		Clock:           clock,
+		resultSet:       &resultSet{},
+		stopChan:        make(chan int),
 	}
 }
