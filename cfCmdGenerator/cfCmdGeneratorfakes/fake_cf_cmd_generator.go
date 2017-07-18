@@ -33,6 +33,29 @@ type FakeCfCmdGenerator struct {
 	authReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
+	CreateQuotaStub        func(quota string) cmdStartWaiter.CmdStartWaiter
+	createQuotaMutex       sync.RWMutex
+	createQuotaArgsForCall []struct {
+		quota string
+	}
+	createQuotaReturns struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
+	createQuotaReturnsOnCall map[int]struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
+	SetQuotaStub        func(org, quota string) cmdStartWaiter.CmdStartWaiter
+	setQuotaMutex       sync.RWMutex
+	setQuotaArgsForCall []struct {
+		org   string
+		quota string
+	}
+	setQuotaReturns struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
+	setQuotaReturnsOnCall map[int]struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
 	CreateOrgStub        func(org string) cmdStartWaiter.CmdStartWaiter
 	createOrgMutex       sync.RWMutex
 	createOrgArgsForCall []struct {
@@ -231,6 +254,103 @@ func (fake *FakeCfCmdGenerator) AuthReturnsOnCall(i int, result1 cmdStartWaiter.
 		})
 	}
 	fake.authReturnsOnCall[i] = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfCmdGenerator) CreateQuota(quota string) cmdStartWaiter.CmdStartWaiter {
+	fake.createQuotaMutex.Lock()
+	ret, specificReturn := fake.createQuotaReturnsOnCall[len(fake.createQuotaArgsForCall)]
+	fake.createQuotaArgsForCall = append(fake.createQuotaArgsForCall, struct {
+		quota string
+	}{quota})
+	fake.recordInvocation("CreateQuota", []interface{}{quota})
+	fake.createQuotaMutex.Unlock()
+	if fake.CreateQuotaStub != nil {
+		return fake.CreateQuotaStub(quota)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.createQuotaReturns.result1
+}
+
+func (fake *FakeCfCmdGenerator) CreateQuotaCallCount() int {
+	fake.createQuotaMutex.RLock()
+	defer fake.createQuotaMutex.RUnlock()
+	return len(fake.createQuotaArgsForCall)
+}
+
+func (fake *FakeCfCmdGenerator) CreateQuotaArgsForCall(i int) string {
+	fake.createQuotaMutex.RLock()
+	defer fake.createQuotaMutex.RUnlock()
+	return fake.createQuotaArgsForCall[i].quota
+}
+
+func (fake *FakeCfCmdGenerator) CreateQuotaReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.CreateQuotaStub = nil
+	fake.createQuotaReturns = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfCmdGenerator) CreateQuotaReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.CreateQuotaStub = nil
+	if fake.createQuotaReturnsOnCall == nil {
+		fake.createQuotaReturnsOnCall = make(map[int]struct {
+			result1 cmdStartWaiter.CmdStartWaiter
+		})
+	}
+	fake.createQuotaReturnsOnCall[i] = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfCmdGenerator) SetQuota(org string, quota string) cmdStartWaiter.CmdStartWaiter {
+	fake.setQuotaMutex.Lock()
+	ret, specificReturn := fake.setQuotaReturnsOnCall[len(fake.setQuotaArgsForCall)]
+	fake.setQuotaArgsForCall = append(fake.setQuotaArgsForCall, struct {
+		org   string
+		quota string
+	}{org, quota})
+	fake.recordInvocation("SetQuota", []interface{}{org, quota})
+	fake.setQuotaMutex.Unlock()
+	if fake.SetQuotaStub != nil {
+		return fake.SetQuotaStub(org, quota)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.setQuotaReturns.result1
+}
+
+func (fake *FakeCfCmdGenerator) SetQuotaCallCount() int {
+	fake.setQuotaMutex.RLock()
+	defer fake.setQuotaMutex.RUnlock()
+	return len(fake.setQuotaArgsForCall)
+}
+
+func (fake *FakeCfCmdGenerator) SetQuotaArgsForCall(i int) (string, string) {
+	fake.setQuotaMutex.RLock()
+	defer fake.setQuotaMutex.RUnlock()
+	return fake.setQuotaArgsForCall[i].org, fake.setQuotaArgsForCall[i].quota
+}
+
+func (fake *FakeCfCmdGenerator) SetQuotaReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.SetQuotaStub = nil
+	fake.setQuotaReturns = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfCmdGenerator) SetQuotaReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.SetQuotaStub = nil
+	if fake.setQuotaReturnsOnCall == nil {
+		fake.setQuotaReturnsOnCall = make(map[int]struct {
+			result1 cmdStartWaiter.CmdStartWaiter
+		})
+	}
+	fake.setQuotaReturnsOnCall[i] = struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
@@ -670,6 +790,10 @@ func (fake *FakeCfCmdGenerator) Invocations() map[string][][]interface{} {
 	defer fake.apiMutex.RUnlock()
 	fake.authMutex.RLock()
 	defer fake.authMutex.RUnlock()
+	fake.createQuotaMutex.RLock()
+	defer fake.createQuotaMutex.RUnlock()
+	fake.setQuotaMutex.RLock()
+	defer fake.setQuotaMutex.RUnlock()
 	fake.createOrgMutex.RLock()
 	defer fake.createOrgMutex.RUnlock()
 	fake.createSpaceMutex.RLock()
