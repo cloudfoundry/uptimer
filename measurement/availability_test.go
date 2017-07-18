@@ -2,14 +2,12 @@ package measurement_test
 
 import (
 	"fmt"
-
-	"github.com/benbjohnson/clock"
-	"github.com/cloudfoundry/uptimer/fakes"
-	. "github.com/cloudfoundry/uptimer/measurement"
-
+	"net/http"
+	"sync"
 	"time"
 
-	"net/http"
+	"github.com/benbjohnson/clock"
+	. "github.com/cloudfoundry/uptimer/measurement"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -20,7 +18,7 @@ var _ = Describe("Availability", func() {
 		url              string
 		freq             time.Duration
 		mockClock        *clock.Mock
-		fakeRoundTripper *fakes.FakeRoundTripper
+		fakeRoundTripper *FakeRoundTripper
 		successResponse  *http.Response
 		failResponse     *http.Response
 		client           *http.Client
@@ -32,7 +30,7 @@ var _ = Describe("Availability", func() {
 		url = "https://example.com/foo"
 		freq = time.Second
 		mockClock = clock.NewMock()
-		fakeRoundTripper = &fakes.FakeRoundTripper{}
+		fakeRoundTripper = &FakeRoundTripper{}
 		successResponse = &http.Response{StatusCode: 200}
 		failResponse = &http.Response{StatusCode: 400}
 		fakeRoundTripper.RoundTripReturns(successResponse, nil)
@@ -154,3 +152,48 @@ var _ = Describe("Availability", func() {
 		})
 	})
 })
+
+type FakeRoundTripper struct {
+	RoundTripStub        func(*http.Request) (*http.Response, error)
+	roundTripMutex       sync.RWMutex
+	roundTripArgsForCall []struct {
+		arg1 *http.Request
+	}
+	roundTripReturns struct {
+		result1 *http.Response
+		result2 error
+	}
+}
+
+func (fake *FakeRoundTripper) RoundTrip(arg1 *http.Request) (*http.Response, error) {
+	fake.roundTripMutex.Lock()
+	fake.roundTripArgsForCall = append(fake.roundTripArgsForCall, struct {
+		arg1 *http.Request
+	}{arg1})
+	fake.roundTripMutex.Unlock()
+	if fake.RoundTripStub != nil {
+		return fake.RoundTripStub(arg1)
+	} else {
+		return fake.roundTripReturns.result1, fake.roundTripReturns.result2
+	}
+}
+
+func (fake *FakeRoundTripper) RoundTripCallCount() int {
+	fake.roundTripMutex.RLock()
+	defer fake.roundTripMutex.RUnlock()
+	return len(fake.roundTripArgsForCall)
+}
+
+func (fake *FakeRoundTripper) RoundTripArgsForCall(i int) *http.Request {
+	fake.roundTripMutex.RLock()
+	defer fake.roundTripMutex.RUnlock()
+	return fake.roundTripArgsForCall[i].arg1
+}
+
+func (fake *FakeRoundTripper) RoundTripReturns(result1 *http.Response, result2 error) {
+	fake.RoundTripStub = nil
+	fake.roundTripReturns = struct {
+		result1 *http.Response
+		result2 error
+	}{result1, result2}
+}

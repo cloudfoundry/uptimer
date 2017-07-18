@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
+	"github.com/cloudfoundry/uptimer/cmdRunner/cmdRunnerfakes"
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
-	"github.com/cloudfoundry/uptimer/fakes"
 	. "github.com/cloudfoundry/uptimer/measurement"
 
 	. "github.com/onsi/ginkgo"
@@ -20,7 +20,7 @@ var _ = Describe("Pushability", func() {
 		mockClock            *clock.Mock
 		commands             []cmdStartWaiter.CmdStartWaiter
 		fakeCmdGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
-		fakeCommandRunner    *fakes.FakeCmdRunner
+		fakeCommandRunner    *cmdRunnerfakes.FakeCmdRunner
 
 		pm Measurement
 	)
@@ -28,7 +28,7 @@ var _ = Describe("Pushability", func() {
 	BeforeEach(func() {
 		freq = time.Second
 		mockClock = clock.NewMock()
-		fakeCommandRunner = &fakes.FakeCmdRunner{}
+		fakeCommandRunner = &cmdRunnerfakes.FakeCmdRunner{}
 		fakeCmdGeneratorFunc = func() []cmdStartWaiter.CmdStartWaiter {
 			return commands
 		}

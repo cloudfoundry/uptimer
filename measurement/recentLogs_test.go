@@ -6,8 +6,9 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
+	"github.com/cloudfoundry/uptimer/appLogValidator/appLogValidatorfakes"
+	"github.com/cloudfoundry/uptimer/cmdRunner/cmdRunnerfakes"
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
-	"github.com/cloudfoundry/uptimer/fakes"
 	. "github.com/cloudfoundry/uptimer/measurement"
 
 	"os/exec"
@@ -22,9 +23,9 @@ var _ = Describe("RecentLogs", func() {
 		mockClock            *clock.Mock
 		commands             []cmdStartWaiter.CmdStartWaiter
 		logBuf               *bytes.Buffer
-		fakeAppLogValidator  *fakes.FakeAppLogValidator
+		fakeAppLogValidator  *appLogValidatorfakes.FakeAppLogValidator
 		fakeCmdGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
-		fakeCommandRunner    *fakes.FakeCmdRunner
+		fakeCommandRunner    *cmdRunnerfakes.FakeCmdRunner
 
 		rlm Measurement
 	)
@@ -34,10 +35,10 @@ var _ = Describe("RecentLogs", func() {
 		mockClock = clock.NewMock()
 		logBuf = bytes.NewBuffer([]byte{})
 
-		fakeAppLogValidator = &fakes.FakeAppLogValidator{}
+		fakeAppLogValidator = &appLogValidatorfakes.FakeAppLogValidator{}
 		fakeAppLogValidator.IsNewerReturns(true, nil)
 
-		fakeCommandRunner = &fakes.FakeCmdRunner{}
+		fakeCommandRunner = &cmdRunnerfakes.FakeCmdRunner{}
 		fakeCmdGeneratorFunc = func() []cmdStartWaiter.CmdStartWaiter {
 			return commands
 		}

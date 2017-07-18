@@ -9,7 +9,7 @@ import (
 	"time"
 
 	. "github.com/cloudfoundry/uptimer/cmdRunner"
-	"github.com/cloudfoundry/uptimer/fakes"
+	"github.com/cloudfoundry/uptimer/cmdStartWaiter/cmdStartWaiterfakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -20,7 +20,7 @@ var _ = Describe("CmdRunner", func() {
 		outBuf *bytes.Buffer
 		errBuf *bytes.Buffer
 
-		fakeCmdStartWaiter *fakes.FakeCmdStartWaiter
+		fakeCmdStartWaiter *cmdStartWaiterfakes.FakeCmdStartWaiter
 
 		runner CmdRunner
 	)
@@ -29,7 +29,7 @@ var _ = Describe("CmdRunner", func() {
 		outBuf = bytes.NewBuffer([]byte{})
 		errBuf = bytes.NewBuffer([]byte{})
 
-		fakeCmdStartWaiter = &fakes.FakeCmdStartWaiter{}
+		fakeCmdStartWaiter = &cmdStartWaiterfakes.FakeCmdStartWaiter{}
 		fakeCmdStartWaiter.StdoutPipeReturns(ioutil.NopCloser(bytes.NewBufferString("")), nil)
 		fakeCmdStartWaiter.StderrPipeReturns(ioutil.NopCloser(bytes.NewBufferString("")), nil)
 
@@ -157,11 +157,11 @@ var _ = Describe("CmdRunner", func() {
 
 	Describe("RunInSequence", func() {
 		var (
-			fakeCmdStartWaiter2 *fakes.FakeCmdStartWaiter
+			fakeCmdStartWaiter2 *cmdStartWaiterfakes.FakeCmdStartWaiter
 		)
 
 		BeforeEach(func() {
-			fakeCmdStartWaiter2 = &fakes.FakeCmdStartWaiter{}
+			fakeCmdStartWaiter2 = &cmdStartWaiterfakes.FakeCmdStartWaiter{}
 			fakeCmdStartWaiter2.StderrPipeReturns(ioutil.NopCloser(bytes.NewBufferString("")), nil)
 
 			fakeCmdStartWaiter.StdoutPipeReturns(ioutil.NopCloser(bytes.NewBufferString("1")), nil)

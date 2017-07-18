@@ -11,6 +11,7 @@ import (
 	"github.com/satori/go.uuid"
 )
 
+//go:generate counterfeiter . CfWorkflow
 type CfWorkflow interface {
 	AppUrl() string
 

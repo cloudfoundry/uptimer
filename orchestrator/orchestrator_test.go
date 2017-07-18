@@ -7,8 +7,10 @@ import (
 	"os/exec"
 	"time"
 
+	"github.com/cloudfoundry/uptimer/cfWorkflow/cfWorkflowfakes"
+	"github.com/cloudfoundry/uptimer/cmdRunner/cmdRunnerfakes"
 	"github.com/cloudfoundry/uptimer/config"
-	"github.com/cloudfoundry/uptimer/fakes"
+	"github.com/cloudfoundry/uptimer/measurement/measurementfakes"
 	. "github.com/cloudfoundry/uptimer/orchestrator"
 
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
@@ -23,10 +25,10 @@ var _ = Describe("Orchestrator", func() {
 		fakeCommand2     *config.CommandConfig
 		logBuf           *bytes.Buffer
 		logger           *log.Logger
-		fakeWorkflow     *fakes.FakeCfWorkflow
-		fakeRunner       *fakes.FakeCmdRunner
-		fakeMeasurement1 *fakes.FakeMeasurement
-		fakeMeasurement2 *fakes.FakeMeasurement
+		fakeWorkflow     *cfWorkflowfakes.FakeCfWorkflow
+		fakeRunner       *cmdRunnerfakes.FakeCmdRunner
+		fakeMeasurement1 *measurementfakes.FakeMeasurement
+		fakeMeasurement2 *measurementfakes.FakeMeasurement
 
 		orc Orchestrator
 	)
@@ -42,11 +44,11 @@ var _ = Describe("Orchestrator", func() {
 		}
 		logBuf = bytes.NewBuffer([]byte{})
 		logger = log.New(logBuf, "", 0)
-		fakeWorkflow = &fakes.FakeCfWorkflow{}
-		fakeRunner = &fakes.FakeCmdRunner{}
-		fakeMeasurement1 = &fakes.FakeMeasurement{}
+		fakeWorkflow = &cfWorkflowfakes.FakeCfWorkflow{}
+		fakeRunner = &cmdRunnerfakes.FakeCmdRunner{}
+		fakeMeasurement1 = &measurementfakes.FakeMeasurement{}
 		fakeMeasurement1.NameReturns("name1")
-		fakeMeasurement2 = &fakes.FakeMeasurement{}
+		fakeMeasurement2 = &measurementfakes.FakeMeasurement{}
 		fakeMeasurement2.NameReturns("name2")
 
 		orc = New([]*config.CommandConfig{fakeCommand1, fakeCommand2}, logger, fakeWorkflow, fakeRunner, []measurement.Measurement{fakeMeasurement1, fakeMeasurement2})

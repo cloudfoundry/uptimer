@@ -8,6 +8,7 @@ import (
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 )
 
+//go:generate counterfeiter . CfCmdGenerator
 type CfCmdGenerator interface {
 	Api(url string) cmdStartWaiter.CmdStartWaiter
 	Auth(username, password string) cmdStartWaiter.CmdStartWaiter

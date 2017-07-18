@@ -7,12 +7,13 @@ import (
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 )
 
+//go:generate counterfeiter . CmdRunner
 type CmdRunner interface {
-	Run(cmdStartWaiter cmdStartWaiter.CmdStartWaiter) error
-	RunInSequence(cmdStartWaiters ...cmdStartWaiter.CmdStartWaiter) error
+	Run(csw cmdStartWaiter.CmdStartWaiter) error
+	RunInSequence(csws ...cmdStartWaiter.CmdStartWaiter) error
 
-	RunWithContext(ctx context.Context, cmdStartWaiter cmdStartWaiter.CmdStartWaiter) error
-	RunInSequenceWithContext(ctx context.Context, cmdStartWaiters ...cmdStartWaiter.CmdStartWaiter) error
+	RunWithContext(ctx context.Context, csw cmdStartWaiter.CmdStartWaiter) error
+	RunInSequenceWithContext(ctx context.Context, csws ...cmdStartWaiter.CmdStartWaiter) error
 }
 
 type cmdRunner struct {

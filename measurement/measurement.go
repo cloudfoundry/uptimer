@@ -1,17 +1,18 @@
 package measurement
 
 import (
+	"bytes"
 	"net/http"
 	"time"
 
-	"bytes"
-
 	"github.com/benbjohnson/clock"
+
 	"github.com/cloudfoundry/uptimer/appLogValidator"
 	"github.com/cloudfoundry/uptimer/cmdRunner"
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 )
 
+//go:generate counterfeiter . Measurement
 type Measurement interface {
 	Name() string
 	Start() error
@@ -21,6 +22,7 @@ type Measurement interface {
 	Summary() string
 }
 
+//go:generate counterfeiter . ResultSet
 type ResultSet interface {
 	Successful() int
 	Failed() int

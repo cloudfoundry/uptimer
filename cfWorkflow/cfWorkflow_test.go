@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
+	"github.com/cloudfoundry/uptimer/cfCmdGenerator/cfCmdGeneratorfakes"
 	. "github.com/cloudfoundry/uptimer/cfWorkflow"
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	"github.com/cloudfoundry/uptimer/config"
-	"github.com/cloudfoundry/uptimer/fakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -61,7 +61,7 @@ var _ = Describe("CfWorkflow", func() {
 
 		Context("when the cf name data isn't provided in the config", func() {
 			var (
-				fakeCfCmdGenerator *fakes.FakeCfCmdGenerator
+				fakeCfCmdGenerator *cfCmdGeneratorfakes.FakeCfCmdGenerator
 			)
 
 			BeforeEach(func() {
@@ -72,7 +72,7 @@ var _ = Describe("CfWorkflow", func() {
 					Org:           "someOrg",
 					Space:         "someSpace",
 				}
-				fakeCfCmdGenerator = &fakes.FakeCfCmdGenerator{
+				fakeCfCmdGenerator = &cfCmdGeneratorfakes.FakeCfCmdGenerator{
 					ApiStub:         ccg.Api,
 					AuthStub:        ccg.Auth,
 					CreateOrgStub:   ccg.CreateOrg,
@@ -132,7 +132,7 @@ var _ = Describe("CfWorkflow", func() {
 
 		Context("when the cf name data isn't provided in the config", func() {
 			var (
-				fakeCfCmdGenerator *fakes.FakeCfCmdGenerator
+				fakeCfCmdGenerator *cfCmdGeneratorfakes.FakeCfCmdGenerator
 			)
 
 			BeforeEach(func() {
@@ -141,7 +141,7 @@ var _ = Describe("CfWorkflow", func() {
 					AdminUser:     "pika",
 					AdminPassword: "chu",
 				}
-				fakeCfCmdGenerator = &fakes.FakeCfCmdGenerator{
+				fakeCfCmdGenerator = &cfCmdGeneratorfakes.FakeCfCmdGenerator{
 					ApiStub:         ccg.Api,
 					AuthStub:        ccg.Auth,
 					CreateOrgStub:   ccg.CreateOrg,

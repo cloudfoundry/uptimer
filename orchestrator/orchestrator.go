@@ -11,6 +11,7 @@ import (
 	"github.com/cloudfoundry/uptimer/measurement"
 )
 
+//go:generate counterfeiter . Orchestrator
 type Orchestrator interface {
 	Setup() error
 	Run() (int, error)

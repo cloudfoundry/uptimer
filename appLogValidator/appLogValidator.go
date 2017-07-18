@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+//go:generate counterfeiter . AppLogValidator
 type AppLogValidator interface {
 	IsNewer(log string) (bool, error)
 }
