@@ -48,7 +48,7 @@ func (c *cfCmdGenerator) Auth(username string, password string) cmdStartWaiter.C
 }
 
 func (c *cfCmdGenerator) CreateQuota(quota string) cmdStartWaiter.CmdStartWaiter {
-	return c.addCfHome(exec.Command("cf", "create-quota", quota, "-m", "10G", "-i", "-l", "-r", "1000", "-a", "-s", "100"))
+	return c.addCfHome(exec.Command("cf", "create-quota", quota, "-m", "10G", "-i", "1G", "-r", "1000", "-s", "100"))
 }
 
 func (c *cfCmdGenerator) SetQuota(org, quota string) cmdStartWaiter.CmdStartWaiter {

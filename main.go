@@ -66,6 +66,7 @@ func main() {
 		baseCfCmdGenerator,
 		fmt.Sprintf("uptimer-org-%s", uuid.NewV4().String()),
 		fmt.Sprintf("uptimer-space-%s", uuid.NewV4().String()),
+		fmt.Sprintf("uptimer-quota-%s", uuid.NewV4().String()),
 		fmt.Sprintf("uptimer-app-%s", uuid.NewV4().String()),
 		appPath,
 	)
@@ -94,6 +95,7 @@ func main() {
 		pushCfCmdGenerator,
 		fmt.Sprintf("uptimer-org-%s", uuid.NewV4().String()),
 		fmt.Sprintf("uptimer-space-%s", uuid.NewV4().String()),
+		fmt.Sprintf("uptimer-quota-%s", uuid.NewV4().String()),
 		fmt.Sprintf("uptimer-app-%s", uuid.NewV4().String()),
 		appPath,
 	)

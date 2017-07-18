@@ -60,7 +60,7 @@ var _ = Describe("CfCmdGenerator", func() {
 
 	Describe("CreateQuota", func() {
 		It("Generates the correct command", func() {
-			expectedCmd := exec.Command("cf", "create-quota", "someQuota", "-m", "10G", "-i", "-l", "-r", "1000", "-a", "-s", "100")
+			expectedCmd := exec.Command("cf", "create-quota", "someQuota", "-m", "10G", "-i", "1G", "-r", "1000", "-s", "100")
 			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
 
 			cmd := generator.CreateQuota("someQuota")

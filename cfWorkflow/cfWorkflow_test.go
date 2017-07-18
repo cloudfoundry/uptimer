@@ -19,6 +19,7 @@ var _ = Describe("CfWorkflow", func() {
 		ccg     cfCmdGenerator.CfCmdGenerator
 		org     string
 		space   string
+		quota   string
 		appName string
 		appPath string
 
@@ -35,10 +36,11 @@ var _ = Describe("CfWorkflow", func() {
 		ccg = cfCmdGenerator.New("/cfhome")
 		org = "someOrg"
 		space = "someSpace"
+		quota = "someQuota"
 		appName = "doraApp"
 		appPath = "this/is/an/app/path"
 
-		cw = New(cfc, ccg, org, space, appName, appPath)
+		cw = New(cfc, ccg, org, space, quota, appName, appPath)
 	})
 
 	It("has the correct app url", func() {
@@ -85,6 +87,8 @@ var _ = Describe("CfWorkflow", func() {
 					ccg.Auth("pika", "chu"),
 					ccg.CreateOrg("someOrg"),
 					ccg.CreateSpace("someOrg", "someSpace"),
+					ccg.CreateQuota("someQuota"),
+					ccg.SetQuota("someOrg", "someQuota"),
 				},
 			))
 		})
@@ -99,6 +103,7 @@ var _ = Describe("CfWorkflow", func() {
 					ccg.Api("jigglypuff.cf-app.com"),
 					ccg.Auth("pika", "chu"),
 					ccg.DeleteOrg("someOrg"),
+					ccg.DeleteQuota("someQuota"),
 					ccg.LogOut(),
 				},
 			))

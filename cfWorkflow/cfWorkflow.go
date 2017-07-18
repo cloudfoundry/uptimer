@@ -29,6 +29,7 @@ type cfWorkflow struct {
 	appPath string
 	org     string
 	space   string
+	quota   string
 	appName string
 }
 
@@ -36,7 +37,7 @@ func (c *cfWorkflow) AppUrl() string {
 	return c.appUrl
 }
 
-func New(cfConfig *config.CfConfig, cfCmdGenerator cfCmdGenerator.CfCmdGenerator, org, space, appName, appPath string) CfWorkflow {
+func New(cfConfig *config.CfConfig, cfCmdGenerator cfCmdGenerator.CfCmdGenerator, org, space, quota, appName, appPath string) CfWorkflow {
 	appUrl := fmt.Sprintf("https://%s.%s", appName, cfConfig.AppDomain)
 
 	return &cfWorkflow{
@@ -46,6 +47,7 @@ func New(cfConfig *config.CfConfig, cfCmdGenerator cfCmdGenerator.CfCmdGenerator
 		appPath:        appPath,
 		org:            org,
 		space:          space,
+		quota:          quota,
 		appName:        appName,
 	}
 }
@@ -56,6 +58,8 @@ func (c *cfWorkflow) Setup() []cmdStartWaiter.CmdStartWaiter {
 		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
 		c.CfCmdGenerator.CreateOrg(c.org),
 		c.CfCmdGenerator.CreateSpace(c.org, c.space),
+		c.CfCmdGenerator.CreateQuota(c.quota),
+		c.CfCmdGenerator.SetQuota(c.org, c.quota),
 	}
 }
 
@@ -82,6 +86,7 @@ func (c *cfWorkflow) TearDown() []cmdStartWaiter.CmdStartWaiter {
 		c.CfCmdGenerator.Api(c.Cf.API),
 		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
 		c.CfCmdGenerator.DeleteOrg(c.org),
+		c.CfCmdGenerator.DeleteQuota(c.quota),
 		c.CfCmdGenerator.LogOut(),
 	}
 }
