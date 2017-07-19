@@ -29,76 +29,30 @@ import (
 )
 
 func main() {
-	configPath := flag.String("configFile", "", "Path to the config file")
-	flag.Parse()
-	if *configPath == "" {
-		log.Fatalln("Error: '-configFile' flag required")
-	}
-
-	cfg, err := config.Load(*configPath)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime|log.LUTC)
-	stdOutAndErrRunner := cmdRunner.New(os.Stdout, os.Stderr, io.Copy)
 
-	baseTmpDir, err := ioutil.TempDir("", "uptimer")
+	cfg, err := loadConfig()
 	if err != nil {
-		logger.Println("Failed to create base temp dir:", err)
+		logger.Println("Failed to load config: ", err)
 		os.Exit(1)
 	}
-	baseCfCmdGenerator := cfCmdGenerator.New(baseTmpDir)
 
-	appPath := path.Join(os.Getenv("GOPATH"), "/src/github.com/cloudfoundry/uptimer/app")
-	buildCmd := exec.Command("go", "build")
-	buildCmd.Dir = appPath
-	buildCmd.Env = []string{"GOOS=linux", "GOARCH=amd64"}
 	logger.Println("Building included app")
-	if err := buildCmd.Run(); err != nil {
+	appPath, err := compileIncludedApp()
+	if err != nil {
 		logger.Println("Failed to build included app: ", err)
 		os.Exit(1)
 	}
 	logger.Println("Finished building included app")
 
-	workflow := cfWorkflow.New(
-		cfg.CF,
-		baseCfCmdGenerator,
-		fmt.Sprintf("uptimer-org-%s", uuid.NewV4().String()),
-		fmt.Sprintf("uptimer-space-%s", uuid.NewV4().String()),
-		fmt.Sprintf("uptimer-quota-%s", uuid.NewV4().String()),
-		fmt.Sprintf("uptimer-app-%s", uuid.NewV4().String()),
-		appPath,
-	)
-
-	var recentLogsBuf = bytes.NewBuffer([]byte{})
-	recentLogsBufferRunner := cmdRunner.New(recentLogsBuf, ioutil.Discard, io.Copy)
-	var streamLogsBuf = bytes.NewBuffer([]byte{})
-	streamLogsBufferRunner := cmdRunner.New(streamLogsBuf, ioutil.Discard, io.Copy)
-	appLogValidator := appLogValidator.New()
-
-	// We are copying values from the cfg object so that this workflow generates its own
-	// org, space, and app names
-	pushTmpDir, err := ioutil.TempDir("", "uptimer")
+	baseTmpDir, pushTmpDir, err := createTmpDirs()
 	if err != nil {
-		logger.Println("Failed to create push temp dir:", err)
+		logger.Println("Failed to create temp dir:", err)
 		os.Exit(1)
 	}
-	pushCfCmdGenerator := cfCmdGenerator.New(pushTmpDir)
-	pushWorkflow := cfWorkflow.New(
-		&config.CfConfig{
-			API:           cfg.CF.API,
-			AppDomain:     cfg.CF.AppDomain,
-			AdminUser:     cfg.CF.AdminUser,
-			AdminPassword: cfg.CF.AdminPassword,
-		},
-		pushCfCmdGenerator,
-		fmt.Sprintf("uptimer-org-%s", uuid.NewV4().String()),
-		fmt.Sprintf("uptimer-space-%s", uuid.NewV4().String()),
-		fmt.Sprintf("uptimer-quota-%s", uuid.NewV4().String()),
-		fmt.Sprintf("uptimer-app-%s", uuid.NewV4().String()),
-		appPath,
-	)
+
+	logger.Println("Setting up push workflow")
+	pushWorkflow := createWorkflow(cfg.CF, cfCmdGenerator.New(pushTmpDir), appPath)
 	discardRunner := cmdRunner.New(ioutil.Discard, ioutil.Discard, io.Copy)
 	if err := discardRunner.RunInSequence(pushWorkflow.Setup()...); err != nil {
 		logger.Println("Failed push workflow setup: ", err)
@@ -107,10 +61,90 @@ func main() {
 		}
 		os.Exit(1)
 	}
+	logger.Println("Finished setting up push workflow")
 
-	measurements := []measurement.Measurement{
+	orcWorkflow := createWorkflow(cfg.CF, cfCmdGenerator.New(baseTmpDir), appPath)
+	stdOutAndErrRunner := cmdRunner.New(os.Stdout, os.Stderr, io.Copy)
+	measurements := getMeasurements(discardRunner, orcWorkflow, pushWorkflow)
+
+	orc := orchestrator.New(cfg.While, logger, orcWorkflow, stdOutAndErrRunner, measurements)
+
+	logger.Println("Setting up")
+	if err := orc.Setup(); err != nil {
+		logger.Println("Failed setup:", err)
+		tearDownAndExit(orc, logger, pushWorkflow, stdOutAndErrRunner, 1)
+	}
+
+	exitCode, err := orc.Run()
+	if err != nil {
+		logger.Println("Failed run:", err)
+		tearDownAndExit(orc, logger, pushWorkflow, stdOutAndErrRunner, exitCode)
+	}
+
+	tearDownAndExit(orc, logger, pushWorkflow, stdOutAndErrRunner, exitCode)
+}
+
+func loadConfig() (*config.Config, error) {
+	configPath := flag.String("configFile", "", "Path to the config file")
+	flag.Parse()
+	if *configPath == "" {
+		return nil, fmt.Errorf("'-configFile' flag required")
+	}
+
+	cfg, err := config.Load(*configPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return cfg, nil
+}
+
+func createTmpDirs() (string, string, error) {
+	baseTmpDir, err := ioutil.TempDir("", "uptimer")
+	if err != nil {
+		return "", "", err
+	}
+	pushTmpDir, err := ioutil.TempDir("", "uptimer")
+	if err != nil {
+		return "", "", err
+	}
+
+	return baseTmpDir, pushTmpDir, nil
+}
+
+func compileIncludedApp() (string, error) {
+	appPath := path.Join(os.Getenv("GOPATH"), "/src/github.com/cloudfoundry/uptimer/app")
+
+	buildCmd := exec.Command("go", "build")
+	buildCmd.Dir = appPath
+	buildCmd.Env = []string{"GOOS=linux", "GOARCH=amd64"}
+	err := buildCmd.Run()
+
+	return appPath, err
+}
+
+func createWorkflow(cfc *config.CfConfig, cg cfCmdGenerator.CfCmdGenerator, appPath string) cfWorkflow.CfWorkflow {
+	return cfWorkflow.New(
+		cfc,
+		cg,
+		fmt.Sprintf("uptimer-org-%s", uuid.NewV4().String()),
+		fmt.Sprintf("uptimer-space-%s", uuid.NewV4().String()),
+		fmt.Sprintf("uptimer-quota-%s", uuid.NewV4().String()),
+		fmt.Sprintf("uptimer-app-%s", uuid.NewV4().String()),
+		appPath,
+	)
+}
+
+func getMeasurements(discardRunner cmdRunner.CmdRunner, orcWorkflow, pushWorkflow cfWorkflow.CfWorkflow) []measurement.Measurement {
+	var recentLogsBuf = bytes.NewBuffer([]byte{})
+	recentLogsBufferRunner := cmdRunner.New(recentLogsBuf, ioutil.Discard, io.Copy)
+	var streamLogsBuf = bytes.NewBuffer([]byte{})
+	streamLogsBufferRunner := cmdRunner.New(streamLogsBuf, ioutil.Discard, io.Copy)
+	appLogValidator := appLogValidator.New()
+
+	return []measurement.Measurement{
 		measurement.NewAvailability(
-			workflow.AppUrl(),
+			orcWorkflow.AppUrl(),
 			time.Second,
 			clock.New(),
 			&http.Client{
@@ -122,9 +156,20 @@ func main() {
 		measurement.NewRecentLogs(
 			10*time.Second,
 			clock.New(),
-			workflow.RecentLogs,
+			orcWorkflow.RecentLogs,
 			recentLogsBufferRunner,
 			recentLogsBuf,
+			appLogValidator,
+		),
+		measurement.NewStreamLogs(
+			30*time.Second,
+			clock.New(),
+			func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter) {
+				ctx, cancelFunc := context.WithTimeout(context.Background(), 15*time.Second)
+				return ctx, cancelFunc, orcWorkflow.StreamLogs(ctx)
+			},
+			streamLogsBufferRunner,
+			streamLogsBuf,
 			appLogValidator,
 		),
 		measurement.NewPushability(
@@ -135,37 +180,10 @@ func main() {
 			},
 			discardRunner,
 		),
-		measurement.NewStreamLogs(
-			30*time.Second,
-			clock.New(),
-			func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter) {
-				ctx, cancelFunc := context.WithTimeout(context.Background(), 15*time.Second)
-				return ctx, cancelFunc, workflow.StreamLogs(ctx)
-			},
-			streamLogsBufferRunner,
-			streamLogsBuf,
-			appLogValidator,
-		),
 	}
-
-	orc := orchestrator.New(cfg.While, logger, workflow, stdOutAndErrRunner, measurements)
-
-	logger.Println("Setting up")
-	if err := orc.Setup(); err != nil {
-		logger.Println("Failed setup:", err)
-		TearDownAndExit(orc, logger, pushWorkflow, stdOutAndErrRunner, 1)
-	}
-
-	exitCode, err := orc.Run()
-	if err != nil {
-		logger.Println("Failed run:", err)
-		TearDownAndExit(orc, logger, pushWorkflow, stdOutAndErrRunner, exitCode)
-	}
-
-	TearDownAndExit(orc, logger, pushWorkflow, stdOutAndErrRunner, exitCode)
 }
 
-func TearDownAndExit(orc orchestrator.Orchestrator, logger *log.Logger, pushWorkflow cfWorkflow.CfWorkflow, runner cmdRunner.CmdRunner, exitCode int) {
+func tearDownAndExit(orc orchestrator.Orchestrator, logger *log.Logger, pushWorkflow cfWorkflow.CfWorkflow, runner cmdRunner.CmdRunner, exitCode int) {
 	logger.Println("Tearing down")
 	if err := orc.TearDown(); err != nil {
 		logger.Fatalln("Failed main teardown:", err)
