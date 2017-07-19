@@ -29,7 +29,7 @@ import (
 )
 
 func main() {
-	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime|log.LUTC)
+	logger := log.New(os.Stdout, "[UPTIMER] ", log.Ldate|log.Ltime|log.LUTC)
 
 	cfg, err := loadConfig()
 	if err != nil {
@@ -65,7 +65,7 @@ func main() {
 
 	orcWorkflow := createWorkflow(cfg.CF, cfCmdGenerator.New(baseTmpDir), appPath)
 	stdOutAndErrRunner := cmdRunner.New(os.Stdout, os.Stderr, io.Copy)
-	measurements := getMeasurements(discardRunner, orcWorkflow, pushWorkflow)
+	measurements := createMeasurements(discardRunner, orcWorkflow, pushWorkflow)
 
 	orc := orchestrator.New(cfg.While, logger, orcWorkflow, stdOutAndErrRunner, measurements)
 
@@ -135,7 +135,7 @@ func createWorkflow(cfc *config.CfConfig, cg cfCmdGenerator.CfCmdGenerator, appP
 	)
 }
 
-func getMeasurements(discardRunner cmdRunner.CmdRunner, orcWorkflow, pushWorkflow cfWorkflow.CfWorkflow) []measurement.Measurement {
+func createMeasurements(discardRunner cmdRunner.CmdRunner, orcWorkflow, pushWorkflow cfWorkflow.CfWorkflow) []measurement.Measurement {
 	var recentLogsBuf = bytes.NewBuffer([]byte{})
 	recentLogsBufferRunner := cmdRunner.New(recentLogsBuf, ioutil.Discard, io.Copy)
 	var streamLogsBuf = bytes.NewBuffer([]byte{})
