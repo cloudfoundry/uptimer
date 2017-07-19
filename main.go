@@ -65,7 +65,7 @@ func main() {
 
 	orcWorkflow := createWorkflow(cfg.CF, cfCmdGenerator.New(baseTmpDir), appPath)
 	stdOutAndErrRunner := cmdRunner.New(os.Stdout, os.Stderr, io.Copy)
-	measurements := createMeasurements(discardRunner, orcWorkflow, pushWorkflow)
+	measurements := createMeasurements(logger, discardRunner, orcWorkflow, pushWorkflow)
 
 	orc := orchestrator.New(cfg.While, logger, orcWorkflow, stdOutAndErrRunner, measurements)
 
@@ -135,7 +135,7 @@ func createWorkflow(cfc *config.CfConfig, cg cfCmdGenerator.CfCmdGenerator, appP
 	)
 }
 
-func createMeasurements(discardRunner cmdRunner.CmdRunner, orcWorkflow, pushWorkflow cfWorkflow.CfWorkflow) []measurement.Measurement {
+func createMeasurements(logger *log.Logger, discardRunner cmdRunner.CmdRunner, orcWorkflow, pushWorkflow cfWorkflow.CfWorkflow) []measurement.Measurement {
 	var recentLogsBuf = bytes.NewBuffer([]byte{})
 	recentLogsBufferRunner := cmdRunner.New(recentLogsBuf, ioutil.Discard, io.Copy)
 	var streamLogsBuf = bytes.NewBuffer([]byte{})
@@ -144,6 +144,7 @@ func createMeasurements(discardRunner cmdRunner.CmdRunner, orcWorkflow, pushWork
 
 	return []measurement.Measurement{
 		measurement.NewAvailability(
+			logger,
 			orcWorkflow.AppUrl(),
 			time.Second,
 			clock.New(),

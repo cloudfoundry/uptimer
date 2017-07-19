@@ -2,6 +2,7 @@ package measurement
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 
 type availability struct {
 	name      string
+	logger    *log.Logger
 	URL       string
 	Frequency time.Duration
 	Clock     clock.Clock
@@ -43,11 +45,18 @@ func (a *availability) Start() error {
 
 func (a *availability) performRequest() {
 	res, err := a.Client.Get(a.URL)
-	if err != nil || res.StatusCode != http.StatusOK {
-		a.resultSet.failed++
+	if err != nil {
+		a.recordAndLogFailure(err.Error())
+	} else if res.StatusCode != http.StatusOK {
+		a.recordAndLogFailure(fmt.Sprintf("response had status %d", res.StatusCode))
 	} else {
 		a.resultSet.successful++
 	}
+}
+
+func (a *availability) recordAndLogFailure(msg string) {
+	a.resultSet.failed++
+	a.logger.Printf("\x1b[31mFAILURE(%s): %s\x1b[0m\n", a.name, msg)
 }
 
 func (a *availability) Stop() error {
