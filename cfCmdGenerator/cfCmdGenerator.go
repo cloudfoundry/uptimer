@@ -40,61 +40,130 @@ func (c *cfCmdGenerator) addCfHome(cmd *exec.Cmd) cmdStartWaiter.CmdStartWaiter 
 }
 
 func (c *cfCmdGenerator) Api(url string) cmdStartWaiter.CmdStartWaiter {
-	return c.addCfHome(exec.Command("cf", "api", url, "--skip-ssl-validation"))
+	return c.addCfHome(
+		exec.Command(
+			"cf", "api", url,
+			"--skip-ssl-validation",
+		),
+	)
 }
 
 func (c *cfCmdGenerator) Auth(username string, password string) cmdStartWaiter.CmdStartWaiter {
-	return c.addCfHome(exec.Command("cf", "auth", username, password))
+	return c.addCfHome(
+		exec.Command(
+			"cf", "auth", username, password,
+		),
+	)
 }
 
 func (c *cfCmdGenerator) CreateQuota(quota string) cmdStartWaiter.CmdStartWaiter {
-	return c.addCfHome(exec.Command("cf", "create-quota", quota, "-m", "10G", "-i", "1G", "-r", "1000", "-s", "100"))
+	return c.addCfHome(
+		exec.Command(
+			"cf", "create-quota", quota,
+			"-m", "10G",
+			"-i", "1G",
+			"-r", "1000",
+			"-s", "100",
+		),
+	)
 }
 
 func (c *cfCmdGenerator) SetQuota(org, quota string) cmdStartWaiter.CmdStartWaiter {
-	return c.addCfHome(exec.Command("cf", "set-quota", org, quota))
+	return c.addCfHome(
+		exec.Command(
+			"cf", "set-quota", org, quota,
+		),
+	)
 }
 
 func (c *cfCmdGenerator) CreateOrg(org string) cmdStartWaiter.CmdStartWaiter {
-	return c.addCfHome(exec.Command("cf", "create-org", org))
+	return c.addCfHome(
+		exec.Command(
+			"cf", "create-org", org,
+		),
+	)
 }
 
 func (c *cfCmdGenerator) CreateSpace(org string, space string) cmdStartWaiter.CmdStartWaiter {
-	return c.addCfHome(exec.Command("cf", "create-space", space, "-o", org))
+	return c.addCfHome(
+		exec.Command(
+			"cf", "create-space", space,
+			"-o", org,
+		),
+	)
 }
 
 func (c *cfCmdGenerator) Target(org string, space string) cmdStartWaiter.CmdStartWaiter {
-	return c.addCfHome(exec.Command("cf", "target", "-o", org, "-s", space))
+	return c.addCfHome(
+		exec.Command(
+			"cf", "target",
+			"-o", org,
+			"-s", space,
+		),
+	)
 }
 
 func (c *cfCmdGenerator) Push(name string, path string) cmdStartWaiter.CmdStartWaiter {
-	return c.addCfHome(exec.Command(
-		"cf", "push", name,
-		"-p", path,
-		"-b", "binary_buildpack",
-		"-c", "./app"))
+	return c.addCfHome(
+		exec.Command(
+			"cf", "push", name,
+			"-p", path,
+			"-b", "binary_buildpack",
+			"-c", "./app",
+			"-i", "2",
+		),
+	)
 }
 
 func (c *cfCmdGenerator) Delete(name string) cmdStartWaiter.CmdStartWaiter {
-	return c.addCfHome(exec.Command("cf", "delete", name, "-f", "-r"))
+	return c.addCfHome(
+		exec.Command(
+			"cf", "delete", name,
+			"-f",
+			"-r",
+		),
+	)
 }
 
 func (c *cfCmdGenerator) DeleteOrg(org string) cmdStartWaiter.CmdStartWaiter {
-	return c.addCfHome(exec.Command("cf", "delete-org", org, "-f"))
+	return c.addCfHome(
+		exec.Command(
+			"cf", "delete-org", org,
+			"-f",
+		),
+	)
 }
 
 func (c *cfCmdGenerator) DeleteQuota(quota string) cmdStartWaiter.CmdStartWaiter {
-	return c.addCfHome(exec.Command("cf", "delete-quota", quota, "-f"))
+	return c.addCfHome(
+		exec.Command(
+			"cf", "delete-quota", quota,
+			"-f",
+		),
+	)
 }
 
 func (c *cfCmdGenerator) LogOut() cmdStartWaiter.CmdStartWaiter {
-	return c.addCfHome(exec.Command("cf", "logout"))
+	return c.addCfHome(
+		exec.Command(
+			"cf", "logout",
+		),
+	)
 }
 
 func (c *cfCmdGenerator) RecentLogs(appName string) cmdStartWaiter.CmdStartWaiter {
-	return c.addCfHome(exec.Command("cf", "logs", appName, "--recent"))
+	return c.addCfHome(
+		exec.Command(
+			"cf", "logs", appName,
+			"--recent",
+		),
+	)
 }
 
 func (c *cfCmdGenerator) StreamLogs(ctx context.Context, appName string) cmdStartWaiter.CmdStartWaiter {
-	return c.addCfHome(exec.CommandContext(ctx, "cf", "logs", appName))
+	return c.addCfHome(
+		exec.CommandContext(ctx,
+			"cf", "logs", appName,
+		),
+	)
 }
