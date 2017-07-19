@@ -1,7 +1,9 @@
 package measurement_test
 
 import (
+	"bytes"
 	"fmt"
+	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -22,6 +24,8 @@ var _ = Describe("Availability", func() {
 		successResponse  *http.Response
 		failResponse     *http.Response
 		client           *http.Client
+		logger           *log.Logger
+		logBuf           *bytes.Buffer
 
 		am Measurement
 	)
@@ -37,8 +41,10 @@ var _ = Describe("Availability", func() {
 		client = &http.Client{
 			Transport: fakeRoundTripper,
 		}
+		logBuf = bytes.NewBuffer([]byte{})
+		logger = log.New(logBuf, "", 0)
 
-		am = NewAvailability(url, freq, mockClock, client)
+		am = NewAvailability(logger, url, freq, mockClock, client)
 	})
 
 	Describe("Name", func() {
@@ -102,6 +108,24 @@ var _ = Describe("Availability", func() {
 			Expect(rs.Total()).To(Equal(4))
 			Expect(rs.Successful()).To(Equal(0))
 			Expect(rs.Failed()).To(Equal(4))
+		})
+
+		It("logs error output when there is a non-200 response", func() {
+			fakeRoundTripper.RoundTripReturns(failResponse, nil)
+
+			am.Start()
+			mockClock.Add(freq - time.Nanosecond)
+
+			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(HTTP availability): response had status 400\x1b[0m\n"))
+		})
+
+		It("logs error output when there is an error", func() {
+			fakeRoundTripper.RoundTripReturns(nil, fmt.Errorf("error"))
+
+			am.Start()
+			mockClock.Add(freq - time.Nanosecond)
+
+			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(HTTP availability): Get https://example.com/foo: error\x1b[0m\n"))
 		})
 	})
 

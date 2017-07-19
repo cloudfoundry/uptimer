@@ -3,6 +3,7 @@ package measurement
 import (
 	"bytes"
 	"context"
+	"log"
 	"net/http"
 	"time"
 
@@ -47,9 +48,10 @@ func (rs *resultSet) Total() int {
 	return rs.successful + rs.failed
 }
 
-func NewAvailability(url string, frequency time.Duration, clock clock.Clock, client *http.Client) Measurement {
+func NewAvailability(logger *log.Logger, url string, frequency time.Duration, clock clock.Clock, client *http.Client) Measurement {
 	return &availability{
 		name:      "HTTP availability",
+		logger:    logger,
 		URL:       url,
 		Frequency: frequency,
 		Clock:     clock,
