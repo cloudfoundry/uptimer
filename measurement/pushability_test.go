@@ -1,7 +1,9 @@
 package measurement_test
 
 import (
+	"bytes"
 	"fmt"
+	"log"
 	"os/exec"
 	"time"
 
@@ -21,6 +23,8 @@ var _ = Describe("Pushability", func() {
 		commands             []cmdStartWaiter.CmdStartWaiter
 		fakeCmdGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
 		fakeCommandRunner    *cmdRunnerfakes.FakeCmdRunner
+		logger               *log.Logger
+		logBuf               *bytes.Buffer
 
 		pm Measurement
 	)
@@ -32,8 +36,10 @@ var _ = Describe("Pushability", func() {
 		fakeCmdGeneratorFunc = func() []cmdStartWaiter.CmdStartWaiter {
 			return commands
 		}
+		logBuf = bytes.NewBuffer([]byte{})
+		logger = log.New(logBuf, "", 0)
 
-		pm = NewPushability(freq, mockClock, fakeCmdGeneratorFunc, fakeCommandRunner)
+		pm = NewPushability(logger, freq, mockClock, fakeCmdGeneratorFunc, fakeCommandRunner)
 	})
 
 	Describe("Name", func() {
@@ -129,6 +135,15 @@ var _ = Describe("Pushability", func() {
 			mockClock.Add(freq)
 
 			Expect(pm.Failed()).To(BeTrue())
+		})
+
+		It("logs error output when there is an error", func() {
+			fakeCommandRunner.RunInSequenceReturns(fmt.Errorf("errrrrrooooorrrr"))
+
+			pm.Start()
+			mockClock.Add(freq - time.Nanosecond)
+
+			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(App pushability): errrrrrooooorrrr\x1b[0m\n"))
 		})
 	})
 

@@ -15,7 +15,7 @@ import (
 type recentLogs struct {
 	RecentLogsCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
 	Runner                         cmdRunner.CmdRunner
-	LogBuf                         *bytes.Buffer
+	RunnerBuf                      *bytes.Buffer
 	Frequency                      time.Duration
 	Clock                          clock.Clock
 	appLogValidator                appLogValidator.AppLogValidator
@@ -55,8 +55,8 @@ func (r *recentLogs) getRecentLogs() {
 		return
 	}
 
-	logIsNewer, err := r.appLogValidator.IsNewer(r.LogBuf.String())
-	r.LogBuf.Reset()
+	logIsNewer, err := r.appLogValidator.IsNewer(r.RunnerBuf.String())
+	r.RunnerBuf.Reset()
 	if err != nil || !logIsNewer {
 		r.resultSet.failed++
 		return

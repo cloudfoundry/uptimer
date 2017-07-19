@@ -174,6 +174,7 @@ func createMeasurements(logger *log.Logger, discardRunner cmdRunner.CmdRunner, o
 			appLogValidator,
 		),
 		measurement.NewPushability(
+			logger,
 			time.Minute,
 			clock.New(),
 			func() []cmdStartWaiter.CmdStartWaiter {

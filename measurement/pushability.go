@@ -2,6 +2,7 @@ package measurement
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/benbjohnson/clock"
@@ -11,6 +12,7 @@ import (
 
 type pushability struct {
 	name                                 string
+	logger                               *log.Logger
 	PushAndDeleteAppCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
 	Runner                               cmdRunner.CmdRunner
 	Frequency                            time.Duration
@@ -43,11 +45,16 @@ func (p *pushability) Start() error {
 
 func (p *pushability) pushIt() {
 	if err := p.Runner.RunInSequence(p.PushAndDeleteAppCommandGeneratorFunc()...); err != nil {
-		p.resultSet.failed++
+		p.recordAndLogFailure(err.Error())
 		return
 	}
 
 	p.resultSet.successful++
+}
+
+func (p *pushability) recordAndLogFailure(msg string) {
+	p.resultSet.failed++
+	p.logger.Printf("\x1b[31mFAILURE(%s): %s\x1b[0m\n", p.name, msg)
 }
 
 func (p *pushability) Stop() error {

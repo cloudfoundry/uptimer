@@ -16,7 +16,7 @@ import (
 type streamLogs struct {
 	StreamLogsCommandGeneratorFunc func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter)
 	Runner                         cmdRunner.CmdRunner
-	LogBuf                         *bytes.Buffer
+	RunnerBuf                      *bytes.Buffer
 	Frequency                      time.Duration
 	Clock                          clock.Clock
 	appLogValidator                appLogValidator.AppLogValidator
@@ -58,8 +58,8 @@ func (s *streamLogs) streamLogs() {
 		return
 	}
 
-	logIsNewer, err := s.appLogValidator.IsNewer(s.LogBuf.String())
-	s.LogBuf.Reset()
+	logIsNewer, err := s.appLogValidator.IsNewer(s.RunnerBuf.String())
+	s.RunnerBuf.Reset()
 	if err != nil || !logIsNewer {
 		s.resultSet.failed++
 		return
