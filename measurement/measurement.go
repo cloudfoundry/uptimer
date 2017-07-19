@@ -66,14 +66,14 @@ func NewRecentLogs(
 	clock clock.Clock,
 	recentLogsCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter,
 	runner cmdRunner.CmdRunner,
-	logBuf *bytes.Buffer,
+	runnerBuf *bytes.Buffer,
 	appLogValidator appLogValidator.AppLogValidator,
 ) Measurement {
 	return &recentLogs{
 		name: "Recent logs fetching",
 		RecentLogsCommandGeneratorFunc: recentLogsCommandGeneratorFunc,
 		Runner:          runner,
-		LogBuf:          logBuf,
+		RunnerBuf:       runnerBuf,
 		appLogValidator: appLogValidator,
 		Frequency:       frequency,
 		Clock:           clock,
@@ -83,13 +83,15 @@ func NewRecentLogs(
 }
 
 func NewPushability(
+	logger *log.Logger,
 	frequency time.Duration,
 	clock clock.Clock,
 	pushAndDeleteAppCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter,
 	runner cmdRunner.CmdRunner,
 ) Measurement {
 	return &pushability{
-		name: "App pushability",
+		name:   "App pushability",
+		logger: logger,
 		PushAndDeleteAppCommandGeneratorFunc: pushAndDeleteAppCommandGeneratorFunc,
 		Runner:    runner,
 		Frequency: frequency,
@@ -104,14 +106,14 @@ func NewStreamLogs(
 	clock clock.Clock,
 	streamLogsCommandGeneratorFunc func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter),
 	runner cmdRunner.CmdRunner,
-	logBuf *bytes.Buffer,
+	runnerBuf *bytes.Buffer,
 	appLogValidator appLogValidator.AppLogValidator,
 ) Measurement {
 	return &streamLogs{
 		name: "Streaming logs",
 		StreamLogsCommandGeneratorFunc: streamLogsCommandGeneratorFunc,
 		Runner:          runner,
-		LogBuf:          logBuf,
+		RunnerBuf:       runnerBuf,
 		appLogValidator: appLogValidator,
 		Frequency:       frequency,
 		Clock:           clock,
