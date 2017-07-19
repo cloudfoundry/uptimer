@@ -13,15 +13,15 @@ to monitor uptime during migrations
 from CF Release to CF Deployment.
 
 # To use uptimer, configure it with an operation to monitor
-
 Create a `config.json` file
 that tells `uptimer`
 how to target
 the CF you wish to test
 and a command (e.g. `bosh deploy`)
 to run while testing uptime.
+Run `uptimer -configFile config.json`.
 
-## You will need to configure it with a `while_command`
+## You will need to configure it with one or more `while_command`s
 A `while_command` is a command
 that is executed
 to determine
@@ -33,6 +33,9 @@ For example,
 you may wish to configure
 the while_command to be
 a `bosh deploy` command.
+Note that the `while` config
+section is an array, and each
+command in it will be run in sequence.
 
 ## You will also need to configure it with credentials
 You should pass the
@@ -46,10 +49,10 @@ and push an app to that space.
 Here is an example `config.json`:
 ```
 {
-    "while": {
+    "while": [{
         "command": "sleep",
         "command_args": ["30"]
-    },
+    }],
     "cf": {
         "api": "api.my-cf.com",
         "app_domain": "my-cf.com",
@@ -57,14 +60,6 @@ Here is an example `config.json`:
         "admin_password": "PASS"
     }
 }
-```
-
-## You will need to compile the asset app to be pushed
-Something like this will do:
-```
-pushd app
-  GOOS=linux GOARCH=amd64 go build main.go
-popd 
 ```
 
 # CI
