@@ -22,8 +22,8 @@ type CfWorkflow interface {
 }
 
 type cfWorkflow struct {
-	Cf             *config.CfConfig
-	CfCmdGenerator cfCmdGenerator.CfCmdGenerator
+	cf             *config.CfConfig
+	cfCmdGenerator cfCmdGenerator.CfCmdGenerator
 
 	appUrl  string
 	appPath string
@@ -41,8 +41,8 @@ func New(cfConfig *config.CfConfig, cfCmdGenerator cfCmdGenerator.CfCmdGenerator
 	appUrl := fmt.Sprintf("https://%s.%s", appName, cfConfig.AppDomain)
 
 	return &cfWorkflow{
-		Cf:             cfConfig,
-		CfCmdGenerator: cfCmdGenerator,
+		cf:             cfConfig,
+		cfCmdGenerator: cfCmdGenerator,
 		appUrl:         appUrl,
 		appPath:        appPath,
 		org:            org,
@@ -54,57 +54,57 @@ func New(cfConfig *config.CfConfig, cfCmdGenerator cfCmdGenerator.CfCmdGenerator
 
 func (c *cfWorkflow) Setup() []cmdStartWaiter.CmdStartWaiter {
 	return []cmdStartWaiter.CmdStartWaiter{
-		c.CfCmdGenerator.Api(c.Cf.API),
-		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
-		c.CfCmdGenerator.CreateOrg(c.org),
-		c.CfCmdGenerator.CreateSpace(c.org, c.space),
-		c.CfCmdGenerator.CreateQuota(c.quota),
-		c.CfCmdGenerator.SetQuota(c.org, c.quota),
+		c.cfCmdGenerator.Api(c.cf.API),
+		c.cfCmdGenerator.Auth(c.cf.AdminUser, c.cf.AdminPassword),
+		c.cfCmdGenerator.CreateOrg(c.org),
+		c.cfCmdGenerator.CreateSpace(c.org, c.space),
+		c.cfCmdGenerator.CreateQuota(c.quota),
+		c.cfCmdGenerator.SetQuota(c.org, c.quota),
 	}
 }
 
 func (c *cfWorkflow) Push() []cmdStartWaiter.CmdStartWaiter {
 	return []cmdStartWaiter.CmdStartWaiter{
-		c.CfCmdGenerator.Api(c.Cf.API),
-		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
-		c.CfCmdGenerator.Target(c.org, c.space),
-		c.CfCmdGenerator.Push(c.appName, c.appPath),
+		c.cfCmdGenerator.Api(c.cf.API),
+		c.cfCmdGenerator.Auth(c.cf.AdminUser, c.cf.AdminPassword),
+		c.cfCmdGenerator.Target(c.org, c.space),
+		c.cfCmdGenerator.Push(c.appName, c.appPath),
 	}
 }
 
 func (c *cfWorkflow) Delete() []cmdStartWaiter.CmdStartWaiter {
 	return []cmdStartWaiter.CmdStartWaiter{
-		c.CfCmdGenerator.Api(c.Cf.API),
-		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
-		c.CfCmdGenerator.Target(c.org, c.space),
-		c.CfCmdGenerator.Delete(c.appName),
+		c.cfCmdGenerator.Api(c.cf.API),
+		c.cfCmdGenerator.Auth(c.cf.AdminUser, c.cf.AdminPassword),
+		c.cfCmdGenerator.Target(c.org, c.space),
+		c.cfCmdGenerator.Delete(c.appName),
 	}
 }
 
 func (c *cfWorkflow) TearDown() []cmdStartWaiter.CmdStartWaiter {
 	return []cmdStartWaiter.CmdStartWaiter{
-		c.CfCmdGenerator.Api(c.Cf.API),
-		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
-		c.CfCmdGenerator.DeleteOrg(c.org),
-		c.CfCmdGenerator.DeleteQuota(c.quota),
-		c.CfCmdGenerator.LogOut(),
+		c.cfCmdGenerator.Api(c.cf.API),
+		c.cfCmdGenerator.Auth(c.cf.AdminUser, c.cf.AdminPassword),
+		c.cfCmdGenerator.DeleteOrg(c.org),
+		c.cfCmdGenerator.DeleteQuota(c.quota),
+		c.cfCmdGenerator.LogOut(),
 	}
 }
 
 func (c *cfWorkflow) RecentLogs() []cmdStartWaiter.CmdStartWaiter {
 	return []cmdStartWaiter.CmdStartWaiter{
-		c.CfCmdGenerator.Api(c.Cf.API),
-		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
-		c.CfCmdGenerator.Target(c.org, c.space),
-		c.CfCmdGenerator.RecentLogs(c.appName),
+		c.cfCmdGenerator.Api(c.cf.API),
+		c.cfCmdGenerator.Auth(c.cf.AdminUser, c.cf.AdminPassword),
+		c.cfCmdGenerator.Target(c.org, c.space),
+		c.cfCmdGenerator.RecentLogs(c.appName),
 	}
 }
 
 func (c *cfWorkflow) StreamLogs(ctx context.Context) []cmdStartWaiter.CmdStartWaiter {
 	return []cmdStartWaiter.CmdStartWaiter{
-		c.CfCmdGenerator.Api(c.Cf.API),
-		c.CfCmdGenerator.Auth(c.Cf.AdminUser, c.Cf.AdminPassword),
-		c.CfCmdGenerator.Target(c.org, c.space),
-		c.CfCmdGenerator.StreamLogs(ctx, c.appName),
+		c.cfCmdGenerator.Api(c.cf.API),
+		c.cfCmdGenerator.Auth(c.cf.AdminUser, c.cf.AdminPassword),
+		c.cfCmdGenerator.Target(c.org, c.space),
+		c.cfCmdGenerator.StreamLogs(ctx, c.appName),
 	}
 }

@@ -13,10 +13,10 @@ import (
 
 type streamLogs struct {
 	name                           string
-	StreamLogsCommandGeneratorFunc func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter)
-	Runner                         cmdRunner.CmdRunner
-	RunnerOutBuf                   *bytes.Buffer
-	RunnerErrBuf                   *bytes.Buffer
+	streamLogsCommandGeneratorFunc func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter)
+	runner                         cmdRunner.CmdRunner
+	runnerOutBuf                   *bytes.Buffer
+	runnerErrBuf                   *bytes.Buffer
 	appLogValidator                appLogValidator.AppLogValidator
 }
 
@@ -25,28 +25,28 @@ func (s *streamLogs) Name() string {
 }
 
 func (s *streamLogs) PerformMeasurement(logger *log.Logger, rs ResultSet) {
-	defer s.RunnerOutBuf.Reset()
-	defer s.RunnerErrBuf.Reset()
+	defer s.runnerOutBuf.Reset()
+	defer s.runnerErrBuf.Reset()
 
-	ctx, cancelFunc, cmds := s.StreamLogsCommandGeneratorFunc()
+	ctx, cancelFunc, cmds := s.streamLogsCommandGeneratorFunc()
 	defer cancelFunc()
 
-	if err := s.Runner.RunInSequenceWithContext(ctx, cmds...); err != nil {
-		s.recordAndLogFailure(logger, err.Error(), s.RunnerOutBuf.String(), s.RunnerErrBuf.String(), rs)
+	if err := s.runner.RunInSequenceWithContext(ctx, cmds...); err != nil {
+		s.recordAndLogFailure(logger, err.Error(), s.runnerOutBuf.String(), s.runnerErrBuf.String(), rs)
 		return
 	}
 
-	logIsNewer, err := s.appLogValidator.IsNewer(s.RunnerOutBuf.String())
+	logIsNewer, err := s.appLogValidator.IsNewer(s.runnerOutBuf.String())
 	if err == nil && logIsNewer {
 		rs.RecordSuccess()
 		return
 	}
 
 	if err != nil {
-		s.recordAndLogFailure(logger, fmt.Sprintf("App log validation failed with: %s", err.Error()), s.RunnerOutBuf.String(), s.RunnerErrBuf.String(), rs)
+		s.recordAndLogFailure(logger, fmt.Sprintf("App log validation failed with: %s", err.Error()), s.runnerOutBuf.String(), s.runnerErrBuf.String(), rs)
 
 	} else if !logIsNewer {
-		s.recordAndLogFailure(logger, "App log fetched was not newer than previous app log fetched", s.RunnerOutBuf.String(), s.RunnerErrBuf.String(), rs)
+		s.recordAndLogFailure(logger, "App log fetched was not newer than previous app log fetched", s.runnerOutBuf.String(), s.runnerErrBuf.String(), rs)
 	}
 }
 

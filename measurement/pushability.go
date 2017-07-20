@@ -11,10 +11,10 @@ import (
 
 type pushability struct {
 	name                                 string
-	PushAndDeleteAppCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
-	Runner                               cmdRunner.CmdRunner
-	RunnerOutBuf                         *bytes.Buffer
-	RunnerErrBuf                         *bytes.Buffer
+	pushAndDeleteAppCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
+	runner                               cmdRunner.CmdRunner
+	runnerOutBuf                         *bytes.Buffer
+	runnerErrBuf                         *bytes.Buffer
 }
 
 func (p *pushability) Name() string {
@@ -22,11 +22,11 @@ func (p *pushability) Name() string {
 }
 
 func (p *pushability) PerformMeasurement(logger *log.Logger, rs ResultSet) {
-	defer p.RunnerOutBuf.Reset()
-	defer p.RunnerErrBuf.Reset()
+	defer p.runnerOutBuf.Reset()
+	defer p.runnerErrBuf.Reset()
 
-	if err := p.Runner.RunInSequence(p.PushAndDeleteAppCommandGeneratorFunc()...); err != nil {
-		p.recordAndLogFailure(logger, err.Error(), p.RunnerOutBuf.String(), p.RunnerErrBuf.String(), rs)
+	if err := p.runner.RunInSequence(p.pushAndDeleteAppCommandGeneratorFunc()...); err != nil {
+		p.recordAndLogFailure(logger, err.Error(), p.runnerOutBuf.String(), p.runnerErrBuf.String(), rs)
 		return
 	}
 

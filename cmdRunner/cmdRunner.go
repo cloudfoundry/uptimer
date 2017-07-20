@@ -17,18 +17,18 @@ type CmdRunner interface {
 }
 
 type cmdRunner struct {
-	OutWriter io.Writer
-	ErrWriter io.Writer
-	CopyFunc  copyFunc
+	outWriter io.Writer
+	errWriter io.Writer
+	copyFunc  copyFunc
 }
 
 type copyFunc func(io.Writer, io.Reader) (int64, error)
 
 func New(outWriter, errWriter io.Writer, copyFunc copyFunc) CmdRunner {
 	return &cmdRunner{
-		OutWriter: outWriter,
-		ErrWriter: errWriter,
-		CopyFunc:  copyFunc,
+		outWriter: outWriter,
+		errWriter: errWriter,
+		copyFunc:  copyFunc,
 	}
 }
 
@@ -64,11 +64,11 @@ func (r *cmdRunner) RunWithContext(ctx context.Context, csw cmdStartWaiter.CmdSt
 		return err
 	}
 
-	if _, err := r.CopyFunc(r.OutWriter, stdoutPipe); err != nil {
+	if _, err := r.copyFunc(r.outWriter, stdoutPipe); err != nil {
 		return err
 	}
 
-	if _, err := r.CopyFunc(r.ErrWriter, stderrPipe); err != nil {
+	if _, err := r.copyFunc(r.errWriter, stderrPipe); err != nil {
 		return err
 	}
 

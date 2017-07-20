@@ -61,10 +61,10 @@ func NewRecentLogs(
 ) BaseMeasurement {
 	return &recentLogs{
 		name: "Recent logs fetching",
-		RecentLogsCommandGeneratorFunc: recentLogsCommandGeneratorFunc,
-		Runner:          runner,
-		RunnerOutBuf:    runnerOutBuf,
-		RunnerErrBuf:    runnerErrBuf,
+		recentLogsCommandGeneratorFunc: recentLogsCommandGeneratorFunc,
+		runner:          runner,
+		runnerOutBuf:    runnerOutBuf,
+		runnerErrBuf:    runnerErrBuf,
 		appLogValidator: appLogValidator,
 	}
 }
@@ -78,10 +78,10 @@ func NewStreamLogs(
 ) BaseMeasurement {
 	return &streamLogs{
 		name: "Streaming logs",
-		StreamLogsCommandGeneratorFunc: streamLogsCommandGeneratorFunc,
-		Runner:          runner,
-		RunnerOutBuf:    runnerOutBuf,
-		RunnerErrBuf:    runnerErrBuf,
+		streamLogsCommandGeneratorFunc: streamLogsCommandGeneratorFunc,
+		runner:          runner,
+		runnerOutBuf:    runnerOutBuf,
+		runnerErrBuf:    runnerErrBuf,
 		appLogValidator: appLogValidator,
 	}
 }
@@ -94,9 +94,9 @@ func NewPushability(
 ) BaseMeasurement {
 	return &pushability{
 		name: "App pushability",
-		PushAndDeleteAppCommandGeneratorFunc: pushAndDeleteAppCommandGeneratorFunc,
-		Runner:       runner,
-		RunnerOutBuf: runnerOutBuf,
-		RunnerErrBuf: runnerErrBuf,
+		pushAndDeleteAppCommandGeneratorFunc: pushAndDeleteAppCommandGeneratorFunc,
+		runner:       runner,
+		runnerOutBuf: runnerOutBuf,
+		runnerErrBuf: runnerErrBuf,
 	}
 }

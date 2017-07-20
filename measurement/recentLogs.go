@@ -12,10 +12,10 @@ import (
 
 type recentLogs struct {
 	name                           string
-	RecentLogsCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
-	Runner                         cmdRunner.CmdRunner
-	RunnerOutBuf                   *bytes.Buffer
-	RunnerErrBuf                   *bytes.Buffer
+	recentLogsCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
+	runner                         cmdRunner.CmdRunner
+	runnerOutBuf                   *bytes.Buffer
+	runnerErrBuf                   *bytes.Buffer
 	appLogValidator                appLogValidator.AppLogValidator
 }
 
@@ -24,25 +24,25 @@ func (r *recentLogs) Name() string {
 }
 
 func (r *recentLogs) PerformMeasurement(logger *log.Logger, rs ResultSet) {
-	defer r.RunnerOutBuf.Reset()
-	defer r.RunnerErrBuf.Reset()
+	defer r.runnerOutBuf.Reset()
+	defer r.runnerErrBuf.Reset()
 
-	if err := r.Runner.RunInSequence(r.RecentLogsCommandGeneratorFunc()...); err != nil {
-		r.recordAndLogFailure(logger, err.Error(), r.RunnerOutBuf.String(), r.RunnerErrBuf.String(), rs)
+	if err := r.runner.RunInSequence(r.recentLogsCommandGeneratorFunc()...); err != nil {
+		r.recordAndLogFailure(logger, err.Error(), r.runnerOutBuf.String(), r.runnerErrBuf.String(), rs)
 		return
 	}
 
-	logIsNewer, err := r.appLogValidator.IsNewer(r.RunnerOutBuf.String())
+	logIsNewer, err := r.appLogValidator.IsNewer(r.runnerOutBuf.String())
 	if err == nil && logIsNewer {
 		rs.RecordSuccess()
 		return
 	}
 
 	if err != nil {
-		r.recordAndLogFailure(logger, fmt.Sprintf("App log validation failed with: %s", err.Error()), r.RunnerOutBuf.String(), r.RunnerErrBuf.String(), rs)
+		r.recordAndLogFailure(logger, fmt.Sprintf("App log validation failed with: %s", err.Error()), r.runnerOutBuf.String(), r.runnerErrBuf.String(), rs)
 
 	} else if !logIsNewer {
-		r.recordAndLogFailure(logger, "App log fetched was not newer than previous app log fetched", r.RunnerOutBuf.String(), r.RunnerErrBuf.String(), rs)
+		r.recordAndLogFailure(logger, "App log fetched was not newer than previous app log fetched", r.runnerOutBuf.String(), r.runnerErrBuf.String(), rs)
 	}
 }
 

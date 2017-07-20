@@ -19,31 +19,31 @@ type Orchestrator interface {
 }
 
 type orchestrator struct {
-	Logger       *log.Logger
-	WhileConfig  []*config.CommandConfig
-	Workflow     cfWorkflow.CfWorkflow
-	Runner       cmdRunner.CmdRunner
-	Measurements []measurement.Measurement
+	logger       *log.Logger
+	whileConfig  []*config.CommandConfig
+	workflow     cfWorkflow.CfWorkflow
+	runner       cmdRunner.CmdRunner
+	measurements []measurement.Measurement
 }
 
 func New(whileConfig []*config.CommandConfig, logger *log.Logger, workflow cfWorkflow.CfWorkflow, runner cmdRunner.CmdRunner, measurements []measurement.Measurement) Orchestrator {
 	return &orchestrator{
-		Logger:       logger,
-		WhileConfig:  whileConfig,
-		Workflow:     workflow,
-		Runner:       runner,
-		Measurements: measurements,
+		logger:       logger,
+		whileConfig:  whileConfig,
+		workflow:     workflow,
+		runner:       runner,
+		measurements: measurements,
 	}
 }
 
 func (o *orchestrator) Setup() error {
-	return o.Runner.RunInSequence(append(o.Workflow.Setup(), o.Workflow.Push()...)...)
+	return o.runner.RunInSequence(append(o.workflow.Setup(), o.workflow.Push()...)...)
 }
 
 func (o *orchestrator) Run() (int, error) {
 	var exitCode int
-	for _, m := range o.Measurements {
-		o.Logger.Printf("Starting measurement: %s\n", m.Name())
+	for _, m := range o.measurements {
+		o.logger.Printf("Starting measurement: %s\n", m.Name())
 		go m.Start()
 	}
 
@@ -52,19 +52,19 @@ func (o *orchestrator) Run() (int, error) {
 		return exitCode, err
 	}
 
-	for _, m := range o.Measurements {
-		o.Logger.Printf("Stopping measurement: %s\n", m.Name())
+	for _, m := range o.measurements {
+		o.logger.Printf("Stopping measurement: %s\n", m.Name())
 		m.Stop()
 	}
 
-	o.Logger.Println("Measurement summaries:")
-	for _, m := range o.Measurements {
+	o.logger.Println("Measurement summaries:")
+	for _, m := range o.measurements {
 		if m.Failed() {
 			exitCode = 1
-			o.Logger.Printf("\x1b[31m%s\x1b[0m\n", m.Summary())
+			o.logger.Printf("\x1b[31m%s\x1b[0m\n", m.Summary())
 
 		} else {
-			o.Logger.Printf("\x1b[32m%s\x1b[0m\n", m.Summary())
+			o.logger.Printf("\x1b[32m%s\x1b[0m\n", m.Summary())
 		}
 
 	}
@@ -73,19 +73,19 @@ func (o *orchestrator) Run() (int, error) {
 }
 
 func (o *orchestrator) TearDown() error {
-	return o.Runner.RunInSequence(o.Workflow.TearDown()...)
+	return o.runner.RunInSequence(o.workflow.TearDown()...)
 }
 
 func (o *orchestrator) runWhileCommands() (int, error) {
-	for _, cfg := range o.WhileConfig {
+	for _, cfg := range o.whileConfig {
 		cmd := exec.Command(cfg.Command, cfg.CommandArgs...)
-		o.Logger.Printf("Running command: `%s %s`\n", o.WhileConfig[0].Command, strings.Join(o.WhileConfig[0].CommandArgs, " "))
-		if err := o.Runner.Run(cmd); err != nil {
+		o.logger.Printf("Running command: `%s %s`\n", o.whileConfig[0].Command, strings.Join(o.whileConfig[0].CommandArgs, " "))
+		if err := o.runner.Run(cmd); err != nil {
 			return 64, err
 		}
-		o.Logger.Println()
+		o.logger.Println()
 
-		o.Logger.Println("Finished running command")
+		o.logger.Println("Finished running command")
 	}
 	return 0, nil
 }
