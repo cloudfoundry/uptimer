@@ -130,24 +130,4 @@ var _ = Describe("Pushability", func() {
 			Expect(pm.Failed(fakeResultSet)).To(BeTrue())
 		})
 	})
-
-	Describe("Summary", func() {
-		It("returns a success summary if none failed", func() {
-			fakeResultSet.FailedReturns(0)
-			fakeResultSet.TotalReturns(3)
-
-			pm.PerformMeasurement(logger, fakeResultSet)
-
-			Expect(pm.Summary(fakeResultSet)).To(Equal(fmt.Sprintf("SUCCESS(%s): All %d attempts to push and delete an app succeeded", pm.Name(), 3)))
-		})
-
-		It("returns a failed summary if there are failures", func() {
-			fakeResultSet.FailedReturns(3)
-			fakeResultSet.TotalReturns(7)
-
-			pm.PerformMeasurement(logger, fakeResultSet)
-
-			Expect(pm.Summary(fakeResultSet)).To(Equal(fmt.Sprintf("FAILED(%s): %d of %d attempts to push and delete an app failed", pm.Name(), 3, 7)))
-		})
-	})
 })

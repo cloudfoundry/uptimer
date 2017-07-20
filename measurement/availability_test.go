@@ -124,22 +124,6 @@ var _ = Describe("Availability", func() {
 			Expect(am.Failed(fakeResultSet)).To(BeTrue())
 		})
 	})
-
-	Describe("Summary", func() {
-		It("returns a success summary if none failed", func() {
-			fakeResultSet.FailedReturns(0)
-			fakeResultSet.TotalReturns(3)
-
-			Expect(am.Summary(fakeResultSet)).To(Equal(fmt.Sprintf("SUCCESS(%s): All %d requests succeeded", am.Name(), 3)))
-		})
-
-		It("returns a failed summary if there are failures", func() {
-			fakeResultSet.FailedReturns(3)
-			fakeResultSet.TotalReturns(7)
-
-			Expect(am.Summary(fakeResultSet)).To(Equal(fmt.Sprintf("FAILED(%s): %d of %d requests failed", am.Name(), 3, 7)))
-		})
-	})
 })
 
 type FakeRoundTripper struct {

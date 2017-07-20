@@ -176,24 +176,4 @@ var _ = Describe("RecentLogs", func() {
 			Expect(rlm.Failed(fakeResultSet)).To(BeTrue())
 		})
 	})
-
-	Describe("Summary", func() {
-		It("returns a success summary if none failed", func() {
-			fakeResultSet.FailedReturns(0)
-			fakeResultSet.TotalReturns(4)
-
-			rlm.PerformMeasurement(logger, fakeResultSet)
-
-			Expect(rlm.Summary(fakeResultSet)).To(Equal(fmt.Sprintf("SUCCESS(%s): All %d attempts to fetch recent logs succeeded", rlm.Name(), 4)))
-		})
-
-		It("returns a failed summary if there are failures", func() {
-			fakeResultSet.FailedReturns(3)
-			fakeResultSet.TotalReturns(7)
-
-			rlm.PerformMeasurement(logger, fakeResultSet)
-
-			Expect(rlm.Summary(fakeResultSet)).To(Equal(fmt.Sprintf("FAILED(%s): %d of %d attempts to fetch recent logs failed", rlm.Name(), 3, 7)))
-		})
-	})
 })

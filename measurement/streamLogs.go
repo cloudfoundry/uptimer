@@ -13,6 +13,7 @@ import (
 
 type streamLogs struct {
 	name                           string
+	summaryPhrase                  string
 	streamLogsCommandGeneratorFunc func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter)
 	runner                         cmdRunner.CmdRunner
 	runnerOutBuf                   *bytes.Buffer
@@ -22,6 +23,10 @@ type streamLogs struct {
 
 func (s *streamLogs) Name() string {
 	return s.name
+}
+
+func (s *streamLogs) SummaryPhrase() string {
+	return s.summaryPhrase
 }
 
 func (s *streamLogs) PerformMeasurement(logger *log.Logger, rs ResultSet) {
@@ -63,12 +68,4 @@ func (s *streamLogs) recordAndLogFailure(logger *log.Logger, errString, cmdOut, 
 
 func (s *streamLogs) Failed(rs ResultSet) bool {
 	return rs.Failed() > 0
-}
-
-func (s *streamLogs) Summary(rs ResultSet) string {
-	if rs.Failed() > 0 {
-		return fmt.Sprintf("FAILED(%s): %d of %d attempts to stream logs failed", s.name, rs.Failed(), rs.Total())
-	}
-
-	return fmt.Sprintf("SUCCESS(%s): All %d attempts to stream logs succeeded", s.name, rs.Total())
 }

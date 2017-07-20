@@ -41,14 +41,15 @@ type BaseMeasurement interface {
 	Name() string
 	PerformMeasurement(*log.Logger, ResultSet)
 	Failed(rs ResultSet) bool
-	Summary(rs ResultSet) string
+	SummaryPhrase() string
 }
 
 func NewAvailability(url string, client *http.Client) BaseMeasurement {
 	return &availability{
-		name:   "HTTP availability",
-		url:    url,
-		client: client,
+		name:          "HTTP availability",
+		summaryPhrase: "perform get requests",
+		url:           url,
+		client:        client,
 	}
 }
 
@@ -60,7 +61,8 @@ func NewRecentLogs(
 	appLogValidator appLogValidator.AppLogValidator,
 ) BaseMeasurement {
 	return &recentLogs{
-		name: "Recent logs fetching",
+		name:                           "Recent logs fetching",
+		summaryPhrase:                  "fetch recent logs",
 		recentLogsCommandGeneratorFunc: recentLogsCommandGeneratorFunc,
 		runner:          runner,
 		runnerOutBuf:    runnerOutBuf,
@@ -77,7 +79,8 @@ func NewStreamLogs(
 	appLogValidator appLogValidator.AppLogValidator,
 ) BaseMeasurement {
 	return &streamLogs{
-		name: "Streaming logs",
+		name:                           "Streaming logs",
+		summaryPhrase:                  "stream logs",
 		streamLogsCommandGeneratorFunc: streamLogsCommandGeneratorFunc,
 		runner:          runner,
 		runnerOutBuf:    runnerOutBuf,
@@ -93,7 +96,8 @@ func NewPushability(
 	runnerErrBuf *bytes.Buffer,
 ) BaseMeasurement {
 	return &pushability{
-		name: "App pushability",
+		name:                                 "App pushability",
+		summaryPhrase:                        "push and delete an app",
 		pushAndDeleteAppCommandGeneratorFunc: pushAndDeleteAppCommandGeneratorFunc,
 		runner:       runner,
 		runnerOutBuf: runnerOutBuf,

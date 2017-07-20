@@ -1,6 +1,7 @@
 package measurement
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -48,6 +49,22 @@ func (p *periodic) Stop() {
 func (p *periodic) Failed() bool {
 	return p.baseMeasurement.Failed(p.resultSet)
 }
+
 func (p *periodic) Summary() string {
-	return p.baseMeasurement.Summary(p.resultSet)
+	if p.Failed() {
+		return fmt.Sprintf(
+			"FAILED(%s): %d of %d attempts to %s failed",
+			p.baseMeasurement.Name(),
+			p.resultSet.Failed(),
+			p.resultSet.Total(),
+			p.baseMeasurement.SummaryPhrase(),
+		)
+	}
+
+	return fmt.Sprintf(
+		"SUCCESS(%s): All %d attempts to %s succeeded",
+		p.baseMeasurement.Name(),
+		p.resultSet.Total(),
+		p.baseMeasurement.SummaryPhrase(),
+	)
 }

@@ -1,6 +1,7 @@
 package measurement_test
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"time"
@@ -29,6 +30,8 @@ var _ = Describe("Periodic", func() {
 		mockClock = clock.NewMock()
 		freq = time.Second
 		fakeBaseMeasurement = &measurementfakes.FakeBaseMeasurement{}
+		fakeBaseMeasurement.NameReturns("foo measurement")
+		fakeBaseMeasurement.SummaryPhraseReturns("wingdang the foobrizzle")
 		fakeResultSet = &measurementfakes.FakeResultSet{}
 
 		p = NewPeriodic(logger, mockClock, freq, fakeBaseMeasurement, fakeResultSet)
@@ -36,8 +39,6 @@ var _ = Describe("Periodic", func() {
 
 	Describe("Name", func() {
 		It("Returns the base measurement's name", func() {
-			fakeBaseMeasurement.NameReturns("foo measurement")
-
 			Expect(p.Name()).To(Equal("foo measurement"))
 		})
 	})
@@ -88,10 +89,20 @@ var _ = Describe("Periodic", func() {
 	})
 
 	Describe("Summary", func() {
-		It("Returns the base measurement's summary", func() {
-			fakeBaseMeasurement.SummaryReturns("this is a summary")
+		It("returns a success summary if none failed", func() {
+			fakeBaseMeasurement.FailedReturns(false)
+			fakeResultSet.FailedReturns(0)
+			fakeResultSet.TotalReturns(4)
 
-			Expect(p.Summary()).To(Equal("this is a summary"))
+			Expect(p.Summary()).To(Equal(fmt.Sprintf("SUCCESS(%s): All %d attempts to %s succeeded", fakeBaseMeasurement.Name(), 4, fakeBaseMeasurement.SummaryPhrase())))
+		})
+
+		It("returns a failed summary if there are failures", func() {
+			fakeBaseMeasurement.FailedReturns(true)
+			fakeResultSet.FailedReturns(3)
+			fakeResultSet.TotalReturns(7)
+
+			Expect(p.Summary()).To(Equal(fmt.Sprintf("FAILED(%s): %d of %d attempts to %s failed", fakeBaseMeasurement.Name(), 3, 7, fakeBaseMeasurement.SummaryPhrase())))
 		})
 	})
 })

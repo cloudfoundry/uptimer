@@ -7,13 +7,18 @@ import (
 )
 
 type availability struct {
-	name   string
-	url    string
-	client *http.Client
+	name          string
+	summaryPhrase string
+	url           string
+	client        *http.Client
 }
 
 func (a *availability) Name() string {
 	return a.name
+}
+
+func (a *availability) SummaryPhrase() string {
+	return a.summaryPhrase
 }
 
 func (a *availability) PerformMeasurement(logger *log.Logger, rs ResultSet) {
@@ -34,12 +39,4 @@ func (a *availability) recordAndLogFailure(logger *log.Logger, msg string, rs Re
 
 func (a *availability) Failed(rs ResultSet) bool {
 	return rs.Failed() > 0
-}
-
-func (a *availability) Summary(rs ResultSet) string {
-	if rs.Failed() > 0 {
-		return fmt.Sprintf("FAILED(%s): %d of %d requests failed", a.name, rs.Failed(), rs.Total())
-	}
-
-	return fmt.Sprintf("SUCCESS(%s): All %d requests succeeded", a.name, rs.Total())
 }

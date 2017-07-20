@@ -2,7 +2,6 @@ package measurement
 
 import (
 	"bytes"
-	"fmt"
 	"log"
 
 	"github.com/cloudfoundry/uptimer/cmdRunner"
@@ -11,6 +10,7 @@ import (
 
 type pushability struct {
 	name                                 string
+	summaryPhrase                        string
 	pushAndDeleteAppCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
 	runner                               cmdRunner.CmdRunner
 	runnerOutBuf                         *bytes.Buffer
@@ -19,6 +19,10 @@ type pushability struct {
 
 func (p *pushability) Name() string {
 	return p.name
+}
+
+func (p *pushability) SummaryPhrase() string {
+	return p.summaryPhrase
 }
 
 func (p *pushability) PerformMeasurement(logger *log.Logger, rs ResultSet) {
@@ -46,12 +50,4 @@ func (p *pushability) recordAndLogFailure(logger *log.Logger, errString, cmdOut,
 
 func (p *pushability) Failed(rs ResultSet) bool {
 	return rs.Failed() > 0
-}
-
-func (p *pushability) Summary(rs ResultSet) string {
-	if rs.Failed() > 0 {
-		return fmt.Sprintf("FAILED(%s): %d of %d attempts to push and delete an app failed", p.name, rs.Failed(), rs.Total())
-	}
-
-	return fmt.Sprintf("SUCCESS(%s): All %d attempts to push and delete an app succeeded", p.name, rs.Total())
 }

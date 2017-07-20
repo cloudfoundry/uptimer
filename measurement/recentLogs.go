@@ -12,6 +12,7 @@ import (
 
 type recentLogs struct {
 	name                           string
+	summaryPhrase                  string
 	recentLogsCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
 	runner                         cmdRunner.CmdRunner
 	runnerOutBuf                   *bytes.Buffer
@@ -21,6 +22,10 @@ type recentLogs struct {
 
 func (r *recentLogs) Name() string {
 	return r.name
+}
+
+func (r *recentLogs) SummaryPhrase() string {
+	return r.summaryPhrase
 }
 
 func (r *recentLogs) PerformMeasurement(logger *log.Logger, rs ResultSet) {
@@ -59,11 +64,4 @@ func (r *recentLogs) recordAndLogFailure(logger *log.Logger, errString, cmdOut, 
 
 func (r *recentLogs) Failed(rs ResultSet) bool {
 	return rs.Failed() > 0
-}
-func (r *recentLogs) Summary(rs ResultSet) string {
-	if rs.Failed() > 0 {
-		return fmt.Sprintf("FAILED(%s): %d of %d attempts to fetch recent logs failed", r.name, rs.Failed(), rs.Total())
-	}
-
-	return fmt.Sprintf("SUCCESS(%s): All %d attempts to fetch recent logs succeeded", r.name, rs.Total())
 }

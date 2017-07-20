@@ -206,24 +206,4 @@ var _ = Describe("StreamLogs", func() {
 			Expect(slm.Failed(fakeResultSet)).To(BeTrue())
 		})
 	})
-
-	Describe("Summary", func() {
-		It("returns a success summary if none failed", func() {
-			fakeResultSet.FailedReturns(0)
-			fakeResultSet.TotalReturns(4)
-
-			slm.PerformMeasurement(logger, fakeResultSet)
-
-			Expect(slm.Summary(fakeResultSet)).To(Equal(fmt.Sprintf("SUCCESS(%s): All %d attempts to stream logs succeeded", slm.Name(), 4)))
-		})
-
-		It("returns a failed summary if there are failures", func() {
-			fakeResultSet.FailedReturns(3)
-			fakeResultSet.TotalReturns(7)
-
-			slm.PerformMeasurement(logger, fakeResultSet)
-
-			Expect(slm.Summary(fakeResultSet)).To(Equal(fmt.Sprintf("FAILED(%s): %d of %d attempts to stream logs failed", slm.Name(), 3, 7)))
-		})
-	})
 })
