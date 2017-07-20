@@ -17,9 +17,9 @@ import (
 //go:generate counterfeiter . Measurement
 type Measurement interface {
 	Name() string
-	Start() error
-	Stop() error
-	Results() (ResultSet, error)
+	Start()
+	Stop()
+	Results() ResultSet
 	Failed() bool
 	Summary() string
 }

@@ -17,34 +17,20 @@ type FakeMeasurement struct {
 	nameReturnsOnCall map[int]struct {
 		result1 string
 	}
-	StartStub        func() error
-	startMutex       sync.RWMutex
-	startArgsForCall []struct{}
-	startReturns     struct {
-		result1 error
-	}
-	startReturnsOnCall map[int]struct {
-		result1 error
-	}
-	StopStub        func() error
-	stopMutex       sync.RWMutex
-	stopArgsForCall []struct{}
-	stopReturns     struct {
-		result1 error
-	}
-	stopReturnsOnCall map[int]struct {
-		result1 error
-	}
-	ResultsStub        func() (measurement.ResultSet, error)
+	StartStub          func()
+	startMutex         sync.RWMutex
+	startArgsForCall   []struct{}
+	StopStub           func()
+	stopMutex          sync.RWMutex
+	stopArgsForCall    []struct{}
+	ResultsStub        func() measurement.ResultSet
 	resultsMutex       sync.RWMutex
 	resultsArgsForCall []struct{}
 	resultsReturns     struct {
 		result1 measurement.ResultSet
-		result2 error
 	}
 	resultsReturnsOnCall map[int]struct {
 		result1 measurement.ResultSet
-		result2 error
 	}
 	FailedStub        func() bool
 	failedMutex       sync.RWMutex
@@ -108,19 +94,14 @@ func (fake *FakeMeasurement) NameReturnsOnCall(i int, result1 string) {
 	}{result1}
 }
 
-func (fake *FakeMeasurement) Start() error {
+func (fake *FakeMeasurement) Start() {
 	fake.startMutex.Lock()
-	ret, specificReturn := fake.startReturnsOnCall[len(fake.startArgsForCall)]
 	fake.startArgsForCall = append(fake.startArgsForCall, struct{}{})
 	fake.recordInvocation("Start", []interface{}{})
 	fake.startMutex.Unlock()
 	if fake.StartStub != nil {
-		return fake.StartStub()
+		fake.StartStub()
 	}
-	if specificReturn {
-		return ret.result1
-	}
-	return fake.startReturns.result1
 }
 
 func (fake *FakeMeasurement) StartCallCount() int {
@@ -129,38 +110,14 @@ func (fake *FakeMeasurement) StartCallCount() int {
 	return len(fake.startArgsForCall)
 }
 
-func (fake *FakeMeasurement) StartReturns(result1 error) {
-	fake.StartStub = nil
-	fake.startReturns = struct {
-		result1 error
-	}{result1}
-}
-
-func (fake *FakeMeasurement) StartReturnsOnCall(i int, result1 error) {
-	fake.StartStub = nil
-	if fake.startReturnsOnCall == nil {
-		fake.startReturnsOnCall = make(map[int]struct {
-			result1 error
-		})
-	}
-	fake.startReturnsOnCall[i] = struct {
-		result1 error
-	}{result1}
-}
-
-func (fake *FakeMeasurement) Stop() error {
+func (fake *FakeMeasurement) Stop() {
 	fake.stopMutex.Lock()
-	ret, specificReturn := fake.stopReturnsOnCall[len(fake.stopArgsForCall)]
 	fake.stopArgsForCall = append(fake.stopArgsForCall, struct{}{})
 	fake.recordInvocation("Stop", []interface{}{})
 	fake.stopMutex.Unlock()
 	if fake.StopStub != nil {
-		return fake.StopStub()
+		fake.StopStub()
 	}
-	if specificReturn {
-		return ret.result1
-	}
-	return fake.stopReturns.result1
 }
 
 func (fake *FakeMeasurement) StopCallCount() int {
@@ -169,26 +126,7 @@ func (fake *FakeMeasurement) StopCallCount() int {
 	return len(fake.stopArgsForCall)
 }
 
-func (fake *FakeMeasurement) StopReturns(result1 error) {
-	fake.StopStub = nil
-	fake.stopReturns = struct {
-		result1 error
-	}{result1}
-}
-
-func (fake *FakeMeasurement) StopReturnsOnCall(i int, result1 error) {
-	fake.StopStub = nil
-	if fake.stopReturnsOnCall == nil {
-		fake.stopReturnsOnCall = make(map[int]struct {
-			result1 error
-		})
-	}
-	fake.stopReturnsOnCall[i] = struct {
-		result1 error
-	}{result1}
-}
-
-func (fake *FakeMeasurement) Results() (measurement.ResultSet, error) {
+func (fake *FakeMeasurement) Results() measurement.ResultSet {
 	fake.resultsMutex.Lock()
 	ret, specificReturn := fake.resultsReturnsOnCall[len(fake.resultsArgsForCall)]
 	fake.resultsArgsForCall = append(fake.resultsArgsForCall, struct{}{})
@@ -198,9 +136,9 @@ func (fake *FakeMeasurement) Results() (measurement.ResultSet, error) {
 		return fake.ResultsStub()
 	}
 	if specificReturn {
-		return ret.result1, ret.result2
+		return ret.result1
 	}
-	return fake.resultsReturns.result1, fake.resultsReturns.result2
+	return fake.resultsReturns.result1
 }
 
 func (fake *FakeMeasurement) ResultsCallCount() int {
@@ -209,26 +147,23 @@ func (fake *FakeMeasurement) ResultsCallCount() int {
 	return len(fake.resultsArgsForCall)
 }
 
-func (fake *FakeMeasurement) ResultsReturns(result1 measurement.ResultSet, result2 error) {
+func (fake *FakeMeasurement) ResultsReturns(result1 measurement.ResultSet) {
 	fake.ResultsStub = nil
 	fake.resultsReturns = struct {
 		result1 measurement.ResultSet
-		result2 error
-	}{result1, result2}
+	}{result1}
 }
 
-func (fake *FakeMeasurement) ResultsReturnsOnCall(i int, result1 measurement.ResultSet, result2 error) {
+func (fake *FakeMeasurement) ResultsReturnsOnCall(i int, result1 measurement.ResultSet) {
 	fake.ResultsStub = nil
 	if fake.resultsReturnsOnCall == nil {
 		fake.resultsReturnsOnCall = make(map[int]struct {
 			result1 measurement.ResultSet
-			result2 error
 		})
 	}
 	fake.resultsReturnsOnCall[i] = struct {
 		result1 measurement.ResultSet
-		result2 error
-	}{result1, result2}
+	}{result1}
 }
 
 func (fake *FakeMeasurement) Failed() bool {

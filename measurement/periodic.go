@@ -21,7 +21,7 @@ func (p *periodic) Name() string {
 	return p.baseMeasurement.Name()
 }
 
-func (p *periodic) Start() error {
+func (p *periodic) Start() {
 	ticker := p.clock.Ticker(p.freq)
 	go func() {
 		p.baseMeasurement.PerformMeasurement(p.logger, p.resultSet)
@@ -35,17 +35,14 @@ func (p *periodic) Start() error {
 			}
 		}
 	}()
-
-	return nil
 }
 
-func (p *periodic) Results() (ResultSet, error) {
-	return p.resultSet, nil
+func (p *periodic) Results() ResultSet {
+	return p.resultSet
 }
 
-func (p *periodic) Stop() error {
+func (p *periodic) Stop() {
 	p.stopChan <- 0
-	return nil
 }
 
 func (p *periodic) Failed() bool {
