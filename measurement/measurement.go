@@ -24,6 +24,18 @@ type Measurement interface {
 	Summary() string
 }
 
+func NewPeriodic(logger *log.Logger, clock clock.Clock, freq time.Duration, baseMeasurement BaseMeasurement, resultSet ResultSet) Measurement {
+	return &periodic{
+		logger:          logger,
+		clock:           clock,
+		freq:            freq,
+		baseMeasurement: baseMeasurement,
+
+		stopChan:  make(chan int),
+		resultSet: resultSet,
+	}
+}
+
 //go:generate counterfeiter . BaseMeasurement
 type BaseMeasurement interface {
 	Name() string
@@ -41,52 +53,36 @@ func NewAvailability(url string, client *http.Client) BaseMeasurement {
 }
 
 func NewRecentLogs(
-	logger *log.Logger,
-	frequency time.Duration,
-	clock clock.Clock,
 	recentLogsCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter,
 	runner cmdRunner.CmdRunner,
 	runnerOutBuf *bytes.Buffer,
 	runnerErrBuf *bytes.Buffer,
 	appLogValidator appLogValidator.AppLogValidator,
-) Measurement {
+) BaseMeasurement {
 	return &recentLogs{
-		name:   "Recent logs fetching",
-		logger: logger,
+		name: "Recent logs fetching",
 		RecentLogsCommandGeneratorFunc: recentLogsCommandGeneratorFunc,
 		Runner:          runner,
 		RunnerOutBuf:    runnerOutBuf,
 		RunnerErrBuf:    runnerErrBuf,
 		appLogValidator: appLogValidator,
-		Frequency:       frequency,
-		Clock:           clock,
-		resultSet:       &resultSet{},
-		stopChan:        make(chan int),
 	}
 }
 
 func NewStreamLogs(
-	logger *log.Logger,
-	frequency time.Duration,
-	clock clock.Clock,
 	streamLogsCommandGeneratorFunc func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter),
 	runner cmdRunner.CmdRunner,
 	runnerOutBuf *bytes.Buffer,
 	runnerErrBuf *bytes.Buffer,
 	appLogValidator appLogValidator.AppLogValidator,
-) Measurement {
+) BaseMeasurement {
 	return &streamLogs{
-		name:   "Streaming logs",
-		logger: logger,
+		name: "Streaming logs",
 		StreamLogsCommandGeneratorFunc: streamLogsCommandGeneratorFunc,
 		Runner:          runner,
 		RunnerOutBuf:    runnerOutBuf,
 		RunnerErrBuf:    runnerErrBuf,
 		appLogValidator: appLogValidator,
-		Frequency:       frequency,
-		Clock:           clock,
-		resultSet:       &resultSet{},
-		stopChan:        make(chan int),
 	}
 }
 

@@ -17,18 +17,6 @@ type periodic struct {
 	stopChan  chan int
 }
 
-func NewPeriodic(logger *log.Logger, clock clock.Clock, freq time.Duration, baseMeasurement BaseMeasurement, resultSet ResultSet) Measurement {
-	return &periodic{
-		logger:          logger,
-		clock:           clock,
-		freq:            freq,
-		baseMeasurement: baseMeasurement,
-
-		stopChan:  make(chan int),
-		resultSet: resultSet,
-	}
-}
-
 func (p *periodic) Name() string {
 	return p.baseMeasurement.Name()
 }

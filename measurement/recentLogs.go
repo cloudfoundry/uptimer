@@ -4,9 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"log"
-	"time"
-
-	"github.com/benbjohnson/clock"
 
 	"github.com/cloudfoundry/uptimer/appLogValidator"
 	"github.com/cloudfoundry/uptimer/cmdRunner"
@@ -15,66 +12,43 @@ import (
 
 type recentLogs struct {
 	name                           string
-	logger                         *log.Logger
 	RecentLogsCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
 	Runner                         cmdRunner.CmdRunner
 	RunnerOutBuf                   *bytes.Buffer
 	RunnerErrBuf                   *bytes.Buffer
-	Frequency                      time.Duration
-	Clock                          clock.Clock
 	appLogValidator                appLogValidator.AppLogValidator
-
-	resultSet *resultSet
-	stopChan  chan int
 }
 
 func (r *recentLogs) Name() string {
 	return r.name
 }
 
-func (r *recentLogs) Start() error {
-	ticker := r.Clock.Ticker(r.Frequency)
-	go func() {
-		r.PerformMeasurement()
-		for {
-			select {
-			case <-ticker.C:
-				r.PerformMeasurement()
-			case <-r.stopChan:
-				ticker.Stop()
-				return
-			}
-		}
-	}()
-
-	return nil
-}
-
-func (r *recentLogs) PerformMeasurement() {
+func (r *recentLogs) PerformMeasurement(logger *log.Logger, rs ResultSet) {
 	defer r.RunnerOutBuf.Reset()
 	defer r.RunnerErrBuf.Reset()
+
 	if err := r.Runner.RunInSequence(r.RecentLogsCommandGeneratorFunc()...); err != nil {
-		r.recordAndLogFailure(err.Error(), r.RunnerOutBuf.String(), r.RunnerErrBuf.String())
+		r.recordAndLogFailure(logger, err.Error(), r.RunnerOutBuf.String(), r.RunnerErrBuf.String(), rs)
 		return
 	}
 
 	logIsNewer, err := r.appLogValidator.IsNewer(r.RunnerOutBuf.String())
 	if err == nil && logIsNewer {
-		r.resultSet.successful++
+		rs.RecordSuccess()
 		return
 	}
 
 	if err != nil {
-		r.recordAndLogFailure(fmt.Sprintf("App log validation failed with: %s", err.Error()), r.RunnerOutBuf.String(), r.RunnerErrBuf.String())
+		r.recordAndLogFailure(logger, fmt.Sprintf("App log validation failed with: %s", err.Error()), r.RunnerOutBuf.String(), r.RunnerErrBuf.String(), rs)
 
 	} else if !logIsNewer {
-		r.recordAndLogFailure("App log fetched was not newer than previous app log fetched", r.RunnerOutBuf.String(), r.RunnerErrBuf.String())
+		r.recordAndLogFailure(logger, "App log fetched was not newer than previous app log fetched", r.RunnerOutBuf.String(), r.RunnerErrBuf.String(), rs)
 	}
 }
 
-func (r *recentLogs) recordAndLogFailure(errString, cmdOut, cmdErr string) {
-	r.resultSet.failed++
-	r.logger.Printf(
+func (r *recentLogs) recordAndLogFailure(logger *log.Logger, errString, cmdOut, cmdErr string, rs ResultSet) {
+	rs.RecordFailure()
+	logger.Printf(
 		"\x1b[31mFAILURE(%s): %s\x1b[0m\nstdout:\n%s\nstderr:\n%s\n\n",
 		r.name,
 		errString,
@@ -83,21 +57,11 @@ func (r *recentLogs) recordAndLogFailure(errString, cmdOut, cmdErr string) {
 	)
 }
 
-func (r *recentLogs) Stop() error {
-	r.stopChan <- 0
-	return nil
+func (r *recentLogs) Failed(rs ResultSet) bool {
+	return rs.Failed() > 0
 }
-
-func (r *recentLogs) Results() (ResultSet, error) {
-	return r.resultSet, nil
-}
-
-func (r *recentLogs) Failed() bool {
-	return r.resultSet.failed > 0
-}
-func (r *recentLogs) Summary() string {
-	rs := r.resultSet
-	if rs.failed > 0 {
+func (r *recentLogs) Summary(rs ResultSet) string {
+	if rs.Failed() > 0 {
 		return fmt.Sprintf("FAILED(%s): %d of %d attempts to fetch recent logs failed", r.name, rs.Failed(), rs.Total())
 	}
 

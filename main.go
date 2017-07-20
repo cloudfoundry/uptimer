@@ -138,9 +138,6 @@ func createWorkflow(cfc *config.CfConfig, cg cfCmdGenerator.CfCmdGenerator, appP
 func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow.CfWorkflow) []measurement.Measurement {
 	recentLogsBufferRunner, recentLogsRunnerOutBuf, recentLogsRunnerErrBuf := createBufferedRunner()
 	recentLogsMeasurement := measurement.NewRecentLogs(
-		logger,
-		10*time.Second,
-		clock.New(),
 		orcWorkflow.RecentLogs,
 		recentLogsBufferRunner,
 		recentLogsRunnerOutBuf,
@@ -150,9 +147,6 @@ func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow
 
 	streamLogsBufferRunner, streamLogsRunnerOutBuf, streamLogsRunnerErrBuf := createBufferedRunner()
 	streamLogsMeasurement := measurement.NewStreamLogs(
-		logger,
-		30*time.Second,
-		clock.New(),
 		func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter) {
 			ctx, cancelFunc := context.WithTimeout(context.Background(), 15*time.Second)
 			return ctx, cancelFunc, orcWorkflow.StreamLogs(ctx)
@@ -198,8 +192,20 @@ func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow
 			pushabilityMeasurement,
 			measurement.NewResultSet(),
 		),
-		recentLogsMeasurement,
-		streamLogsMeasurement,
+		measurement.NewPeriodic(
+			logger,
+			clock,
+			10*time.Second,
+			recentLogsMeasurement,
+			measurement.NewResultSet(),
+		),
+		measurement.NewPeriodic(
+			logger,
+			clock,
+			30*time.Second,
+			streamLogsMeasurement,
+			measurement.NewResultSet(),
+		),
 	}
 }
 
