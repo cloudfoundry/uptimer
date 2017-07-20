@@ -131,7 +131,7 @@ var _ = Describe("Orchestrator", func() {
 			})
 		})
 
-		It("prints a list of all measurements", func() {
+		It("prints a list of all measurements starting", func() {
 			orc.Run()
 
 			Expect(logBuf.String()).To(ContainSubstring("Starting measurement: name1"))
@@ -152,8 +152,16 @@ var _ = Describe("Orchestrator", func() {
 			Expect(fakeMeasurement2.StopCallCount()).To(Equal(1))
 		})
 
+		It("prints a list of all measurements stopping", func() {
+			orc.Run()
+
+			Expect(logBuf.String()).To(ContainSubstring("Stopping measurement: name1"))
+			Expect(logBuf.String()).To(ContainSubstring("Stopping measurement: name2"))
+		})
+
 		It("gathers the sumaries and prints them all with a header", func() {
 			fakeMeasurement1.SummaryReturns("summary1")
+			fakeMeasurement1.FailedReturns(true)
 			fakeMeasurement2.SummaryReturns("summary2")
 
 			orc.Run()
@@ -161,8 +169,8 @@ var _ = Describe("Orchestrator", func() {
 			Expect(fakeMeasurement1.SummaryCallCount()).To(Equal(1))
 			Expect(fakeMeasurement2.SummaryCallCount()).To(Equal(1))
 			Expect(logBuf.String()).To(ContainSubstring("Measurement summaries:"))
-			Expect(logBuf.String()).To(ContainSubstring("summary1"))
-			Expect(logBuf.String()).To(ContainSubstring("summary2"))
+			Expect(logBuf.String()).To(ContainSubstring("\x1b[31msummary1\x1b[0m"))
+			Expect(logBuf.String()).To(ContainSubstring("\x1b[32msummary2\x1b[0m"))
 		})
 
 		It("returns an exit code of 0 when all measurements succeed", func() {

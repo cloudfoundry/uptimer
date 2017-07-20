@@ -52,13 +52,21 @@ func (o *orchestrator) Run() (int, error) {
 		return exitCode, err
 	}
 
+	for _, m := range o.Measurements {
+		o.Logger.Printf("Stopping measurement: %s\n", m.Name())
+		m.Stop()
+	}
+
 	o.Logger.Println("Measurement summaries:")
 	for _, m := range o.Measurements {
-		m.Stop()
-		o.Logger.Println(m.Summary())
 		if m.Failed() {
 			exitCode = 1
+			o.Logger.Printf("\x1b[31m%s\x1b[0m\n", m.Summary())
+
+		} else {
+			o.Logger.Printf("\x1b[32m%s\x1b[0m\n", m.Summary())
 		}
+
 	}
 
 	return exitCode, nil
