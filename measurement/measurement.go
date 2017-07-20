@@ -62,18 +62,22 @@ func NewAvailability(logger *log.Logger, url string, frequency time.Duration, cl
 }
 
 func NewRecentLogs(
+	logger *log.Logger,
 	frequency time.Duration,
 	clock clock.Clock,
 	recentLogsCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter,
 	runner cmdRunner.CmdRunner,
-	runnerBuf *bytes.Buffer,
+	runnerOutBuf *bytes.Buffer,
+	runnerErrBuf *bytes.Buffer,
 	appLogValidator appLogValidator.AppLogValidator,
 ) Measurement {
 	return &recentLogs{
-		name: "Recent logs fetching",
+		name:   "Recent logs fetching",
+		logger: logger,
 		RecentLogsCommandGeneratorFunc: recentLogsCommandGeneratorFunc,
 		Runner:          runner,
-		RunnerBuf:       runnerBuf,
+		RunnerOutBuf:    runnerOutBuf,
+		RunnerErrBuf:    runnerErrBuf,
 		appLogValidator: appLogValidator,
 		Frequency:       frequency,
 		Clock:           clock,

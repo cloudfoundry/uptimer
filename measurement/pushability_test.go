@@ -111,35 +111,6 @@ var _ = Describe("Pushability", func() {
 			Expect(rs.Failed()).To(Equal(3))
 			Expect(rs.Total()).To(Equal(7))
 		})
-	})
-
-	Describe("Stop", func() {
-		It("stops the measurement", func() {
-			pm.Start()
-			mockClock.Add(3 * freq)
-			pm.Stop()
-			mockClock.Add(3 * freq)
-
-			Expect(fakeCommandRunner.RunInSequenceCallCount()).To(Equal(4))
-		})
-	})
-
-	Describe("Failed", func() {
-		It("returns false when the measurement has succeeded", func() {
-			pm.Start()
-			mockClock.Add(3 * freq)
-
-			Expect(pm.Failed()).To(BeFalse())
-		})
-
-		It("returns true when the measurement has failed", func() {
-			pm.Start()
-			mockClock.Add(3 * freq)
-			fakeCommandRunner.RunInSequenceReturns(fmt.Errorf("errrrrrooooorrrr"))
-			mockClock.Add(freq)
-
-			Expect(pm.Failed()).To(BeTrue())
-		})
 
 		It("logs both stdout and stderr when there is an error", func() {
 			outBuf.WriteString("heyyy guys")
@@ -169,6 +140,35 @@ var _ = Describe("Pushability", func() {
 			mockClock.Add(freq)
 
 			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(App pushability): e 1\x1b[0m\nstdout:\nfirst failure\nstderr:\nthat's some standard error\n\n\x1b[31mFAILURE(App pushability): e 2\x1b[0m\nstdout:\nsecond failure\nstderr:\nerr-body in the club\n\n"))
+		})
+	})
+
+	Describe("Stop", func() {
+		It("stops the measurement", func() {
+			pm.Start()
+			mockClock.Add(3 * freq)
+			pm.Stop()
+			mockClock.Add(3 * freq)
+
+			Expect(fakeCommandRunner.RunInSequenceCallCount()).To(Equal(4))
+		})
+	})
+
+	Describe("Failed", func() {
+		It("returns false when the measurement has succeeded", func() {
+			pm.Start()
+			mockClock.Add(3 * freq)
+
+			Expect(pm.Failed()).To(BeFalse())
+		})
+
+		It("returns true when the measurement has failed", func() {
+			pm.Start()
+			mockClock.Add(3 * freq)
+			fakeCommandRunner.RunInSequenceReturns(fmt.Errorf("errrrrrooooorrrr"))
+			mockClock.Add(freq)
+
+			Expect(pm.Failed()).To(BeTrue())
 		})
 	})
 

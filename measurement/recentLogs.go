@@ -3,6 +3,7 @@ package measurement
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/benbjohnson/clock"
@@ -13,14 +14,16 @@ import (
 )
 
 type recentLogs struct {
+	name                           string
+	logger                         *log.Logger
 	RecentLogsCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
 	Runner                         cmdRunner.CmdRunner
-	RunnerBuf                      *bytes.Buffer
+	RunnerOutBuf                   *bytes.Buffer
+	RunnerErrBuf                   *bytes.Buffer
 	Frequency                      time.Duration
 	Clock                          clock.Clock
 	appLogValidator                appLogValidator.AppLogValidator
 
-	name      string
 	resultSet *resultSet
 	stopChan  chan int
 
@@ -50,19 +53,36 @@ func (r *recentLogs) Start() error {
 }
 
 func (r *recentLogs) getRecentLogs() {
+	defer r.RunnerOutBuf.Reset()
+	defer r.RunnerErrBuf.Reset()
 	if err := r.Runner.RunInSequence(r.RecentLogsCommandGeneratorFunc()...); err != nil {
-		r.resultSet.failed++
+		r.recordAndLogFailure(err.Error(), r.RunnerOutBuf.String(), r.RunnerErrBuf.String())
 		return
 	}
 
-	logIsNewer, err := r.appLogValidator.IsNewer(r.RunnerBuf.String())
-	r.RunnerBuf.Reset()
-	if err != nil || !logIsNewer {
-		r.resultSet.failed++
+	logIsNewer, err := r.appLogValidator.IsNewer(r.RunnerOutBuf.String())
+	if err == nil && logIsNewer {
+		r.resultSet.successful++
 		return
 	}
 
-	r.resultSet.successful++
+	if err != nil {
+		r.recordAndLogFailure(fmt.Sprintf("App log validation failed with: %s", err.Error()), r.RunnerOutBuf.String(), r.RunnerErrBuf.String())
+
+	} else if !logIsNewer {
+		r.recordAndLogFailure("App log fetched was not newer than previous app log fetched", r.RunnerOutBuf.String(), r.RunnerErrBuf.String())
+	}
+}
+
+func (r *recentLogs) recordAndLogFailure(errString, cmdOut, cmdErr string) {
+	r.resultSet.failed++
+	r.logger.Printf(
+		"\x1b[31mFAILURE(%s): %s\x1b[0m\nstdout:\n%s\nstderr:\n%s\n\n",
+		r.name,
+		errString,
+		cmdOut,
+		cmdErr,
+	)
 }
 
 func (r *recentLogs) Stop() error {

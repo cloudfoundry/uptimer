@@ -50,19 +50,19 @@ func (p *pushability) pushIt() {
 	defer p.RunnerOutBuf.Reset()
 	defer p.RunnerErrBuf.Reset()
 	if err := p.Runner.RunInSequence(p.PushAndDeleteAppCommandGeneratorFunc()...); err != nil {
-		p.recordAndLogFailure(err, p.RunnerOutBuf.String(), p.RunnerErrBuf.String())
+		p.recordAndLogFailure(err.Error(), p.RunnerOutBuf.String(), p.RunnerErrBuf.String())
 		return
 	}
 
 	p.resultSet.successful++
 }
 
-func (p *pushability) recordAndLogFailure(err error, cmdOut, cmdErr string) {
+func (p *pushability) recordAndLogFailure(errString, cmdOut, cmdErr string) {
 	p.resultSet.failed++
 	p.logger.Printf(
 		"\x1b[31mFAILURE(%s): %s\x1b[0m\nstdout:\n%s\nstderr:\n%s\n\n",
 		p.name,
-		err.Error(),
+		errString,
 		cmdOut,
 		cmdErr,
 	)

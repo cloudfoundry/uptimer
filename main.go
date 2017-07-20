@@ -136,12 +136,11 @@ func createWorkflow(cfc *config.CfConfig, cg cfCmdGenerator.CfCmdGenerator, appP
 }
 
 func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow.CfWorkflow) []measurement.Measurement {
-	recentLogsBuf := bytes.NewBuffer([]byte{})
-	recentLogsBufferRunner := cmdRunner.New(recentLogsBuf, ioutil.Discard, io.Copy)
 
 	streamLogsBuf := bytes.NewBuffer([]byte{})
 	streamLogsBufferRunner := cmdRunner.New(streamLogsBuf, ioutil.Discard, io.Copy)
 
+	recentLogsBufferRunner, recentLogsRunnerOutBuf, recentLogsRunnerErrBuf := createBufferedRunner()
 	pushRunner, pushRunnerOutBuf, pushRunnerErrBuf := createBufferedRunner()
 
 	appLogValidator := appLogValidator.New()
@@ -159,11 +158,13 @@ func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow
 			},
 		),
 		measurement.NewRecentLogs(
+			logger,
 			10*time.Second,
 			clock.New(),
 			orcWorkflow.RecentLogs,
 			recentLogsBufferRunner,
-			recentLogsBuf,
+			recentLogsRunnerOutBuf,
+			recentLogsRunnerErrBuf,
 			appLogValidator,
 		),
 		measurement.NewStreamLogs(
