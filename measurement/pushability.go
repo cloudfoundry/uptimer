@@ -1,6 +1,7 @@
 package measurement
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"time"
@@ -15,6 +16,8 @@ type pushability struct {
 	logger                               *log.Logger
 	PushAndDeleteAppCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
 	Runner                               cmdRunner.CmdRunner
+	RunnerOutBuf                         *bytes.Buffer
+	RunnerErrBuf                         *bytes.Buffer
 	Frequency                            time.Duration
 	Clock                                clock.Clock
 	resultSet                            *resultSet
@@ -44,17 +47,25 @@ func (p *pushability) Start() error {
 }
 
 func (p *pushability) pushIt() {
+	defer p.RunnerOutBuf.Reset()
+	defer p.RunnerErrBuf.Reset()
 	if err := p.Runner.RunInSequence(p.PushAndDeleteAppCommandGeneratorFunc()...); err != nil {
-		p.recordAndLogFailure(err.Error())
+		p.recordAndLogFailure(err, p.RunnerOutBuf.String(), p.RunnerErrBuf.String())
 		return
 	}
 
 	p.resultSet.successful++
 }
 
-func (p *pushability) recordAndLogFailure(msg string) {
+func (p *pushability) recordAndLogFailure(err error, cmdOut, cmdErr string) {
 	p.resultSet.failed++
-	p.logger.Printf("\x1b[31mFAILURE(%s): %s\x1b[0m\n", p.name, msg)
+	p.logger.Printf(
+		"\x1b[31mFAILURE(%s): %s\x1b[0m\nstdout:\n%s\nstderr:\n%s\n\n",
+		p.name,
+		err.Error(),
+		cmdOut,
+		cmdErr,
+	)
 }
 
 func (p *pushability) Stop() error {

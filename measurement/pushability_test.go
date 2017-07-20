@@ -23,6 +23,8 @@ var _ = Describe("Pushability", func() {
 		commands             []cmdStartWaiter.CmdStartWaiter
 		fakeCmdGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
 		fakeCommandRunner    *cmdRunnerfakes.FakeCmdRunner
+		outBuf               *bytes.Buffer
+		errBuf               *bytes.Buffer
 		logger               *log.Logger
 		logBuf               *bytes.Buffer
 
@@ -37,9 +39,11 @@ var _ = Describe("Pushability", func() {
 			return commands
 		}
 		logBuf = bytes.NewBuffer([]byte{})
+		outBuf = bytes.NewBuffer([]byte{})
+		errBuf = bytes.NewBuffer([]byte{})
 		logger = log.New(logBuf, "", 0)
 
-		pm = NewPushability(logger, freq, mockClock, fakeCmdGeneratorFunc, fakeCommandRunner)
+		pm = NewPushability(logger, freq, mockClock, fakeCmdGeneratorFunc, fakeCommandRunner, outBuf, errBuf)
 	})
 
 	Describe("Name", func() {
@@ -137,13 +141,34 @@ var _ = Describe("Pushability", func() {
 			Expect(pm.Failed()).To(BeTrue())
 		})
 
-		It("logs error output when there is an error", func() {
+		It("logs both stdout and stderr when there is an error", func() {
+			outBuf.WriteString("heyyy guys")
+			errBuf.WriteString("whaaats happening?")
 			fakeCommandRunner.RunInSequenceReturns(fmt.Errorf("errrrrrooooorrrr"))
 
 			pm.Start()
 			mockClock.Add(freq - time.Nanosecond)
 
-			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(App pushability): errrrrrooooorrrr\x1b[0m\n"))
+			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(App pushability): errrrrrooooorrrr\x1b[0m\nstdout:\nheyyy guys\nstderr:\nwhaaats happening?\n\n"))
+		})
+
+		It("does not accumulate buffers indefinitely", func() {
+			outBuf.WriteString("great success")
+
+			pm.Start()
+			mockClock.Add(freq - time.Nanosecond)
+
+			outBuf.WriteString("first failure")
+			errBuf.WriteString("that's some standard error")
+			fakeCommandRunner.RunInSequenceReturns(fmt.Errorf("e 1"))
+			mockClock.Add(freq)
+
+			outBuf.WriteString("second failure")
+			errBuf.WriteString("err-body in the club")
+			fakeCommandRunner.RunInSequenceReturns(fmt.Errorf("e 2"))
+			mockClock.Add(freq)
+
+			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(App pushability): e 1\x1b[0m\nstdout:\nfirst failure\nstderr:\nthat's some standard error\n\n\x1b[31mFAILURE(App pushability): e 2\x1b[0m\nstdout:\nsecond failure\nstderr:\nerr-body in the club\n\n"))
 		})
 	})
 

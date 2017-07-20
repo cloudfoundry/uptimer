@@ -65,7 +65,7 @@ func main() {
 
 	orcWorkflow := createWorkflow(cfg.CF, cfCmdGenerator.New(baseTmpDir), appPath)
 	stdOutAndErrRunner := cmdRunner.New(os.Stdout, os.Stderr, io.Copy)
-	measurements := createMeasurements(logger, discardRunner, orcWorkflow, pushWorkflow)
+	measurements := createMeasurements(logger, orcWorkflow, pushWorkflow)
 
 	orc := orchestrator.New(cfg.While, logger, orcWorkflow, stdOutAndErrRunner, measurements)
 
@@ -135,11 +135,15 @@ func createWorkflow(cfc *config.CfConfig, cg cfCmdGenerator.CfCmdGenerator, appP
 	)
 }
 
-func createMeasurements(logger *log.Logger, discardRunner cmdRunner.CmdRunner, orcWorkflow, pushWorkflow cfWorkflow.CfWorkflow) []measurement.Measurement {
-	var recentLogsBuf = bytes.NewBuffer([]byte{})
+func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow.CfWorkflow) []measurement.Measurement {
+	recentLogsBuf := bytes.NewBuffer([]byte{})
 	recentLogsBufferRunner := cmdRunner.New(recentLogsBuf, ioutil.Discard, io.Copy)
-	var streamLogsBuf = bytes.NewBuffer([]byte{})
+
+	streamLogsBuf := bytes.NewBuffer([]byte{})
 	streamLogsBufferRunner := cmdRunner.New(streamLogsBuf, ioutil.Discard, io.Copy)
+
+	pushRunner, pushRunnerOutBuf, pushRunnerErrBuf := createBufferedRunner()
+
 	appLogValidator := appLogValidator.New()
 
 	return []measurement.Measurement{
@@ -180,9 +184,18 @@ func createMeasurements(logger *log.Logger, discardRunner cmdRunner.CmdRunner, o
 			func() []cmdStartWaiter.CmdStartWaiter {
 				return append(pushWorkflow.Push(), pushWorkflow.Delete()...)
 			},
-			discardRunner,
+			pushRunner,
+			pushRunnerOutBuf,
+			pushRunnerErrBuf,
 		),
 	}
+}
+
+func createBufferedRunner() (cmdRunner.CmdRunner, *bytes.Buffer, *bytes.Buffer) {
+	outBuf := bytes.NewBuffer([]byte{})
+	errBuf := bytes.NewBuffer([]byte{})
+
+	return cmdRunner.New(outBuf, errBuf, io.Copy), outBuf, errBuf
 }
 
 func tearDownAndExit(orc orchestrator.Orchestrator, logger *log.Logger, pushWorkflow cfWorkflow.CfWorkflow, runner cmdRunner.CmdRunner, exitCode int) {

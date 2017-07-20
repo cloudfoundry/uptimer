@@ -88,16 +88,20 @@ func NewPushability(
 	clock clock.Clock,
 	pushAndDeleteAppCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter,
 	runner cmdRunner.CmdRunner,
+	runnerOutBuf *bytes.Buffer,
+	runnerErrBuf *bytes.Buffer,
 ) Measurement {
 	return &pushability{
 		name:   "App pushability",
 		logger: logger,
 		PushAndDeleteAppCommandGeneratorFunc: pushAndDeleteAppCommandGeneratorFunc,
-		Runner:    runner,
-		Frequency: frequency,
-		Clock:     clock,
-		resultSet: &resultSet{},
-		stopChan:  make(chan int),
+		Runner:       runner,
+		RunnerOutBuf: runnerOutBuf,
+		RunnerErrBuf: runnerErrBuf,
+		Frequency:    frequency,
+		Clock:        clock,
+		resultSet:    &resultSet{},
+		stopChan:     make(chan int),
 	}
 }
 
