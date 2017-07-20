@@ -26,8 +26,6 @@ type recentLogs struct {
 
 	resultSet *resultSet
 	stopChan  chan int
-
-	lastAppNumber int
 }
 
 func (r *recentLogs) Name() string {

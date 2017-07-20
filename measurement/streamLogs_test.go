@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log"
 	"os/exec"
 	"time"
 
@@ -22,6 +23,7 @@ var _ = Describe("StreamLogs", func() {
 		freq                 time.Duration
 		mockClock            *clock.Mock
 		commands             []cmdStartWaiter.CmdStartWaiter
+		logger               *log.Logger
 		ctx                  context.Context
 		logBuf               *bytes.Buffer
 		fakeAppLogValidator  *appLogValidatorfakes.FakeAppLogValidator
@@ -29,6 +31,8 @@ var _ = Describe("StreamLogs", func() {
 		cancelFuncCallCount  int
 		fakeCmdGeneratorFunc func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter)
 		fakeCommandRunner    *cmdRunnerfakes.FakeCmdRunner
+		outBuf               *bytes.Buffer
+		errBuf               *bytes.Buffer
 
 		slm Measurement
 	)
@@ -37,6 +41,8 @@ var _ = Describe("StreamLogs", func() {
 		freq = time.Second
 		mockClock = clock.NewMock()
 		logBuf = bytes.NewBuffer([]byte{})
+		outBuf = bytes.NewBuffer([]byte{})
+		errBuf = bytes.NewBuffer([]byte{})
 
 		ctx = context.TODO()
 		cancelFuncCallCount = 0
@@ -51,8 +57,9 @@ var _ = Describe("StreamLogs", func() {
 		fakeCmdGeneratorFunc = func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter) {
 			return ctx, fakeCancelFunc, commands
 		}
+		logger = log.New(logBuf, "", 0)
 
-		slm = NewStreamLogs(freq, mockClock, fakeCmdGeneratorFunc, fakeCommandRunner, logBuf, fakeAppLogValidator)
+		slm = NewStreamLogs(logger, freq, mockClock, fakeCmdGeneratorFunc, fakeCommandRunner, outBuf, errBuf, fakeAppLogValidator)
 	})
 
 	Describe("Name", func() {
@@ -156,6 +163,58 @@ var _ = Describe("StreamLogs", func() {
 			mockClock.Add(3 * freq)
 
 			Expect(cancelFuncCallCount).To(Equal(4))
+		})
+
+		It("logs both stdout and stderr when there is an error running the command", func() {
+			outBuf.WriteString("heyyy guys")
+			errBuf.WriteString("whaaats happening?")
+			fakeCommandRunner.RunInSequenceWithContextReturns(fmt.Errorf("errrrrrooooorrrr"))
+
+			slm.Start()
+			mockClock.Add(freq - time.Nanosecond)
+
+			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(Streaming logs): errrrrrooooorrrr\x1b[0m\nstdout:\nheyyy guys\nstderr:\nwhaaats happening?\n\n"))
+		})
+
+		It("logs both stdout and stderr when the log validator fails", func() {
+			outBuf.WriteString("yo yo")
+			errBuf.WriteString("howayah?")
+			fakeAppLogValidator.IsNewerReturns(false, nil)
+
+			slm.Start()
+			mockClock.Add(freq - time.Nanosecond)
+
+			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(Streaming logs): App log fetched was not newer than previous app log fetched\x1b[0m\nstdout:\nyo yo\nstderr:\nhowayah?\n\n"))
+		})
+
+		It("logs both stdout and stderr when the log validator returns an error", func() {
+			outBuf.WriteString("yo yo")
+			errBuf.WriteString("howayah?")
+			fakeAppLogValidator.IsNewerReturns(false, fmt.Errorf("we don't need no stinking numbers"))
+
+			slm.Start()
+			mockClock.Add(freq - time.Nanosecond)
+
+			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(Streaming logs): App log validation failed with: we don't need no stinking numbers\x1b[0m\nstdout:\nyo yo\nstderr:\nhowayah?\n\n"))
+		})
+
+		It("does not accumulate buffers indefinitely", func() {
+			outBuf.WriteString("great success")
+
+			slm.Start()
+			mockClock.Add(freq - time.Nanosecond)
+
+			outBuf.WriteString("first failure")
+			errBuf.WriteString("that's some standard error")
+			fakeCommandRunner.RunInSequenceWithContextReturns(fmt.Errorf("e 1"))
+			mockClock.Add(freq)
+
+			outBuf.WriteString("second failure")
+			errBuf.WriteString("err-body in the club")
+			fakeCommandRunner.RunInSequenceWithContextReturns(fmt.Errorf("e 2"))
+			mockClock.Add(freq)
+
+			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(Streaming logs): e 1\x1b[0m\nstdout:\nfirst failure\nstderr:\nthat's some standard error\n\n\x1b[31mFAILURE(Streaming logs): e 2\x1b[0m\nstdout:\nsecond failure\nstderr:\nerr-body in the club\n\n"))
 		})
 	})
 

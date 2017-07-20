@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"os/exec"
 	"time"
 
 	"github.com/benbjohnson/clock"
@@ -11,8 +12,6 @@ import (
 	"github.com/cloudfoundry/uptimer/cmdRunner/cmdRunnerfakes"
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	. "github.com/cloudfoundry/uptimer/measurement"
-
-	"os/exec"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

@@ -2,10 +2,10 @@ package measurement
 
 import (
 	"bytes"
-	"fmt"
-	"time"
-
 	"context"
+	"fmt"
+	"log"
+	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/cloudfoundry/uptimer/appLogValidator"
@@ -14,18 +14,18 @@ import (
 )
 
 type streamLogs struct {
+	name                           string
+	logger                         *log.Logger
 	StreamLogsCommandGeneratorFunc func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter)
 	Runner                         cmdRunner.CmdRunner
-	RunnerBuf                      *bytes.Buffer
+	RunnerOutBuf                   *bytes.Buffer
+	RunnerErrBuf                   *bytes.Buffer
 	Frequency                      time.Duration
 	Clock                          clock.Clock
 	appLogValidator                appLogValidator.AppLogValidator
 
-	name      string
 	resultSet *resultSet
 	stopChan  chan int
-
-	lastAppNumber int
 }
 
 func (s *streamLogs) Name() string {
@@ -53,19 +53,36 @@ func (s *streamLogs) Start() error {
 func (s *streamLogs) streamLogs() {
 	ctx, cancelFunc, cmds := s.StreamLogsCommandGeneratorFunc()
 	defer cancelFunc()
+	defer s.RunnerOutBuf.Reset()
+	defer s.RunnerErrBuf.Reset()
 	if err := s.Runner.RunInSequenceWithContext(ctx, cmds...); err != nil {
-		s.resultSet.failed++
+		s.recordAndLogFailure(err.Error(), s.RunnerOutBuf.String(), s.RunnerErrBuf.String())
 		return
 	}
 
-	logIsNewer, err := s.appLogValidator.IsNewer(s.RunnerBuf.String())
-	s.RunnerBuf.Reset()
-	if err != nil || !logIsNewer {
-		s.resultSet.failed++
+	logIsNewer, err := s.appLogValidator.IsNewer(s.RunnerOutBuf.String())
+	if err == nil && logIsNewer {
+		s.resultSet.successful++
 		return
 	}
 
-	s.resultSet.successful++
+	if err != nil {
+		s.recordAndLogFailure(fmt.Sprintf("App log validation failed with: %s", err.Error()), s.RunnerOutBuf.String(), s.RunnerErrBuf.String())
+
+	} else if !logIsNewer {
+		s.recordAndLogFailure("App log fetched was not newer than previous app log fetched", s.RunnerOutBuf.String(), s.RunnerErrBuf.String())
+	}
+}
+
+func (s *streamLogs) recordAndLogFailure(errString, cmdOut, cmdErr string) {
+	s.resultSet.failed++
+	s.logger.Printf(
+		"\x1b[31mFAILURE(%s): %s\x1b[0m\nstdout:\n%s\nstderr:\n%s\n\n",
+		s.name,
+		errString,
+		cmdOut,
+		cmdErr,
+	)
 }
 
 func (s *streamLogs) Stop() error {

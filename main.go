@@ -136,14 +136,9 @@ func createWorkflow(cfc *config.CfConfig, cg cfCmdGenerator.CfCmdGenerator, appP
 }
 
 func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow.CfWorkflow) []measurement.Measurement {
-
-	streamLogsBuf := bytes.NewBuffer([]byte{})
-	streamLogsBufferRunner := cmdRunner.New(streamLogsBuf, ioutil.Discard, io.Copy)
-
 	recentLogsBufferRunner, recentLogsRunnerOutBuf, recentLogsRunnerErrBuf := createBufferedRunner()
+	streamLogsBufferRunner, streamLogsRunnerOutBuf, streamLogsRunnerErrBuf := createBufferedRunner()
 	pushRunner, pushRunnerOutBuf, pushRunnerErrBuf := createBufferedRunner()
-
-	appLogValidator := appLogValidator.New()
 
 	return []measurement.Measurement{
 		measurement.NewAvailability(
@@ -165,9 +160,10 @@ func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow
 			recentLogsBufferRunner,
 			recentLogsRunnerOutBuf,
 			recentLogsRunnerErrBuf,
-			appLogValidator,
+			appLogValidator.New(),
 		),
 		measurement.NewStreamLogs(
+			logger,
 			30*time.Second,
 			clock.New(),
 			func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter) {
@@ -175,8 +171,9 @@ func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow
 				return ctx, cancelFunc, orcWorkflow.StreamLogs(ctx)
 			},
 			streamLogsBufferRunner,
-			streamLogsBuf,
-			appLogValidator,
+			streamLogsRunnerOutBuf,
+			streamLogsRunnerErrBuf,
+			appLogValidator.New(),
 		),
 		measurement.NewPushability(
 			logger,
