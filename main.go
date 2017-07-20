@@ -29,7 +29,7 @@ import (
 )
 
 func main() {
-	logger := log.New(os.Stdout, "[UPTIMER] ", log.Ldate|log.Ltime|log.LUTC)
+	logger := log.New(os.Stdout, "\n[UPTIMER] ", log.Ldate|log.Ltime|log.LUTC)
 
 	cfg, err := loadConfig()
 	if err != nil {
