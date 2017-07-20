@@ -61,7 +61,7 @@ var _ = Describe("RecentLogs", func() {
 				exec.Command("foo"),
 				exec.Command("bar"),
 			}
-			rlm.PerformMeasurement(logger, fakeResultSet)
+			rlm.PerformMeasurement(logger)
 
 			Expect(fakeCommandRunner.RunInSequenceCallCount()).To(Equal(1))
 			Expect(fakeCommandRunner.RunInSequenceArgsForCall(0)).To(Equal(
@@ -73,41 +73,33 @@ var _ = Describe("RecentLogs", func() {
 		})
 
 		It("records the commands that run without an error as success", func() {
-			rlm.PerformMeasurement(logger, fakeResultSet)
-			rlm.PerformMeasurement(logger, fakeResultSet)
-			rlm.PerformMeasurement(logger, fakeResultSet)
+			res := rlm.PerformMeasurement(logger)
 
-			Expect(fakeResultSet.RecordSuccessCallCount()).To(Equal(3))
+			Expect(res).To(BeTrue())
 		})
 
 		It("records failure when the app logs are not in order", func() {
 			fakeAppLogValidator.IsNewerReturns(false, nil)
 
-			rlm.PerformMeasurement(logger, fakeResultSet)
-			rlm.PerformMeasurement(logger, fakeResultSet)
-			rlm.PerformMeasurement(logger, fakeResultSet)
+			res := rlm.PerformMeasurement(logger)
 
-			Expect(fakeResultSet.RecordFailureCallCount()).To(Equal(3))
+			Expect(res).To(BeFalse())
 		})
 
 		It("records failure when the app log validator returns an error", func() {
 			fakeAppLogValidator.IsNewerReturns(true, fmt.Errorf("oh totally bad news"))
 
-			rlm.PerformMeasurement(logger, fakeResultSet)
-			rlm.PerformMeasurement(logger, fakeResultSet)
-			rlm.PerformMeasurement(logger, fakeResultSet)
+			res := rlm.PerformMeasurement(logger)
 
-			Expect(fakeResultSet.RecordFailureCallCount()).To(Equal(3))
+			Expect(res).To(BeFalse())
 		})
 
 		It("records the commands that run with error as failed", func() {
 			fakeCommandRunner.RunInSequenceReturns(fmt.Errorf("errrrrrooooorrrr"))
 
-			rlm.PerformMeasurement(logger, fakeResultSet)
-			rlm.PerformMeasurement(logger, fakeResultSet)
-			rlm.PerformMeasurement(logger, fakeResultSet)
+			res := rlm.PerformMeasurement(logger)
 
-			Expect(fakeResultSet.RecordFailureCallCount()).To(Equal(3))
+			Expect(res).To(BeFalse())
 		})
 
 		It("logs both stdout and stderr when there is an error running the command", func() {
@@ -115,7 +107,7 @@ var _ = Describe("RecentLogs", func() {
 			errBuf.WriteString("whaaats happening?")
 			fakeCommandRunner.RunInSequenceReturns(fmt.Errorf("errrrrrooooorrrr"))
 
-			rlm.PerformMeasurement(logger, fakeResultSet)
+			rlm.PerformMeasurement(logger)
 
 			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(Recent logs fetching): errrrrrooooorrrr\x1b[0m\nstdout:\nheyyy guys\nstderr:\nwhaaats happening?\n\n"))
 		})
@@ -125,7 +117,7 @@ var _ = Describe("RecentLogs", func() {
 			errBuf.WriteString("howayah?")
 			fakeAppLogValidator.IsNewerReturns(false, nil)
 
-			rlm.PerformMeasurement(logger, fakeResultSet)
+			rlm.PerformMeasurement(logger)
 
 			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(Recent logs fetching): App log fetched was not newer than previous app log fetched\x1b[0m\nstdout:\nyo yo\nstderr:\nhowayah?\n\n"))
 		})
@@ -135,7 +127,7 @@ var _ = Describe("RecentLogs", func() {
 			errBuf.WriteString("howayah?")
 			fakeAppLogValidator.IsNewerReturns(false, fmt.Errorf("we don't need no stinking numbers"))
 
-			rlm.PerformMeasurement(logger, fakeResultSet)
+			rlm.PerformMeasurement(logger)
 
 			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(Recent logs fetching): App log validation failed with: we don't need no stinking numbers\x1b[0m\nstdout:\nyo yo\nstderr:\nhowayah?\n\n"))
 		})
@@ -143,17 +135,17 @@ var _ = Describe("RecentLogs", func() {
 		It("does not accumulate buffers indefinitely", func() {
 			outBuf.WriteString("great success")
 
-			rlm.PerformMeasurement(logger, fakeResultSet)
+			rlm.PerformMeasurement(logger)
 
 			outBuf.WriteString("first failure")
 			errBuf.WriteString("that's some standard error")
 			fakeCommandRunner.RunInSequenceReturns(fmt.Errorf("e 1"))
-			rlm.PerformMeasurement(logger, fakeResultSet)
+			rlm.PerformMeasurement(logger)
 
 			outBuf.WriteString("second failure")
 			errBuf.WriteString("err-body in the club")
 			fakeCommandRunner.RunInSequenceReturns(fmt.Errorf("e 2"))
-			rlm.PerformMeasurement(logger, fakeResultSet)
+			rlm.PerformMeasurement(logger)
 
 			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(Recent logs fetching): e 1\x1b[0m\nstdout:\nfirst failure\nstderr:\nthat's some standard error\n\n\x1b[31mFAILURE(Recent logs fetching): e 2\x1b[0m\nstdout:\nsecond failure\nstderr:\nerr-body in the club\n\n"))
 		})
@@ -163,7 +155,7 @@ var _ = Describe("RecentLogs", func() {
 		It("returns false when the measurement has succeeded", func() {
 			fakeResultSet.FailedReturns(0)
 
-			rlm.PerformMeasurement(logger, fakeResultSet)
+			rlm.PerformMeasurement(logger)
 
 			Expect(rlm.Failed(fakeResultSet)).To(BeFalse())
 		})
@@ -171,7 +163,7 @@ var _ = Describe("RecentLogs", func() {
 		It("returns true when the measurement has failed", func() {
 			fakeResultSet.FailedReturns(1)
 
-			rlm.PerformMeasurement(logger, fakeResultSet)
+			rlm.PerformMeasurement(logger)
 
 			Expect(rlm.Failed(fakeResultSet)).To(BeTrue())
 		})

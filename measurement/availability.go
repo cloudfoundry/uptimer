@@ -21,19 +21,20 @@ func (a *availability) SummaryPhrase() string {
 	return a.summaryPhrase
 }
 
-func (a *availability) PerformMeasurement(logger *log.Logger, rs ResultSet) {
+func (a *availability) PerformMeasurement(logger *log.Logger) bool {
 	res, err := a.client.Get(a.url)
 	if err != nil {
-		a.recordAndLogFailure(logger, err.Error(), rs)
+		a.logFailure(logger, err.Error())
+		return false
 	} else if res.StatusCode != http.StatusOK {
-		a.recordAndLogFailure(logger, fmt.Sprintf("response had status %d", res.StatusCode), rs)
-	} else {
-		rs.RecordSuccess()
+		a.logFailure(logger, fmt.Sprintf("response had status %d", res.StatusCode))
+		return false
 	}
+
+	return true
 }
 
-func (a *availability) recordAndLogFailure(logger *log.Logger, msg string, rs ResultSet) {
-	rs.RecordFailure()
+func (a *availability) logFailure(logger *log.Logger, msg string) {
 	logger.Printf("\x1b[31mFAILURE(%s): %s\x1b[0m\n", a.name, msg)
 }
 

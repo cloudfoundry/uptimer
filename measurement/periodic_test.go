@@ -61,6 +61,26 @@ var _ = Describe("Periodic", func() {
 
 			Expect(fakeBaseMeasurement.PerformMeasurementCallCount()).To(Equal(4))
 		})
+
+		It("records success if the base measurement succeeds", func() {
+			fakeBaseMeasurement.PerformMeasurementReturns(true)
+
+			p.Start()
+			mockClock.Add(freq - time.Nanosecond)
+
+			Expect(fakeResultSet.RecordSuccessCallCount()).To(Equal(1))
+			Expect(fakeResultSet.RecordFailureCallCount()).To(Equal(0))
+		})
+
+		It("records failure if the base measurement fails", func() {
+			fakeBaseMeasurement.PerformMeasurementReturns(false)
+
+			p.Start()
+			mockClock.Add(freq - time.Nanosecond)
+
+			Expect(fakeResultSet.RecordSuccessCallCount()).To(Equal(0))
+			Expect(fakeResultSet.RecordFailureCallCount()).To(Equal(1))
+		})
 	})
 
 	Describe("Stop", func() {

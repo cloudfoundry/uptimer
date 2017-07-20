@@ -25,17 +25,25 @@ func (p *periodic) Name() string {
 func (p *periodic) Start() {
 	ticker := p.clock.Ticker(p.freq)
 	go func() {
-		p.baseMeasurement.PerformMeasurement(p.logger, p.resultSet)
+		p.performMeasurement()
 		for {
 			select {
 			case <-ticker.C:
-				p.baseMeasurement.PerformMeasurement(p.logger, p.resultSet)
+				p.performMeasurement()
 			case <-p.stopChan:
 				ticker.Stop()
 				return
 			}
 		}
 	}()
+}
+
+func (p *periodic) performMeasurement() {
+	if p.baseMeasurement.PerformMeasurement(p.logger) {
+		p.resultSet.RecordSuccess()
+	} else {
+		p.resultSet.RecordFailure()
+	}
 }
 
 func (p *periodic) Results() ResultSet {

@@ -18,11 +18,16 @@ type FakeBaseMeasurement struct {
 	nameReturnsOnCall map[int]struct {
 		result1 string
 	}
-	PerformMeasurementStub        func(*log.Logger, measurement.ResultSet)
+	PerformMeasurementStub        func(*log.Logger) bool
 	performMeasurementMutex       sync.RWMutex
 	performMeasurementArgsForCall []struct {
 		arg1 *log.Logger
-		arg2 measurement.ResultSet
+	}
+	performMeasurementReturns struct {
+		result1 bool
+	}
+	performMeasurementReturnsOnCall map[int]struct {
+		result1 bool
 	}
 	FailedStub        func(rs measurement.ResultSet) bool
 	failedMutex       sync.RWMutex
@@ -88,17 +93,21 @@ func (fake *FakeBaseMeasurement) NameReturnsOnCall(i int, result1 string) {
 	}{result1}
 }
 
-func (fake *FakeBaseMeasurement) PerformMeasurement(arg1 *log.Logger, arg2 measurement.ResultSet) {
+func (fake *FakeBaseMeasurement) PerformMeasurement(arg1 *log.Logger) bool {
 	fake.performMeasurementMutex.Lock()
+	ret, specificReturn := fake.performMeasurementReturnsOnCall[len(fake.performMeasurementArgsForCall)]
 	fake.performMeasurementArgsForCall = append(fake.performMeasurementArgsForCall, struct {
 		arg1 *log.Logger
-		arg2 measurement.ResultSet
-	}{arg1, arg2})
-	fake.recordInvocation("PerformMeasurement", []interface{}{arg1, arg2})
+	}{arg1})
+	fake.recordInvocation("PerformMeasurement", []interface{}{arg1})
 	fake.performMeasurementMutex.Unlock()
 	if fake.PerformMeasurementStub != nil {
-		fake.PerformMeasurementStub(arg1, arg2)
+		return fake.PerformMeasurementStub(arg1)
 	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.performMeasurementReturns.result1
 }
 
 func (fake *FakeBaseMeasurement) PerformMeasurementCallCount() int {
@@ -107,10 +116,29 @@ func (fake *FakeBaseMeasurement) PerformMeasurementCallCount() int {
 	return len(fake.performMeasurementArgsForCall)
 }
 
-func (fake *FakeBaseMeasurement) PerformMeasurementArgsForCall(i int) (*log.Logger, measurement.ResultSet) {
+func (fake *FakeBaseMeasurement) PerformMeasurementArgsForCall(i int) *log.Logger {
 	fake.performMeasurementMutex.RLock()
 	defer fake.performMeasurementMutex.RUnlock()
-	return fake.performMeasurementArgsForCall[i].arg1, fake.performMeasurementArgsForCall[i].arg2
+	return fake.performMeasurementArgsForCall[i].arg1
+}
+
+func (fake *FakeBaseMeasurement) PerformMeasurementReturns(result1 bool) {
+	fake.PerformMeasurementStub = nil
+	fake.performMeasurementReturns = struct {
+		result1 bool
+	}{result1}
+}
+
+func (fake *FakeBaseMeasurement) PerformMeasurementReturnsOnCall(i int, result1 bool) {
+	fake.PerformMeasurementStub = nil
+	if fake.performMeasurementReturnsOnCall == nil {
+		fake.performMeasurementReturnsOnCall = make(map[int]struct {
+			result1 bool
+		})
+	}
+	fake.performMeasurementReturnsOnCall[i] = struct {
+		result1 bool
+	}{result1}
 }
 
 func (fake *FakeBaseMeasurement) Failed(rs measurement.ResultSet) bool {

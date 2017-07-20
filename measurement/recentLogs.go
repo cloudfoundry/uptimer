@@ -28,31 +28,28 @@ func (r *recentLogs) SummaryPhrase() string {
 	return r.summaryPhrase
 }
 
-func (r *recentLogs) PerformMeasurement(logger *log.Logger, rs ResultSet) {
+func (r *recentLogs) PerformMeasurement(logger *log.Logger) bool {
 	defer r.runnerOutBuf.Reset()
 	defer r.runnerErrBuf.Reset()
 
 	if err := r.runner.RunInSequence(r.recentLogsCommandGeneratorFunc()...); err != nil {
-		r.recordAndLogFailure(logger, err.Error(), r.runnerOutBuf.String(), r.runnerErrBuf.String(), rs)
-		return
+		r.logFailure(logger, err.Error(), r.runnerOutBuf.String(), r.runnerErrBuf.String())
+		return false
 	}
 
 	logIsNewer, err := r.appLogValidator.IsNewer(r.runnerOutBuf.String())
-	if err == nil && logIsNewer {
-		rs.RecordSuccess()
-		return
-	}
-
 	if err != nil {
-		r.recordAndLogFailure(logger, fmt.Sprintf("App log validation failed with: %s", err.Error()), r.runnerOutBuf.String(), r.runnerErrBuf.String(), rs)
-
+		r.logFailure(logger, fmt.Sprintf("App log validation failed with: %s", err.Error()), r.runnerOutBuf.String(), r.runnerErrBuf.String())
+		return false
 	} else if !logIsNewer {
-		r.recordAndLogFailure(logger, "App log fetched was not newer than previous app log fetched", r.runnerOutBuf.String(), r.runnerErrBuf.String(), rs)
+		r.logFailure(logger, "App log fetched was not newer than previous app log fetched", r.runnerOutBuf.String(), r.runnerErrBuf.String())
+		return false
 	}
+
+	return true
 }
 
-func (r *recentLogs) recordAndLogFailure(logger *log.Logger, errString, cmdOut, cmdErr string, rs ResultSet) {
-	rs.RecordFailure()
+func (r *recentLogs) logFailure(logger *log.Logger, errString, cmdOut, cmdErr string) {
 	logger.Printf(
 		"\x1b[31mFAILURE(%s): %s\x1b[0m\nstdout:\n%s\nstderr:\n%s\n\n",
 		r.name,
