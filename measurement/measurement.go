@@ -24,40 +24,19 @@ type Measurement interface {
 	Summary() string
 }
 
-//go:generate counterfeiter . ResultSet
-type ResultSet interface {
-	Successful() int
-	Failed() int
-	Total() int
+//go:generate counterfeiter . BaseMeasurement
+type BaseMeasurement interface {
+	Name() string
+	PerformMeasurement(*log.Logger, ResultSet)
+	Failed(rs ResultSet) bool
+	Summary(rs ResultSet) string
 }
 
-type resultSet struct {
-	successful int
-	failed     int
-}
-
-func (rs *resultSet) Successful() int {
-	return rs.successful
-}
-
-func (rs *resultSet) Failed() int {
-	return rs.failed
-}
-
-func (rs *resultSet) Total() int {
-	return rs.successful + rs.failed
-}
-
-func NewAvailability(logger *log.Logger, url string, frequency time.Duration, clock clock.Clock, client *http.Client) Measurement {
+func NewAvailability(url string, client *http.Client) BaseMeasurement {
 	return &availability{
-		name:      "HTTP availability",
-		logger:    logger,
-		URL:       url,
-		Frequency: frequency,
-		Clock:     clock,
-		Client:    client,
-		resultSet: &resultSet{},
-		stopChan:  make(chan int),
+		name:   "HTTP availability",
+		url:    url,
+		client: client,
 	}
 }
 
@@ -112,24 +91,16 @@ func NewStreamLogs(
 }
 
 func NewPushability(
-	logger *log.Logger,
-	frequency time.Duration,
-	clock clock.Clock,
 	pushAndDeleteAppCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter,
 	runner cmdRunner.CmdRunner,
 	runnerOutBuf *bytes.Buffer,
 	runnerErrBuf *bytes.Buffer,
-) Measurement {
+) BaseMeasurement {
 	return &pushability{
-		name:   "App pushability",
-		logger: logger,
+		name: "App pushability",
 		PushAndDeleteAppCommandGeneratorFunc: pushAndDeleteAppCommandGeneratorFunc,
 		Runner:       runner,
 		RunnerOutBuf: runnerOutBuf,
 		RunnerErrBuf: runnerErrBuf,
-		Frequency:    frequency,
-		Clock:        clock,
-		resultSet:    &resultSet{},
-		stopChan:     make(chan int),
 	}
 }

@@ -35,11 +35,11 @@ func (s *streamLogs) Name() string {
 func (s *streamLogs) Start() error {
 	ticker := s.Clock.Ticker(s.Frequency)
 	go func() {
-		s.streamLogs()
+		s.PerformMeasurement()
 		for {
 			select {
 			case <-ticker.C:
-				s.streamLogs()
+				s.PerformMeasurement()
 			case <-s.stopChan:
 				ticker.Stop()
 				return
@@ -50,11 +50,13 @@ func (s *streamLogs) Start() error {
 	return nil
 }
 
-func (s *streamLogs) streamLogs() {
-	ctx, cancelFunc, cmds := s.StreamLogsCommandGeneratorFunc()
-	defer cancelFunc()
+func (s *streamLogs) PerformMeasurement() {
 	defer s.RunnerOutBuf.Reset()
 	defer s.RunnerErrBuf.Reset()
+
+	ctx, cancelFunc, cmds := s.StreamLogsCommandGeneratorFunc()
+	defer cancelFunc()
+
 	if err := s.Runner.RunInSequenceWithContext(ctx, cmds...); err != nil {
 		s.recordAndLogFailure(err.Error(), s.RunnerOutBuf.String(), s.RunnerErrBuf.String())
 		return

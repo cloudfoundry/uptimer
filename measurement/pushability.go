@@ -4,62 +4,38 @@ import (
 	"bytes"
 	"fmt"
 	"log"
-	"time"
 
-	"github.com/benbjohnson/clock"
 	"github.com/cloudfoundry/uptimer/cmdRunner"
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 )
 
 type pushability struct {
 	name                                 string
-	logger                               *log.Logger
 	PushAndDeleteAppCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
 	Runner                               cmdRunner.CmdRunner
 	RunnerOutBuf                         *bytes.Buffer
 	RunnerErrBuf                         *bytes.Buffer
-	Frequency                            time.Duration
-	Clock                                clock.Clock
-	resultSet                            *resultSet
-	stopChan                             chan int
 }
 
 func (p *pushability) Name() string {
 	return p.name
 }
 
-func (p *pushability) Start() error {
-	ticker := p.Clock.Ticker(p.Frequency)
-	go func() {
-		p.pushIt()
-		for {
-			select {
-			case <-ticker.C:
-				p.pushIt()
-			case <-p.stopChan:
-				ticker.Stop()
-				return
-			}
-		}
-	}()
-
-	return nil
-}
-
-func (p *pushability) pushIt() {
+func (p *pushability) PerformMeasurement(logger *log.Logger, rs ResultSet) {
 	defer p.RunnerOutBuf.Reset()
 	defer p.RunnerErrBuf.Reset()
+
 	if err := p.Runner.RunInSequence(p.PushAndDeleteAppCommandGeneratorFunc()...); err != nil {
-		p.recordAndLogFailure(err.Error(), p.RunnerOutBuf.String(), p.RunnerErrBuf.String())
+		p.recordAndLogFailure(logger, err.Error(), p.RunnerOutBuf.String(), p.RunnerErrBuf.String(), rs)
 		return
 	}
 
-	p.resultSet.successful++
+	rs.RecordSuccess()
 }
 
-func (p *pushability) recordAndLogFailure(errString, cmdOut, cmdErr string) {
-	p.resultSet.failed++
-	p.logger.Printf(
+func (p *pushability) recordAndLogFailure(logger *log.Logger, errString, cmdOut, cmdErr string, rs ResultSet) {
+	rs.RecordFailure()
+	logger.Printf(
 		"\x1b[31mFAILURE(%s): %s\x1b[0m\nstdout:\n%s\nstderr:\n%s\n\n",
 		p.name,
 		errString,
@@ -68,21 +44,12 @@ func (p *pushability) recordAndLogFailure(errString, cmdOut, cmdErr string) {
 	)
 }
 
-func (p *pushability) Stop() error {
-	p.stopChan <- 0
-	return nil
+func (p *pushability) Failed(rs ResultSet) bool {
+	return rs.Failed() > 0
 }
 
-func (p *pushability) Results() (ResultSet, error) {
-	return p.resultSet, nil
-}
-
-func (p *pushability) Failed() bool {
-	return p.resultSet.failed > 0
-}
-func (p *pushability) Summary() string {
-	rs := p.resultSet
-	if rs.failed > 0 {
+func (p *pushability) Summary(rs ResultSet) string {
+	if rs.Failed() > 0 {
 		return fmt.Sprintf("FAILED(%s): %d of %d attempts to push and delete an app failed", p.name, rs.Failed(), rs.Total())
 	}
 

@@ -137,55 +137,69 @@ func createWorkflow(cfc *config.CfConfig, cg cfCmdGenerator.CfCmdGenerator, appP
 
 func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow.CfWorkflow) []measurement.Measurement {
 	recentLogsBufferRunner, recentLogsRunnerOutBuf, recentLogsRunnerErrBuf := createBufferedRunner()
-	streamLogsBufferRunner, streamLogsRunnerOutBuf, streamLogsRunnerErrBuf := createBufferedRunner()
-	pushRunner, pushRunnerOutBuf, pushRunnerErrBuf := createBufferedRunner()
+	recentLogsMeasurement := measurement.NewRecentLogs(
+		logger,
+		10*time.Second,
+		clock.New(),
+		orcWorkflow.RecentLogs,
+		recentLogsBufferRunner,
+		recentLogsRunnerOutBuf,
+		recentLogsRunnerErrBuf,
+		appLogValidator.New(),
+	)
 
+	streamLogsBufferRunner, streamLogsRunnerOutBuf, streamLogsRunnerErrBuf := createBufferedRunner()
+	streamLogsMeasurement := measurement.NewStreamLogs(
+		logger,
+		30*time.Second,
+		clock.New(),
+		func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter) {
+			ctx, cancelFunc := context.WithTimeout(context.Background(), 15*time.Second)
+			return ctx, cancelFunc, orcWorkflow.StreamLogs(ctx)
+		},
+		streamLogsBufferRunner,
+		streamLogsRunnerOutBuf,
+		streamLogsRunnerErrBuf,
+		appLogValidator.New(),
+	)
+
+	pushRunner, pushRunnerOutBuf, pushRunnerErrBuf := createBufferedRunner()
+	pushabilityMeasurement := measurement.NewPushability(
+		func() []cmdStartWaiter.CmdStartWaiter {
+			return append(pushWorkflow.Push(), pushWorkflow.Delete()...)
+		},
+		pushRunner,
+		pushRunnerOutBuf,
+		pushRunnerErrBuf,
+	)
+
+	availabilityMeasurement := measurement.NewAvailability(
+		orcWorkflow.AppUrl(),
+		&http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
+		},
+	)
+
+	clock := clock.New()
 	return []measurement.Measurement{
-		measurement.NewAvailability(
+		measurement.NewPeriodic(
 			logger,
-			orcWorkflow.AppUrl(),
+			clock,
 			time.Second,
-			clock.New(),
-			&http.Client{
-				Transport: &http.Transport{
-					TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-				},
-			},
+			availabilityMeasurement,
+			measurement.NewResultSet(),
 		),
-		measurement.NewRecentLogs(
+		measurement.NewPeriodic(
 			logger,
-			10*time.Second,
-			clock.New(),
-			orcWorkflow.RecentLogs,
-			recentLogsBufferRunner,
-			recentLogsRunnerOutBuf,
-			recentLogsRunnerErrBuf,
-			appLogValidator.New(),
-		),
-		measurement.NewStreamLogs(
-			logger,
-			30*time.Second,
-			clock.New(),
-			func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter) {
-				ctx, cancelFunc := context.WithTimeout(context.Background(), 15*time.Second)
-				return ctx, cancelFunc, orcWorkflow.StreamLogs(ctx)
-			},
-			streamLogsBufferRunner,
-			streamLogsRunnerOutBuf,
-			streamLogsRunnerErrBuf,
-			appLogValidator.New(),
-		),
-		measurement.NewPushability(
-			logger,
+			clock,
 			time.Minute,
-			clock.New(),
-			func() []cmdStartWaiter.CmdStartWaiter {
-				return append(pushWorkflow.Push(), pushWorkflow.Delete()...)
-			},
-			pushRunner,
-			pushRunnerOutBuf,
-			pushRunnerErrBuf,
+			pushabilityMeasurement,
+			measurement.NewResultSet(),
 		),
+		recentLogsMeasurement,
+		streamLogsMeasurement,
 	}
 }
 

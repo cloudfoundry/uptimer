@@ -4,76 +4,40 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
-
-	"github.com/benbjohnson/clock"
 )
 
 type availability struct {
-	name      string
-	logger    *log.Logger
-	URL       string
-	Frequency time.Duration
-	Clock     clock.Clock
-	Client    *http.Client
-
-	resultSet *resultSet
-	stopChan  chan int
+	name   string
+	url    string
+	client *http.Client
 }
 
 func (a *availability) Name() string {
 	return a.name
 }
 
-func (a *availability) Start() error {
-	ticker := a.Clock.Ticker(a.Frequency)
-	go func() {
-		a.performRequest()
-		for {
-			select {
-			case <-ticker.C:
-				a.performRequest()
-			case <-a.stopChan:
-				ticker.Stop()
-				return
-			}
-		}
-	}()
-
-	return nil
-}
-
-func (a *availability) performRequest() {
-	res, err := a.Client.Get(a.URL)
+func (a *availability) PerformMeasurement(logger *log.Logger, rs ResultSet) {
+	res, err := a.client.Get(a.url)
 	if err != nil {
-		a.recordAndLogFailure(err.Error())
+		a.recordAndLogFailure(logger, err.Error(), rs)
 	} else if res.StatusCode != http.StatusOK {
-		a.recordAndLogFailure(fmt.Sprintf("response had status %d", res.StatusCode))
+		a.recordAndLogFailure(logger, fmt.Sprintf("response had status %d", res.StatusCode), rs)
 	} else {
-		a.resultSet.successful++
+		rs.RecordSuccess()
 	}
 }
 
-func (a *availability) recordAndLogFailure(msg string) {
-	a.resultSet.failed++
-	a.logger.Printf("\x1b[31mFAILURE(%s): %s\x1b[0m\n", a.name, msg)
+func (a *availability) recordAndLogFailure(logger *log.Logger, msg string, rs ResultSet) {
+	rs.RecordFailure()
+	logger.Printf("\x1b[31mFAILURE(%s): %s\x1b[0m\n", a.name, msg)
 }
 
-func (a *availability) Stop() error {
-	a.stopChan <- 0
-	return nil
+func (a *availability) Failed(rs ResultSet) bool {
+	return rs.Failed() > 0
 }
 
-func (a *availability) Results() (ResultSet, error) {
-	return a.resultSet, nil
-}
-
-func (a *availability) Failed() bool {
-	return a.resultSet.failed > 0
-}
-func (a *availability) Summary() string {
-	rs := a.resultSet
-	if rs.failed > 0 {
+func (a *availability) Summary(rs ResultSet) string {
+	if rs.Failed() > 0 {
 		return fmt.Sprintf("FAILED(%s): %d of %d requests failed", a.name, rs.Failed(), rs.Total())
 	}
 

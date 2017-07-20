@@ -35,11 +35,11 @@ func (r *recentLogs) Name() string {
 func (r *recentLogs) Start() error {
 	ticker := r.Clock.Ticker(r.Frequency)
 	go func() {
-		r.getRecentLogs()
+		r.PerformMeasurement()
 		for {
 			select {
 			case <-ticker.C:
-				r.getRecentLogs()
+				r.PerformMeasurement()
 			case <-r.stopChan:
 				ticker.Stop()
 				return
@@ -50,7 +50,7 @@ func (r *recentLogs) Start() error {
 	return nil
 }
 
-func (r *recentLogs) getRecentLogs() {
+func (r *recentLogs) PerformMeasurement() {
 	defer r.RunnerOutBuf.Reset()
 	defer r.RunnerErrBuf.Reset()
 	if err := r.Runner.RunInSequence(r.RecentLogsCommandGeneratorFunc()...); err != nil {

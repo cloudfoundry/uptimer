@@ -8,10 +8,16 @@ import (
 )
 
 type FakeResultSet struct {
-	SuccessfulStub        func() int
-	successfulMutex       sync.RWMutex
-	successfulArgsForCall []struct{}
-	successfulReturns     struct {
+	RecordSuccessStub        func()
+	recordSuccessMutex       sync.RWMutex
+	recordSuccessArgsForCall []struct{}
+	RecordFailureStub        func()
+	recordFailureMutex       sync.RWMutex
+	recordFailureArgsForCall []struct{}
+	SuccessfulStub           func() int
+	successfulMutex          sync.RWMutex
+	successfulArgsForCall    []struct{}
+	successfulReturns        struct {
 		result1 int
 	}
 	successfulReturnsOnCall map[int]struct {
@@ -37,6 +43,38 @@ type FakeResultSet struct {
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
+}
+
+func (fake *FakeResultSet) RecordSuccess() {
+	fake.recordSuccessMutex.Lock()
+	fake.recordSuccessArgsForCall = append(fake.recordSuccessArgsForCall, struct{}{})
+	fake.recordInvocation("RecordSuccess", []interface{}{})
+	fake.recordSuccessMutex.Unlock()
+	if fake.RecordSuccessStub != nil {
+		fake.RecordSuccessStub()
+	}
+}
+
+func (fake *FakeResultSet) RecordSuccessCallCount() int {
+	fake.recordSuccessMutex.RLock()
+	defer fake.recordSuccessMutex.RUnlock()
+	return len(fake.recordSuccessArgsForCall)
+}
+
+func (fake *FakeResultSet) RecordFailure() {
+	fake.recordFailureMutex.Lock()
+	fake.recordFailureArgsForCall = append(fake.recordFailureArgsForCall, struct{}{})
+	fake.recordInvocation("RecordFailure", []interface{}{})
+	fake.recordFailureMutex.Unlock()
+	if fake.RecordFailureStub != nil {
+		fake.RecordFailureStub()
+	}
+}
+
+func (fake *FakeResultSet) RecordFailureCallCount() int {
+	fake.recordFailureMutex.RLock()
+	defer fake.recordFailureMutex.RUnlock()
+	return len(fake.recordFailureArgsForCall)
 }
 
 func (fake *FakeResultSet) Successful() int {
@@ -162,6 +200,10 @@ func (fake *FakeResultSet) TotalReturnsOnCall(i int, result1 int) {
 func (fake *FakeResultSet) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
+	fake.recordSuccessMutex.RLock()
+	defer fake.recordSuccessMutex.RUnlock()
+	fake.recordFailureMutex.RLock()
+	defer fake.recordFailureMutex.RUnlock()
 	fake.successfulMutex.RLock()
 	defer fake.successfulMutex.RUnlock()
 	fake.failedMutex.RLock()
