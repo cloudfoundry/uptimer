@@ -41,12 +41,12 @@ func (o *orchestrator) Setup() error {
 }
 
 func (o *orchestrator) Run() (int, error) {
-	var exitCode int
 	for _, m := range o.measurements {
 		o.logger.Printf("Starting measurement: %s\n", m.Name())
 		go m.Start()
 	}
 
+	var exitCode int
 	exitCode, err := o.runWhileCommands()
 	if err != nil {
 		return exitCode, err
