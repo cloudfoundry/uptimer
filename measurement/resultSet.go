@@ -1,12 +1,16 @@
 package measurement
 
-import "time"
+import (
+	"sort"
+	"time"
+)
 
 //go:generate counterfeiter . ResultSet
 type ResultSet interface {
 	RecordSuccess()
 	RecordFailure()
 
+	SuccessesSinceLastFailure() int
 	LastFailure() time.Time
 
 	Successful() int
@@ -41,6 +45,17 @@ func (rs *resultSet) Failed() int {
 
 func (rs *resultSet) Total() int {
 	return len(rs.successful) + len(rs.failed)
+}
+
+func (rs *resultSet) SuccessesSinceLastFailure() int {
+	lf := rs.failed[len(rs.failed)-1]
+	s := sort.Search(len(rs.successful), func(i int) bool { return rs.successful[i].After(lf) })
+
+	if s < len(rs.failed) {
+		return len(rs.successful) - s
+	}
+
+	return 0
 }
 
 func (rs *resultSet) LastFailure() time.Time {

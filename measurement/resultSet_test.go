@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("ResultSet", func() {
+var _ = FDescribe("ResultSet", func() {
 	var (
 		rs ResultSet
 	)
@@ -27,17 +27,43 @@ var _ = Describe("ResultSet", func() {
 		Expect(rs.Total()).To(Equal(2))
 	})
 
-	It("records the time of the last failure", func() {
-		rs.RecordFailure()
-		time.Sleep(10 * time.Millisecond)
+	Describe("LastFailure", func() {
+		It("records the time of the last failure", func() {
+			rs.RecordFailure()
+			time.Sleep(10 * time.Millisecond)
 
-		now := time.Now().UTC()
-		rs.RecordFailure()
-		time.Sleep(10 * time.Millisecond)
+			now := time.Now().UTC()
+			rs.RecordFailure()
+			time.Sleep(10 * time.Millisecond)
 
-		rs.RecordSuccess()
-		rs.RecordSuccess()
+			rs.RecordSuccess()
+			rs.RecordSuccess()
 
-		Expect(rs.LastFailure()).To(BeTemporally("~", now))
+			Expect(rs.LastFailure()).To(BeTemporally("~", now))
+		})
+	})
+
+	Describe("SuccessesSinceLastFailure", func() {
+		It("returns the number of successes since the last failure", func() {
+			rs.RecordFailure()
+
+			rs.RecordSuccess()
+			rs.RecordSuccess()
+			rs.RecordSuccess()
+
+			Expect(rs.SuccessesSinceLastFailure()).To(Equal(3))
+		})
+
+		It("returns 0 if there have been no successes since the last failure", func() {
+			rs.RecordFailure()
+
+			rs.RecordSuccess()
+			rs.RecordSuccess()
+			rs.RecordSuccess()
+
+			rs.RecordFailure()
+
+			Expect(rs.SuccessesSinceLastFailure()).To(BeZero())
+		})
 	})
 })
