@@ -1,8 +1,8 @@
 package measurement_test
 
 import (
+	"bytes"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"time"
 
@@ -16,6 +16,7 @@ import (
 
 var _ = Describe("Periodic", func() {
 	var (
+		logBuf              *bytes.Buffer
 		logger              *log.Logger
 		mockClock           *clock.Mock
 		freq                time.Duration
@@ -26,7 +27,8 @@ var _ = Describe("Periodic", func() {
 	)
 
 	BeforeEach(func() {
-		logger = log.New(ioutil.Discard, "", 0)
+		logBuf = bytes.NewBuffer([]byte{})
+		logger = log.New(logBuf, "", 0)
 		mockClock = clock.NewMock()
 		freq = time.Second
 		fakeBaseMeasurement = &measurementfakes.FakeBaseMeasurement{}
@@ -63,7 +65,7 @@ var _ = Describe("Periodic", func() {
 		})
 
 		It("records success if the base measurement succeeds", func() {
-			fakeBaseMeasurement.PerformMeasurementReturns(true)
+			fakeBaseMeasurement.PerformMeasurementReturns("", true)
 
 			p.Start()
 			mockClock.Add(freq - time.Nanosecond)
@@ -73,13 +75,22 @@ var _ = Describe("Periodic", func() {
 		})
 
 		It("records failure if the base measurement fails", func() {
-			fakeBaseMeasurement.PerformMeasurementReturns(false)
+			fakeBaseMeasurement.PerformMeasurementReturns("", false)
 
 			p.Start()
 			mockClock.Add(freq - time.Nanosecond)
 
 			Expect(fakeResultSet.RecordSuccessCallCount()).To(Equal(0))
 			Expect(fakeResultSet.RecordFailureCallCount()).To(Equal(1))
+		})
+
+		It("logs when the measurement fails", func() {
+			fakeBaseMeasurement.PerformMeasurementReturns("measurement failed!", false)
+
+			p.Start()
+			mockClock.Add(freq - time.Nanosecond)
+
+			Expect(logBuf.String()).To(Equal("measurement failed!\n"))
 		})
 	})
 

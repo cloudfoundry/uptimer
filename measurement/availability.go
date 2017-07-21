@@ -2,7 +2,6 @@ package measurement
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 )
 
@@ -21,21 +20,19 @@ func (a *availability) SummaryPhrase() string {
 	return a.summaryPhrase
 }
 
-func (a *availability) PerformMeasurement(logger *log.Logger) bool {
+func (a *availability) PerformMeasurement() (string, bool) {
 	res, err := a.client.Get(a.url)
 	if err != nil {
-		a.logFailure(logger, err.Error())
-		return false
+		return a.fmtFailure(err.Error()), false
 	} else if res.StatusCode != http.StatusOK {
-		a.logFailure(logger, fmt.Sprintf("response had status %d", res.StatusCode))
-		return false
+		return a.fmtFailure(fmt.Sprintf("response had status %d", res.StatusCode)), false
 	}
 
-	return true
+	return "", true
 }
 
-func (a *availability) logFailure(logger *log.Logger, msg string) {
-	logger.Printf("\x1b[31mFAILURE(%s): %s\x1b[0m\n", a.name, msg)
+func (a *availability) fmtFailure(msg string) string {
+	return fmt.Sprintf("\x1b[31mFAILURE(%s): %s\x1b[0m\n", a.name, msg)
 }
 
 func (a *availability) Failed(rs ResultSet) bool {

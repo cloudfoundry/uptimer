@@ -3,7 +3,6 @@ package measurement_test
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os/exec"
 
 	"github.com/cloudfoundry/uptimer/cmdRunner/cmdRunnerfakes"
@@ -23,8 +22,6 @@ var _ = Describe("Pushability", func() {
 		fakeResultSet        *measurementfakes.FakeResultSet
 		outBuf               *bytes.Buffer
 		errBuf               *bytes.Buffer
-		logBuf               *bytes.Buffer
-		logger               *log.Logger
 
 		pm BaseMeasurement
 	)
@@ -37,8 +34,6 @@ var _ = Describe("Pushability", func() {
 		fakeResultSet = &measurementfakes.FakeResultSet{}
 		outBuf = bytes.NewBuffer([]byte{})
 		errBuf = bytes.NewBuffer([]byte{})
-		logBuf = bytes.NewBuffer([]byte{})
-		logger = log.New(logBuf, "", 0)
 
 		pm = NewPushability(fakeCmdGeneratorFunc, fakeCommandRunner, outBuf, errBuf)
 	})
@@ -56,7 +51,7 @@ var _ = Describe("Pushability", func() {
 				exec.Command("bar"),
 			}
 
-			pm.PerformMeasurement(logger)
+			pm.PerformMeasurement()
 
 			Expect(fakeCommandRunner.RunInSequenceCallCount()).To(Equal(1))
 			Expect(fakeCommandRunner.RunInSequenceArgsForCall(0)).To(Equal(
@@ -68,7 +63,7 @@ var _ = Describe("Pushability", func() {
 		})
 
 		It("records the commands that run without an error as success", func() {
-			res := pm.PerformMeasurement(logger)
+			_, res := pm.PerformMeasurement()
 
 			Expect(res).To(BeTrue())
 		})
@@ -76,36 +71,29 @@ var _ = Describe("Pushability", func() {
 		It("records the commands that run with error as failed", func() {
 			fakeCommandRunner.RunInSequenceReturns(fmt.Errorf("errrrrrooooorrrr"))
 
-			res := pm.PerformMeasurement(logger)
+			_, res := pm.PerformMeasurement()
 
 			Expect(res).To(BeFalse())
 		})
 
-		It("logs both stdout and stderr when there is an error", func() {
+		It("returns both stdout and stderr when there is an error", func() {
 			outBuf.WriteString("heyyy guys")
 			errBuf.WriteString("whaaats happening?")
 			fakeCommandRunner.RunInSequenceReturns(fmt.Errorf("errrrrrooooorrrr"))
 
-			pm.PerformMeasurement(logger)
+			msg, _ := pm.PerformMeasurement()
 
-			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(App pushability): errrrrrooooorrrr\x1b[0m\nstdout:\nheyyy guys\nstderr:\nwhaaats happening?\n\n"))
+			Expect(msg).To(Equal("\x1b[31mFAILURE(App pushability): errrrrrooooorrrr\x1b[0m\nstdout:\nheyyy guys\nstderr:\nwhaaats happening?\n\n"))
 		})
 
 		It("does not accumulate buffers indefinitely", func() {
 			outBuf.WriteString("great success")
-			pm.PerformMeasurement(logger)
-
-			outBuf.WriteString("first failure")
 			errBuf.WriteString("that's some standard error")
-			fakeCommandRunner.RunInSequenceReturns(fmt.Errorf("e 1"))
-			pm.PerformMeasurement(logger)
 
-			outBuf.WriteString("second failure")
-			errBuf.WriteString("err-body in the club")
-			fakeCommandRunner.RunInSequenceReturns(fmt.Errorf("e 2"))
-			pm.PerformMeasurement(logger)
+			pm.PerformMeasurement()
 
-			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(App pushability): e 1\x1b[0m\nstdout:\nfirst failure\nstderr:\nthat's some standard error\n\n\x1b[31mFAILURE(App pushability): e 2\x1b[0m\nstdout:\nsecond failure\nstderr:\nerr-body in the club\n\n"))
+			Expect(outBuf.Len()).To(Equal(0))
+			Expect(errBuf.Len()).To(Equal(0))
 		})
 	})
 
@@ -113,7 +101,7 @@ var _ = Describe("Pushability", func() {
 		It("returns false when the measurement has succeeded", func() {
 			fakeResultSet.FailedReturns(0)
 
-			pm.PerformMeasurement(logger)
+			pm.PerformMeasurement()
 
 			Expect(pm.Failed(fakeResultSet)).To(BeFalse())
 		})
@@ -121,7 +109,7 @@ var _ = Describe("Pushability", func() {
 		It("returns true when the measurement has failed", func() {
 			fakeResultSet.FailedReturns(1)
 
-			pm.PerformMeasurement(logger)
+			pm.PerformMeasurement()
 
 			Expect(pm.Failed(fakeResultSet)).To(BeTrue())
 		})

@@ -1,9 +1,7 @@
 package measurement_test
 
 import (
-	"bytes"
 	"fmt"
-	"log"
 	"net/http"
 	"sync"
 
@@ -21,8 +19,6 @@ var _ = Describe("Availability", func() {
 		successResponse  *http.Response
 		failResponse     *http.Response
 		client           *http.Client
-		logger           *log.Logger
-		logBuf           *bytes.Buffer
 		fakeResultSet    *measurementfakes.FakeResultSet
 
 		am BaseMeasurement
@@ -37,8 +33,6 @@ var _ = Describe("Availability", func() {
 		client = &http.Client{
 			Transport: fakeRoundTripper,
 		}
-		logBuf = bytes.NewBuffer([]byte{})
-		logger = log.New(logBuf, "", 0)
 		fakeResultSet = &measurementfakes.FakeResultSet{}
 
 		am = NewAvailability(url, client)
@@ -52,7 +46,7 @@ var _ = Describe("Availability", func() {
 
 	Describe("PerformMeasurement", func() {
 		It("makes a get request to the url", func() {
-			am.PerformMeasurement(logger)
+			am.PerformMeasurement()
 
 			req := fakeRoundTripper.RoundTripArgsForCall(0)
 			Expect(req.Method).To(Equal(http.MethodGet))
@@ -60,7 +54,7 @@ var _ = Describe("Availability", func() {
 		})
 
 		It("records 200 results as success", func() {
-			res := am.PerformMeasurement(logger)
+			_, res := am.PerformMeasurement()
 
 			Expect(res).To(BeTrue())
 		})
@@ -68,7 +62,7 @@ var _ = Describe("Availability", func() {
 		It("records the non-200 results as failed", func() {
 			fakeRoundTripper.RoundTripReturns(failResponse, nil)
 
-			res := am.PerformMeasurement(logger)
+			_, res := am.PerformMeasurement()
 
 			Expect(res).To(BeFalse())
 		})
@@ -76,25 +70,25 @@ var _ = Describe("Availability", func() {
 		It("records the error results as failed", func() {
 			fakeRoundTripper.RoundTripReturns(nil, fmt.Errorf("error"))
 
-			res := am.PerformMeasurement(logger)
+			_, res := am.PerformMeasurement()
 
 			Expect(res).To(BeFalse())
 		})
 
-		It("logs error output when there is a non-200 response", func() {
+		It("returns error output when there is a non-200 response", func() {
 			fakeRoundTripper.RoundTripReturns(failResponse, nil)
 
-			am.PerformMeasurement(logger)
+			msg, _ := am.PerformMeasurement()
 
-			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(HTTP availability): response had status 400\x1b[0m\n"))
+			Expect(msg).To(Equal("\x1b[31mFAILURE(HTTP availability): response had status 400\x1b[0m\n"))
 		})
 
-		It("logs error output when there is an error", func() {
+		It("returns error output when there is an error", func() {
 			fakeRoundTripper.RoundTripReturns(nil, fmt.Errorf("error"))
 
-			am.PerformMeasurement(logger)
+			msg, _ := am.PerformMeasurement()
 
-			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(HTTP availability): Get https://example.com/foo: error\x1b[0m\n"))
+			Expect(msg).To(Equal("\x1b[31mFAILURE(HTTP availability): Get https://example.com/foo: error\x1b[0m\n"))
 		})
 	})
 
@@ -102,7 +96,7 @@ var _ = Describe("Availability", func() {
 		It("returns false when the measurement has succeeded", func() {
 			fakeResultSet.FailedReturns(0)
 
-			am.PerformMeasurement(logger)
+			am.PerformMeasurement()
 
 			Expect(am.Failed(fakeResultSet)).To(BeFalse())
 		})
@@ -110,7 +104,7 @@ var _ = Describe("Availability", func() {
 		It("returns true when the measurement has failed", func() {
 			fakeResultSet.FailedReturns(1)
 
-			am.PerformMeasurement(logger)
+			am.PerformMeasurement()
 
 			Expect(am.Failed(fakeResultSet)).To(BeTrue())
 		})

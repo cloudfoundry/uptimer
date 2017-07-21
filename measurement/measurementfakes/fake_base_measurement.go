@@ -2,7 +2,6 @@
 package measurementfakes
 
 import (
-	"log"
 	"sync"
 
 	"github.com/cloudfoundry/uptimer/measurement"
@@ -18,16 +17,16 @@ type FakeBaseMeasurement struct {
 	nameReturnsOnCall map[int]struct {
 		result1 string
 	}
-	PerformMeasurementStub        func(*log.Logger) bool
+	PerformMeasurementStub        func() (string, bool)
 	performMeasurementMutex       sync.RWMutex
-	performMeasurementArgsForCall []struct {
-		arg1 *log.Logger
-	}
-	performMeasurementReturns struct {
-		result1 bool
+	performMeasurementArgsForCall []struct{}
+	performMeasurementReturns     struct {
+		result1 string
+		result2 bool
 	}
 	performMeasurementReturnsOnCall map[int]struct {
-		result1 bool
+		result1 string
+		result2 bool
 	}
 	FailedStub        func(rs measurement.ResultSet) bool
 	failedMutex       sync.RWMutex
@@ -93,21 +92,19 @@ func (fake *FakeBaseMeasurement) NameReturnsOnCall(i int, result1 string) {
 	}{result1}
 }
 
-func (fake *FakeBaseMeasurement) PerformMeasurement(arg1 *log.Logger) bool {
+func (fake *FakeBaseMeasurement) PerformMeasurement() (string, bool) {
 	fake.performMeasurementMutex.Lock()
 	ret, specificReturn := fake.performMeasurementReturnsOnCall[len(fake.performMeasurementArgsForCall)]
-	fake.performMeasurementArgsForCall = append(fake.performMeasurementArgsForCall, struct {
-		arg1 *log.Logger
-	}{arg1})
-	fake.recordInvocation("PerformMeasurement", []interface{}{arg1})
+	fake.performMeasurementArgsForCall = append(fake.performMeasurementArgsForCall, struct{}{})
+	fake.recordInvocation("PerformMeasurement", []interface{}{})
 	fake.performMeasurementMutex.Unlock()
 	if fake.PerformMeasurementStub != nil {
-		return fake.PerformMeasurementStub(arg1)
+		return fake.PerformMeasurementStub()
 	}
 	if specificReturn {
-		return ret.result1
+		return ret.result1, ret.result2
 	}
-	return fake.performMeasurementReturns.result1
+	return fake.performMeasurementReturns.result1, fake.performMeasurementReturns.result2
 }
 
 func (fake *FakeBaseMeasurement) PerformMeasurementCallCount() int {
@@ -116,29 +113,26 @@ func (fake *FakeBaseMeasurement) PerformMeasurementCallCount() int {
 	return len(fake.performMeasurementArgsForCall)
 }
 
-func (fake *FakeBaseMeasurement) PerformMeasurementArgsForCall(i int) *log.Logger {
-	fake.performMeasurementMutex.RLock()
-	defer fake.performMeasurementMutex.RUnlock()
-	return fake.performMeasurementArgsForCall[i].arg1
-}
-
-func (fake *FakeBaseMeasurement) PerformMeasurementReturns(result1 bool) {
+func (fake *FakeBaseMeasurement) PerformMeasurementReturns(result1 string, result2 bool) {
 	fake.PerformMeasurementStub = nil
 	fake.performMeasurementReturns = struct {
-		result1 bool
-	}{result1}
+		result1 string
+		result2 bool
+	}{result1, result2}
 }
 
-func (fake *FakeBaseMeasurement) PerformMeasurementReturnsOnCall(i int, result1 bool) {
+func (fake *FakeBaseMeasurement) PerformMeasurementReturnsOnCall(i int, result1 string, result2 bool) {
 	fake.PerformMeasurementStub = nil
 	if fake.performMeasurementReturnsOnCall == nil {
 		fake.performMeasurementReturnsOnCall = make(map[int]struct {
-			result1 bool
+			result1 string
+			result2 bool
 		})
 	}
 	fake.performMeasurementReturnsOnCall[i] = struct {
-		result1 bool
-	}{result1}
+		result1 string
+		result2 bool
+	}{result1, result2}
 }
 
 func (fake *FakeBaseMeasurement) Failed(rs measurement.ResultSet) bool {

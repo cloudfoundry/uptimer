@@ -39,11 +39,14 @@ func (p *periodic) Start() {
 }
 
 func (p *periodic) performMeasurement() {
-	if p.baseMeasurement.PerformMeasurement(p.logger) {
-		p.resultSet.RecordSuccess()
-	} else {
+	msg, ok := p.baseMeasurement.PerformMeasurement()
+	if !ok {
 		p.resultSet.RecordFailure()
+		p.logger.Print(msg)
+		return
 	}
+
+	p.resultSet.RecordSuccess()
 }
 
 func (p *periodic) Results() ResultSet {
