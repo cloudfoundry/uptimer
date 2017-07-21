@@ -17,16 +17,20 @@ type FakeBaseMeasurement struct {
 	nameReturnsOnCall map[int]struct {
 		result1 string
 	}
-	PerformMeasurementStub        func() (string, bool)
+	PerformMeasurementStub        func() (string, string, string, bool)
 	performMeasurementMutex       sync.RWMutex
 	performMeasurementArgsForCall []struct{}
 	performMeasurementReturns     struct {
 		result1 string
-		result2 bool
+		result2 string
+		result3 string
+		result4 bool
 	}
 	performMeasurementReturnsOnCall map[int]struct {
 		result1 string
-		result2 bool
+		result2 string
+		result3 string
+		result4 bool
 	}
 	FailedStub        func(rs measurement.ResultSet) bool
 	failedMutex       sync.RWMutex
@@ -92,7 +96,7 @@ func (fake *FakeBaseMeasurement) NameReturnsOnCall(i int, result1 string) {
 	}{result1}
 }
 
-func (fake *FakeBaseMeasurement) PerformMeasurement() (string, bool) {
+func (fake *FakeBaseMeasurement) PerformMeasurement() (string, string, string, bool) {
 	fake.performMeasurementMutex.Lock()
 	ret, specificReturn := fake.performMeasurementReturnsOnCall[len(fake.performMeasurementArgsForCall)]
 	fake.performMeasurementArgsForCall = append(fake.performMeasurementArgsForCall, struct{}{})
@@ -102,9 +106,9 @@ func (fake *FakeBaseMeasurement) PerformMeasurement() (string, bool) {
 		return fake.PerformMeasurementStub()
 	}
 	if specificReturn {
-		return ret.result1, ret.result2
+		return ret.result1, ret.result2, ret.result3, ret.result4
 	}
-	return fake.performMeasurementReturns.result1, fake.performMeasurementReturns.result2
+	return fake.performMeasurementReturns.result1, fake.performMeasurementReturns.result2, fake.performMeasurementReturns.result3, fake.performMeasurementReturns.result4
 }
 
 func (fake *FakeBaseMeasurement) PerformMeasurementCallCount() int {
@@ -113,26 +117,32 @@ func (fake *FakeBaseMeasurement) PerformMeasurementCallCount() int {
 	return len(fake.performMeasurementArgsForCall)
 }
 
-func (fake *FakeBaseMeasurement) PerformMeasurementReturns(result1 string, result2 bool) {
+func (fake *FakeBaseMeasurement) PerformMeasurementReturns(result1 string, result2 string, result3 string, result4 bool) {
 	fake.PerformMeasurementStub = nil
 	fake.performMeasurementReturns = struct {
 		result1 string
-		result2 bool
-	}{result1, result2}
+		result2 string
+		result3 string
+		result4 bool
+	}{result1, result2, result3, result4}
 }
 
-func (fake *FakeBaseMeasurement) PerformMeasurementReturnsOnCall(i int, result1 string, result2 bool) {
+func (fake *FakeBaseMeasurement) PerformMeasurementReturnsOnCall(i int, result1 string, result2 string, result3 string, result4 bool) {
 	fake.PerformMeasurementStub = nil
 	if fake.performMeasurementReturnsOnCall == nil {
 		fake.performMeasurementReturnsOnCall = make(map[int]struct {
 			result1 string
-			result2 bool
+			result2 string
+			result3 string
+			result4 bool
 		})
 	}
 	fake.performMeasurementReturnsOnCall[i] = struct {
 		result1 string
-		result2 bool
-	}{result1, result2}
+		result2 string
+		result3 string
+		result4 bool
+	}{result1, result2, result3, result4}
 }
 
 func (fake *FakeBaseMeasurement) Failed(rs measurement.ResultSet) bool {

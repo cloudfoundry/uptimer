@@ -28,7 +28,7 @@ func (s *streamLogs) SummaryPhrase() string {
 	return s.summaryPhrase
 }
 
-func (s *streamLogs) PerformMeasurement() (string, bool) {
+func (s *streamLogs) PerformMeasurement() (string, string, string, bool) {
 	defer s.runnerOutBuf.Reset()
 	defer s.runnerErrBuf.Reset()
 
@@ -36,43 +36,24 @@ func (s *streamLogs) PerformMeasurement() (string, bool) {
 	defer cancelFunc()
 
 	if err := s.runner.RunInSequenceWithContext(ctx, cmds...); err != nil {
-		return s.fmtFailure(
-				err.Error(),
-				s.runnerOutBuf.String(),
-				s.runnerErrBuf.String(),
-			),
-			false
+		return err.Error(), s.runnerOutBuf.String(), s.runnerErrBuf.String(), false
 	}
 
 	logIsNewer, err := s.appLogValidator.IsNewer(s.runnerOutBuf.String())
 	if err != nil {
-		return s.fmtFailure(
-				fmt.Sprintf("App log validation failed with: %s", err.Error()),
-				s.runnerOutBuf.String(),
-				s.runnerErrBuf.String(),
-			),
+		return fmt.Sprintf("App log validation failed with: %s", err.Error()),
+			s.runnerOutBuf.String(),
+			s.runnerErrBuf.String(),
 			false
 
 	} else if !logIsNewer {
-		return s.fmtFailure(
-				"App log fetched was not newer than previous app log fetched",
-				s.runnerOutBuf.String(),
-				s.runnerErrBuf.String(),
-			),
+		return "App log fetched was not newer than previous app log fetched",
+			s.runnerOutBuf.String(),
+			s.runnerErrBuf.String(),
 			false
 	}
 
-	return "", true
-}
-
-func (s *streamLogs) fmtFailure(errString, cmdOut, cmdErr string) string {
-	return fmt.Sprintf(
-		"\x1b[31mFAILURE(%s): %s\x1b[0m\nstdout:\n%s\nstderr:\n%s\n\n",
-		s.name,
-		errString,
-		cmdOut,
-		cmdErr,
-	)
+	return "", "", "", true
 }
 
 func (s *streamLogs) Failed(rs ResultSet) bool {

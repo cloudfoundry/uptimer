@@ -73,7 +73,7 @@ var _ = Describe("RecentLogs", func() {
 		})
 
 		It("records the commands that run without an error as success", func() {
-			_, res := rlm.PerformMeasurement()
+			_, _, _, res := rlm.PerformMeasurement()
 
 			Expect(res).To(BeTrue())
 		})
@@ -81,7 +81,7 @@ var _ = Describe("RecentLogs", func() {
 		It("records failure when the app logs are not in order", func() {
 			fakeAppLogValidator.IsNewerReturns(false, nil)
 
-			_, res := rlm.PerformMeasurement()
+			_, _, _, res := rlm.PerformMeasurement()
 
 			Expect(res).To(BeFalse())
 		})
@@ -89,7 +89,7 @@ var _ = Describe("RecentLogs", func() {
 		It("records failure when the app log validator returns an error", func() {
 			fakeAppLogValidator.IsNewerReturns(true, fmt.Errorf("oh totally bad news"))
 
-			_, res := rlm.PerformMeasurement()
+			_, _, _, res := rlm.PerformMeasurement()
 
 			Expect(res).To(BeFalse())
 		})
@@ -97,7 +97,7 @@ var _ = Describe("RecentLogs", func() {
 		It("records the commands that run with error as failed", func() {
 			fakeCommandRunner.RunInSequenceReturns(fmt.Errorf("errrrrrooooorrrr"))
 
-			_, res := rlm.PerformMeasurement()
+			_, _, _, res := rlm.PerformMeasurement()
 
 			Expect(res).To(BeFalse())
 		})
@@ -107,9 +107,11 @@ var _ = Describe("RecentLogs", func() {
 			errBuf.WriteString("whaaats happening?")
 			fakeCommandRunner.RunInSequenceReturns(fmt.Errorf("errrrrrooooorrrr"))
 
-			msg, _ := rlm.PerformMeasurement()
+			msg, stdOut, stdErr, _ := rlm.PerformMeasurement()
 
-			Expect(msg).To(Equal("\x1b[31mFAILURE(Recent logs fetching): errrrrrooooorrrr\x1b[0m\nstdout:\nheyyy guys\nstderr:\nwhaaats happening?\n\n"))
+			Expect(msg).To(Equal("errrrrrooooorrrr"))
+			Expect(stdOut).To(Equal("heyyy guys"))
+			Expect(stdErr).To(Equal("whaaats happening?"))
 		})
 
 		It("returns both stdout and stderr when the log validator fails", func() {
@@ -117,9 +119,11 @@ var _ = Describe("RecentLogs", func() {
 			errBuf.WriteString("howayah?")
 			fakeAppLogValidator.IsNewerReturns(false, nil)
 
-			msg, _ := rlm.PerformMeasurement()
+			msg, stdOut, stdErr, _ := rlm.PerformMeasurement()
 
-			Expect(msg).To(Equal("\x1b[31mFAILURE(Recent logs fetching): App log fetched was not newer than previous app log fetched\x1b[0m\nstdout:\nyo yo\nstderr:\nhowayah?\n\n"))
+			Expect(msg).To(Equal("App log fetched was not newer than previous app log fetched"))
+			Expect(stdOut).To(Equal("yo yo"))
+			Expect(stdErr).To(Equal("howayah?"))
 		})
 
 		It("returns both stdout and stderr when the log validator returns an error", func() {
@@ -127,9 +131,11 @@ var _ = Describe("RecentLogs", func() {
 			errBuf.WriteString("howayah?")
 			fakeAppLogValidator.IsNewerReturns(false, fmt.Errorf("we don't need no stinking numbers"))
 
-			msg, _ := rlm.PerformMeasurement()
+			msg, stdOut, stdErr, _ := rlm.PerformMeasurement()
 
-			Expect(msg).To(Equal("\x1b[31mFAILURE(Recent logs fetching): App log validation failed with: we don't need no stinking numbers\x1b[0m\nstdout:\nyo yo\nstderr:\nhowayah?\n\n"))
+			Expect(msg).To(Equal("App log validation failed with: we don't need no stinking numbers"))
+			Expect(stdOut).To(Equal("yo yo"))
+			Expect(stdErr).To(Equal("howayah?"))
 		})
 
 		It("does not accumulate buffers indefinitely", func() {

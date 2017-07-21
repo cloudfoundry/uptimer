@@ -63,7 +63,7 @@ var _ = Describe("Pushability", func() {
 		})
 
 		It("records the commands that run without an error as success", func() {
-			_, res := pm.PerformMeasurement()
+			_, _, _, res := pm.PerformMeasurement()
 
 			Expect(res).To(BeTrue())
 		})
@@ -71,7 +71,7 @@ var _ = Describe("Pushability", func() {
 		It("records the commands that run with error as failed", func() {
 			fakeCommandRunner.RunInSequenceReturns(fmt.Errorf("errrrrrooooorrrr"))
 
-			_, res := pm.PerformMeasurement()
+			_, _, _, res := pm.PerformMeasurement()
 
 			Expect(res).To(BeFalse())
 		})
@@ -81,9 +81,11 @@ var _ = Describe("Pushability", func() {
 			errBuf.WriteString("whaaats happening?")
 			fakeCommandRunner.RunInSequenceReturns(fmt.Errorf("errrrrrooooorrrr"))
 
-			msg, _ := pm.PerformMeasurement()
+			msg, stdOut, stdErr, _ := pm.PerformMeasurement()
 
-			Expect(msg).To(Equal("\x1b[31mFAILURE(App pushability): errrrrrooooorrrr\x1b[0m\nstdout:\nheyyy guys\nstderr:\nwhaaats happening?\n\n"))
+			Expect(msg).To(Equal("errrrrrooooorrrr"))
+			Expect(stdOut).To(Equal("heyyy guys"))
+			Expect(stdErr).To(Equal("whaaats happening?"))
 		})
 
 		It("does not accumulate buffers indefinitely", func() {

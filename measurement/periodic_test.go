@@ -65,7 +65,7 @@ var _ = Describe("Periodic", func() {
 		})
 
 		It("records success if the base measurement succeeds", func() {
-			fakeBaseMeasurement.PerformMeasurementReturns("", true)
+			fakeBaseMeasurement.PerformMeasurementReturns("", "", "", true)
 
 			p.Start()
 			mockClock.Add(freq - time.Nanosecond)
@@ -75,7 +75,7 @@ var _ = Describe("Periodic", func() {
 		})
 
 		It("records failure if the base measurement fails", func() {
-			fakeBaseMeasurement.PerformMeasurementReturns("", false)
+			fakeBaseMeasurement.PerformMeasurementReturns("", "", "", false)
 
 			p.Start()
 			mockClock.Add(freq - time.Nanosecond)
@@ -84,34 +84,61 @@ var _ = Describe("Periodic", func() {
 			Expect(fakeResultSet.RecordFailureCallCount()).To(Equal(1))
 		})
 
-		It("logs when the measurement fails", func() {
-			fakeBaseMeasurement.PerformMeasurementReturns("measurement failed!", false)
+		It("logs when the measurement fails without stdout or stderr", func() {
+			fakeBaseMeasurement.PerformMeasurementReturns("measurement failed!", "", "", false)
 
 			p.Start()
 			mockClock.Add(freq - time.Nanosecond)
 
-			Expect(logBuf.String()).To(Equal("measurement failed!\n"))
+			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(foo measurement): measurement failed!\x1b[0m\n\n"))
+		})
+
+		It("logs when the measurement fails with stdout", func() {
+			fakeBaseMeasurement.PerformMeasurementReturns("measurement failed!", "out out!", "", false)
+
+			p.Start()
+			mockClock.Add(freq - time.Nanosecond)
+
+			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(foo measurement): measurement failed!\x1b[0m\n\nstdout:\nout out!\n\n"))
+		})
+
+		It("logs when the measurement fails with stderr", func() {
+			fakeBaseMeasurement.PerformMeasurementReturns("measurement failed!", "", "err err!", false)
+
+			p.Start()
+			mockClock.Add(freq - time.Nanosecond)
+
+			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(foo measurement): measurement failed!\x1b[0m\n\nstderr:\nerr err!\n\n"))
+		})
+
+		It("logs when the measurement fails with both stdout or stderr", func() {
+			fakeBaseMeasurement.PerformMeasurementReturns("measurement failed!", "out out!", "err err!", false)
+
+			p.Start()
+			mockClock.Add(freq - time.Nanosecond)
+
+			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(foo measurement): measurement failed!\x1b[0m\n\nstdout:\nout out!\n\nstderr:\nerr err!\n\n"))
 		})
 
 		It("logs how many successes since the last failure", func() {
 			lastFailure := mockClock.Now().UTC()
-			fakeBaseMeasurement.PerformMeasurementReturns("measurement failed!", false)
+			fakeBaseMeasurement.PerformMeasurementReturns("measurement failed!", "", "", false)
 			fakeResultSet.SuccessesSinceLastFailureReturns(3, lastFailure)
 
 			p.Start()
 			mockClock.Add(freq - time.Nanosecond)
 
-			Expect(logBuf.String()).To(Equal(fmt.Sprintf("measurement failed!\n3 successes since last failure (at %s)\n", lastFailure.Format("2006/01/02 15:04:05"))))
+			Expect(logBuf.String()).To(Equal(fmt.Sprintf("\x1b[31mFAILURE(foo measurement): measurement failed! (3 successes since last failure at %s)\x1b[0m\n\n", lastFailure.Format("2006/01/02 15:04:05"))))
 		})
 
 		It("does not logs how many successes since the last failure if there have been none", func() {
-			fakeBaseMeasurement.PerformMeasurementReturns("measurement failed!", false)
+			fakeBaseMeasurement.PerformMeasurementReturns("measurement failed!", "", "", false)
 			fakeResultSet.SuccessesSinceLastFailureReturns(0, time.Time{})
 
 			p.Start()
 			mockClock.Add(freq - time.Nanosecond)
 
-			Expect(logBuf.String()).To(Equal("measurement failed!\n"))
+			Expect(logBuf.String()).To(Equal("\x1b[31mFAILURE(foo measurement): measurement failed!\x1b[0m\n\n"))
 		})
 	})
 

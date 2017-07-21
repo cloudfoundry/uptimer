@@ -54,7 +54,7 @@ var _ = Describe("Availability", func() {
 		})
 
 		It("records 200 results as success", func() {
-			_, res := am.PerformMeasurement()
+			_, _, _, res := am.PerformMeasurement()
 
 			Expect(res).To(BeTrue())
 		})
@@ -62,7 +62,7 @@ var _ = Describe("Availability", func() {
 		It("records the non-200 results as failed", func() {
 			fakeRoundTripper.RoundTripReturns(failResponse, nil)
 
-			_, res := am.PerformMeasurement()
+			_, _, _, res := am.PerformMeasurement()
 
 			Expect(res).To(BeFalse())
 		})
@@ -70,7 +70,7 @@ var _ = Describe("Availability", func() {
 		It("records the error results as failed", func() {
 			fakeRoundTripper.RoundTripReturns(nil, fmt.Errorf("error"))
 
-			_, res := am.PerformMeasurement()
+			_, _, _, res := am.PerformMeasurement()
 
 			Expect(res).To(BeFalse())
 		})
@@ -78,17 +78,17 @@ var _ = Describe("Availability", func() {
 		It("returns error output when there is a non-200 response", func() {
 			fakeRoundTripper.RoundTripReturns(failResponse, nil)
 
-			msg, _ := am.PerformMeasurement()
+			msg, _, _, _ := am.PerformMeasurement()
 
-			Expect(msg).To(Equal("\x1b[31mFAILURE(HTTP availability): response had status 400\x1b[0m\n"))
+			Expect(msg).To(Equal("response had status 400"))
 		})
 
 		It("returns error output when there is an error", func() {
 			fakeRoundTripper.RoundTripReturns(nil, fmt.Errorf("error"))
 
-			msg, _ := am.PerformMeasurement()
+			msg, _, _, _ := am.PerformMeasurement()
 
-			Expect(msg).To(Equal("\x1b[31mFAILURE(HTTP availability): Get https://example.com/foo: error\x1b[0m\n"))
+			Expect(msg).To(Equal("Get https://example.com/foo: error"))
 		})
 	})
 

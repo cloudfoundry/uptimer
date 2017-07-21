@@ -20,19 +20,15 @@ func (a *availability) SummaryPhrase() string {
 	return a.summaryPhrase
 }
 
-func (a *availability) PerformMeasurement() (string, bool) {
+func (a *availability) PerformMeasurement() (string, string, string, bool) {
 	res, err := a.client.Get(a.url)
 	if err != nil {
-		return a.fmtFailure(err.Error()), false
+		return err.Error(), "", "", false
 	} else if res.StatusCode != http.StatusOK {
-		return a.fmtFailure(fmt.Sprintf("response had status %d", res.StatusCode)), false
+		return fmt.Sprintf("response had status %d", res.StatusCode), "", "", false
 	}
 
-	return "", true
-}
-
-func (a *availability) fmtFailure(msg string) string {
-	return fmt.Sprintf("\x1b[31mFAILURE(%s): %s\x1b[0m\n", a.name, msg)
+	return "", "", "", true
 }
 
 func (a *availability) Failed(rs ResultSet) bool {

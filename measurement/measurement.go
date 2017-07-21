@@ -39,7 +39,7 @@ func NewPeriodic(logger *log.Logger, clock clock.Clock, freq time.Duration, base
 //go:generate counterfeiter . BaseMeasurement
 type BaseMeasurement interface {
 	Name() string
-	PerformMeasurement() (string, bool)
+	PerformMeasurement() (string, string, string, bool)
 	Failed(rs ResultSet) bool
 	SummaryPhrase() string
 }

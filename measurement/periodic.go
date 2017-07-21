@@ -39,18 +39,39 @@ func (p *periodic) Start() {
 }
 
 func (p *periodic) performMeasurement() {
-	if msg, ok := p.baseMeasurement.PerformMeasurement(); !ok {
-		sslf, lf := p.resultSet.SuccessesSinceLastFailure()
+	if msg, stdOut, stdErr, ok := p.baseMeasurement.PerformMeasurement(); !ok {
+		p.logFailure(msg, stdOut, stdErr)
 		p.resultSet.RecordFailure()
-
-		p.logger.Println(msg)
-		if sslf > 0 {
-			p.logger.Printf("%d successes since last failure (at %s)\n", sslf, lf.Format("2006/01/02 15:04:05"))
-		}
 		return
 	}
 
 	p.resultSet.RecordSuccess()
+}
+
+func (p *periodic) logFailure(msg, stdOut, stdErr string) {
+	var lfMsg string
+	if sslf, lf := p.resultSet.SuccessesSinceLastFailure(); sslf > 0 {
+		lfMsg = fmt.Sprintf(" (%d successes since last failure at %s)", sslf, lf.Format("2006/01/02 15:04:05"))
+	}
+
+	var stdOutMsg string
+	if stdOut != "" {
+		stdOutMsg = fmt.Sprintf("\nstdout:\n%s\n", stdOut)
+	}
+
+	var stdErrMsg string
+	if stdErr != "" {
+		stdErrMsg = fmt.Sprintf("\nstderr:\n%s\n", stdErr)
+	}
+
+	p.logger.Printf(
+		"\x1b[31mFAILURE(%s): %s%s\x1b[0m\n%s%s\n",
+		p.baseMeasurement.Name(),
+		msg,
+		lfMsg,
+		stdOutMsg,
+		stdErrMsg,
+	)
 }
 
 func (p *periodic) Results() ResultSet {
