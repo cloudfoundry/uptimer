@@ -15,23 +15,16 @@ type FakeResultSet struct {
 	RecordFailureStub                    func()
 	recordFailureMutex                   sync.RWMutex
 	recordFailureArgsForCall             []struct{}
-	SuccessesSinceLastFailureStub        func() int
+	SuccessesSinceLastFailureStub        func() (int, time.Time)
 	successesSinceLastFailureMutex       sync.RWMutex
 	successesSinceLastFailureArgsForCall []struct{}
 	successesSinceLastFailureReturns     struct {
 		result1 int
+		result2 time.Time
 	}
 	successesSinceLastFailureReturnsOnCall map[int]struct {
 		result1 int
-	}
-	LastFailureStub        func() time.Time
-	lastFailureMutex       sync.RWMutex
-	lastFailureArgsForCall []struct{}
-	lastFailureReturns     struct {
-		result1 time.Time
-	}
-	lastFailureReturnsOnCall map[int]struct {
-		result1 time.Time
+		result2 time.Time
 	}
 	SuccessfulStub        func() int
 	successfulMutex       sync.RWMutex
@@ -96,7 +89,7 @@ func (fake *FakeResultSet) RecordFailureCallCount() int {
 	return len(fake.recordFailureArgsForCall)
 }
 
-func (fake *FakeResultSet) SuccessesSinceLastFailure() int {
+func (fake *FakeResultSet) SuccessesSinceLastFailure() (int, time.Time) {
 	fake.successesSinceLastFailureMutex.Lock()
 	ret, specificReturn := fake.successesSinceLastFailureReturnsOnCall[len(fake.successesSinceLastFailureArgsForCall)]
 	fake.successesSinceLastFailureArgsForCall = append(fake.successesSinceLastFailureArgsForCall, struct{}{})
@@ -106,9 +99,9 @@ func (fake *FakeResultSet) SuccessesSinceLastFailure() int {
 		return fake.SuccessesSinceLastFailureStub()
 	}
 	if specificReturn {
-		return ret.result1
+		return ret.result1, ret.result2
 	}
-	return fake.successesSinceLastFailureReturns.result1
+	return fake.successesSinceLastFailureReturns.result1, fake.successesSinceLastFailureReturns.result2
 }
 
 func (fake *FakeResultSet) SuccessesSinceLastFailureCallCount() int {
@@ -117,63 +110,26 @@ func (fake *FakeResultSet) SuccessesSinceLastFailureCallCount() int {
 	return len(fake.successesSinceLastFailureArgsForCall)
 }
 
-func (fake *FakeResultSet) SuccessesSinceLastFailureReturns(result1 int) {
+func (fake *FakeResultSet) SuccessesSinceLastFailureReturns(result1 int, result2 time.Time) {
 	fake.SuccessesSinceLastFailureStub = nil
 	fake.successesSinceLastFailureReturns = struct {
 		result1 int
-	}{result1}
+		result2 time.Time
+	}{result1, result2}
 }
 
-func (fake *FakeResultSet) SuccessesSinceLastFailureReturnsOnCall(i int, result1 int) {
+func (fake *FakeResultSet) SuccessesSinceLastFailureReturnsOnCall(i int, result1 int, result2 time.Time) {
 	fake.SuccessesSinceLastFailureStub = nil
 	if fake.successesSinceLastFailureReturnsOnCall == nil {
 		fake.successesSinceLastFailureReturnsOnCall = make(map[int]struct {
 			result1 int
+			result2 time.Time
 		})
 	}
 	fake.successesSinceLastFailureReturnsOnCall[i] = struct {
 		result1 int
-	}{result1}
-}
-
-func (fake *FakeResultSet) LastFailure() time.Time {
-	fake.lastFailureMutex.Lock()
-	ret, specificReturn := fake.lastFailureReturnsOnCall[len(fake.lastFailureArgsForCall)]
-	fake.lastFailureArgsForCall = append(fake.lastFailureArgsForCall, struct{}{})
-	fake.recordInvocation("LastFailure", []interface{}{})
-	fake.lastFailureMutex.Unlock()
-	if fake.LastFailureStub != nil {
-		return fake.LastFailureStub()
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	return fake.lastFailureReturns.result1
-}
-
-func (fake *FakeResultSet) LastFailureCallCount() int {
-	fake.lastFailureMutex.RLock()
-	defer fake.lastFailureMutex.RUnlock()
-	return len(fake.lastFailureArgsForCall)
-}
-
-func (fake *FakeResultSet) LastFailureReturns(result1 time.Time) {
-	fake.LastFailureStub = nil
-	fake.lastFailureReturns = struct {
-		result1 time.Time
-	}{result1}
-}
-
-func (fake *FakeResultSet) LastFailureReturnsOnCall(i int, result1 time.Time) {
-	fake.LastFailureStub = nil
-	if fake.lastFailureReturnsOnCall == nil {
-		fake.lastFailureReturnsOnCall = make(map[int]struct {
-			result1 time.Time
-		})
-	}
-	fake.lastFailureReturnsOnCall[i] = struct {
-		result1 time.Time
-	}{result1}
+		result2 time.Time
+	}{result1, result2}
 }
 
 func (fake *FakeResultSet) Successful() int {
@@ -305,8 +261,6 @@ func (fake *FakeResultSet) Invocations() map[string][][]interface{} {
 	defer fake.recordFailureMutex.RUnlock()
 	fake.successesSinceLastFailureMutex.RLock()
 	defer fake.successesSinceLastFailureMutex.RUnlock()
-	fake.lastFailureMutex.RLock()
-	defer fake.lastFailureMutex.RUnlock()
 	fake.successfulMutex.RLock()
 	defer fake.successfulMutex.RUnlock()
 	fake.failedMutex.RLock()

@@ -10,8 +10,7 @@ type ResultSet interface {
 	RecordSuccess()
 	RecordFailure()
 
-	SuccessesSinceLastFailure() int
-	LastFailure() time.Time
+	SuccessesSinceLastFailure() (int, time.Time)
 
 	Successful() int
 	Failed() int
@@ -47,17 +46,17 @@ func (rs *resultSet) Total() int {
 	return len(rs.successful) + len(rs.failed)
 }
 
-func (rs *resultSet) SuccessesSinceLastFailure() int {
+func (rs *resultSet) SuccessesSinceLastFailure() (int, time.Time) {
+	if len(rs.successful) == 0 || len(rs.failed) == 0 {
+		return 0, time.Time{}
+	}
+
 	lf := rs.failed[len(rs.failed)-1]
 	s := sort.Search(len(rs.successful), func(i int) bool { return rs.successful[i].After(lf) })
 
 	if s < len(rs.failed) {
-		return len(rs.successful) - s
+		return len(rs.successful) - s, lf
 	}
 
-	return 0
-}
-
-func (rs *resultSet) LastFailure() time.Time {
-	return rs.failed[len(rs.failed)-1]
+	return 0, time.Time{}
 }

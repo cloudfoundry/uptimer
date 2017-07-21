@@ -92,6 +92,27 @@ var _ = Describe("Periodic", func() {
 
 			Expect(logBuf.String()).To(Equal("measurement failed!\n"))
 		})
+
+		It("logs how many successes since the last failure", func() {
+			lastFailure := mockClock.Now().UTC()
+			fakeBaseMeasurement.PerformMeasurementReturns("measurement failed!", false)
+			fakeResultSet.SuccessesSinceLastFailureReturns(3, lastFailure)
+
+			p.Start()
+			mockClock.Add(freq - time.Nanosecond)
+
+			Expect(logBuf.String()).To(Equal(fmt.Sprintf("measurement failed!\n3 successes since last failure (at %s)\n", lastFailure.Format("2006/01/02 15:04:05"))))
+		})
+
+		It("does not logs how many successes since the last failure if there have been none", func() {
+			fakeBaseMeasurement.PerformMeasurementReturns("measurement failed!", false)
+			fakeResultSet.SuccessesSinceLastFailureReturns(0, time.Time{})
+
+			p.Start()
+			mockClock.Add(freq - time.Nanosecond)
+
+			Expect(logBuf.String()).To(Equal("measurement failed!\n"))
+		})
 	})
 
 	Describe("Stop", func() {
@@ -134,6 +155,23 @@ var _ = Describe("Periodic", func() {
 			fakeResultSet.TotalReturns(7)
 
 			Expect(p.Summary()).To(Equal(fmt.Sprintf("FAILED(%s): %d of %d attempts to %s failed", fakeBaseMeasurement.Name(), 3, 7, fakeBaseMeasurement.SummaryPhrase())))
+		})
+
+		It("returns a failed summary with additional last x succeeded if there are successes since the last failure", func() {
+			fakeBaseMeasurement.FailedReturns(true)
+			fakeResultSet.FailedReturns(3)
+			fakeResultSet.TotalReturns(7)
+			fakeResultSet.SuccessesSinceLastFailureReturns(2, time.Time{})
+
+			Expect(p.Summary()).To(Equal(
+				fmt.Sprintf(
+					"FAILED(%s): %d of %d attempts to %s failed (the last %d succeeded)",
+					fakeBaseMeasurement.Name(),
+					3,
+					7,
+					fakeBaseMeasurement.SummaryPhrase(),
+					2,
+				)))
 		})
 	})
 })

@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = FDescribe("ResultSet", func() {
+var _ = Describe("ResultSet", func() {
 	var (
 		rs ResultSet
 	)
@@ -27,22 +27,6 @@ var _ = FDescribe("ResultSet", func() {
 		Expect(rs.Total()).To(Equal(2))
 	})
 
-	Describe("LastFailure", func() {
-		It("records the time of the last failure", func() {
-			rs.RecordFailure()
-			time.Sleep(10 * time.Millisecond)
-
-			now := time.Now().UTC()
-			rs.RecordFailure()
-			time.Sleep(10 * time.Millisecond)
-
-			rs.RecordSuccess()
-			rs.RecordSuccess()
-
-			Expect(rs.LastFailure()).To(BeTemporally("~", now))
-		})
-	})
-
 	Describe("SuccessesSinceLastFailure", func() {
 		It("returns the number of successes since the last failure", func() {
 			rs.RecordFailure()
@@ -51,10 +35,51 @@ var _ = FDescribe("ResultSet", func() {
 			rs.RecordSuccess()
 			rs.RecordSuccess()
 
-			Expect(rs.SuccessesSinceLastFailure()).To(Equal(3))
+			s, _ := rs.SuccessesSinceLastFailure()
+
+			Expect(s).To(Equal(3))
 		})
 
-		It("returns 0 if there have been no successes since the last failure", func() {
+		It("records the time of the last failure", func() {
+			rs.RecordFailure()
+			time.Sleep(10 * time.Millisecond)
+
+			lastFailure := time.Now().UTC()
+			rs.RecordFailure()
+			time.Sleep(10 * time.Millisecond)
+
+			rs.RecordSuccess()
+			rs.RecordSuccess()
+
+			s, t := rs.SuccessesSinceLastFailure()
+
+			Expect(s).To(Equal(2))
+			Expect(t).To(BeTemporally("~", lastFailure))
+		})
+
+		It("returns 0 and a base time value when there have been no successes", func() {
+			rs.RecordFailure()
+			rs.RecordFailure()
+			rs.RecordFailure()
+
+			s, t := rs.SuccessesSinceLastFailure()
+
+			Expect(s).To(BeZero())
+			Expect(t).To(Equal(time.Time{}))
+		})
+
+		It("returns 0 and a base time value when there have been no failures", func() {
+			rs.RecordSuccess()
+			rs.RecordSuccess()
+			rs.RecordSuccess()
+
+			s, t := rs.SuccessesSinceLastFailure()
+
+			Expect(s).To(BeZero())
+			Expect(t).To(Equal(time.Time{}))
+		})
+
+		It("returns 0 and a base time value if there have been no successes since the last failure", func() {
 			rs.RecordFailure()
 
 			rs.RecordSuccess()
@@ -63,7 +88,10 @@ var _ = FDescribe("ResultSet", func() {
 
 			rs.RecordFailure()
 
-			Expect(rs.SuccessesSinceLastFailure()).To(BeZero())
+			s, t := rs.SuccessesSinceLastFailure()
+
+			Expect(s).To(BeZero())
+			Expect(t).To(Equal(time.Time{}))
 		})
 	})
 })
