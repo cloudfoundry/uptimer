@@ -3,6 +3,7 @@ package measurementfakes
 
 import (
 	"sync"
+	"time"
 
 	"github.com/cloudfoundry/uptimer/measurement"
 )
@@ -14,10 +15,19 @@ type FakeResultSet struct {
 	RecordFailureStub        func()
 	recordFailureMutex       sync.RWMutex
 	recordFailureArgsForCall []struct{}
-	SuccessfulStub           func() int
-	successfulMutex          sync.RWMutex
-	successfulArgsForCall    []struct{}
-	successfulReturns        struct {
+	LastFailureStub          func() time.Time
+	lastFailureMutex         sync.RWMutex
+	lastFailureArgsForCall   []struct{}
+	lastFailureReturns       struct {
+		result1 time.Time
+	}
+	lastFailureReturnsOnCall map[int]struct {
+		result1 time.Time
+	}
+	SuccessfulStub        func() int
+	successfulMutex       sync.RWMutex
+	successfulArgsForCall []struct{}
+	successfulReturns     struct {
 		result1 int
 	}
 	successfulReturnsOnCall map[int]struct {
@@ -75,6 +85,46 @@ func (fake *FakeResultSet) RecordFailureCallCount() int {
 	fake.recordFailureMutex.RLock()
 	defer fake.recordFailureMutex.RUnlock()
 	return len(fake.recordFailureArgsForCall)
+}
+
+func (fake *FakeResultSet) LastFailure() time.Time {
+	fake.lastFailureMutex.Lock()
+	ret, specificReturn := fake.lastFailureReturnsOnCall[len(fake.lastFailureArgsForCall)]
+	fake.lastFailureArgsForCall = append(fake.lastFailureArgsForCall, struct{}{})
+	fake.recordInvocation("LastFailure", []interface{}{})
+	fake.lastFailureMutex.Unlock()
+	if fake.LastFailureStub != nil {
+		return fake.LastFailureStub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.lastFailureReturns.result1
+}
+
+func (fake *FakeResultSet) LastFailureCallCount() int {
+	fake.lastFailureMutex.RLock()
+	defer fake.lastFailureMutex.RUnlock()
+	return len(fake.lastFailureArgsForCall)
+}
+
+func (fake *FakeResultSet) LastFailureReturns(result1 time.Time) {
+	fake.LastFailureStub = nil
+	fake.lastFailureReturns = struct {
+		result1 time.Time
+	}{result1}
+}
+
+func (fake *FakeResultSet) LastFailureReturnsOnCall(i int, result1 time.Time) {
+	fake.LastFailureStub = nil
+	if fake.lastFailureReturnsOnCall == nil {
+		fake.lastFailureReturnsOnCall = make(map[int]struct {
+			result1 time.Time
+		})
+	}
+	fake.lastFailureReturnsOnCall[i] = struct {
+		result1 time.Time
+	}{result1}
 }
 
 func (fake *FakeResultSet) Successful() int {
@@ -204,6 +254,8 @@ func (fake *FakeResultSet) Invocations() map[string][][]interface{} {
 	defer fake.recordSuccessMutex.RUnlock()
 	fake.recordFailureMutex.RLock()
 	defer fake.recordFailureMutex.RUnlock()
+	fake.lastFailureMutex.RLock()
+	defer fake.lastFailureMutex.RUnlock()
 	fake.successfulMutex.RLock()
 	defer fake.successfulMutex.RUnlock()
 	fake.failedMutex.RLock()
