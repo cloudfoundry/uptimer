@@ -24,7 +24,10 @@ func (a *availability) PerformMeasurement() (string, string, string, bool) {
 	res, err := a.client.Get(a.url)
 	if err != nil {
 		return err.Error(), "", "", false
-	} else if res.StatusCode != http.StatusOK {
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
 		return fmt.Sprintf("response had status %d", res.StatusCode), "", "", false
 	}
 

@@ -8,6 +8,9 @@ import (
 	. "github.com/cloudfoundry/uptimer/measurement"
 	"github.com/cloudfoundry/uptimer/measurement/measurementfakes"
 
+	"bytes"
+	"io/ioutil"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -27,8 +30,14 @@ var _ = Describe("Availability", func() {
 	BeforeEach(func() {
 		url = "https://example.com/foo"
 		fakeRoundTripper = &FakeRoundTripper{}
-		successResponse = &http.Response{StatusCode: 200}
-		failResponse = &http.Response{StatusCode: 400}
+		successResponse = &http.Response{
+			StatusCode: 200,
+			Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+		}
+		failResponse = &http.Response{
+			StatusCode: 400,
+			Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+		}
 		fakeRoundTripper.RoundTripReturns(successResponse, nil)
 		client = &http.Client{
 			Transport: fakeRoundTripper,
@@ -90,6 +99,45 @@ var _ = Describe("Availability", func() {
 
 			Expect(msg).To(Equal("Get https://example.com/foo: error"))
 		})
+
+		It("closes the body of the response when there is a 200 response", func() {
+			fakeRC := &fakeReadCloser{}
+			fakeRoundTripper.RoundTripReturns(
+				&http.Response{
+					StatusCode: 200,
+					Body:       fakeRC,
+				},
+				nil,
+			)
+
+			am.PerformMeasurement()
+
+			Expect(fakeRC.Closed).To(BeTrue())
+		})
+
+		It("closes the body of the response when there is a non-200 response", func() {
+			fakeRC := &fakeReadCloser{}
+			fakeRoundTripper.RoundTripReturns(
+				&http.Response{
+					StatusCode: 400,
+					Body:       fakeRC,
+				},
+				nil,
+			)
+
+			am.PerformMeasurement()
+
+			Expect(fakeRC.Closed).To(BeTrue())
+		})
+
+		It("does not close the body of the response when there is an error", func() {
+			fakeRoundTripper.RoundTripReturns(
+				nil,
+				fmt.Errorf("foobar"),
+			)
+
+			Expect(func() { am.PerformMeasurement() }).NotTo(Panic())
+		})
 	})
 
 	Describe("Failed", func() {
@@ -110,6 +158,20 @@ var _ = Describe("Availability", func() {
 		})
 	})
 })
+
+type fakeReadCloser struct {
+	Closed bool
+}
+
+func (rc *fakeReadCloser) Read(p []byte) (n int, err error) {
+	return 0, nil
+}
+
+func (rc *fakeReadCloser) Close() error {
+	rc.Closed = true
+
+	return nil
+}
 
 type FakeRoundTripper struct {
 	RoundTripStub        func(*http.Request) (*http.Response, error)
