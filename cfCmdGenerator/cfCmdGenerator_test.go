@@ -170,7 +170,8 @@ var _ = Describe("CfCmdGenerator", func() {
 
 	Describe("StreamLogs", func() {
 		It("Generates the correct command", func() {
-			ctx, _ := context.WithTimeout(context.Background(), time.Second)
+			ctx, cancelFunc := context.WithTimeout(context.Background(), time.Second)
+			defer cancelFunc()
 			expectedCmd := exec.CommandContext(ctx, "cf", "logs", "appName")
 			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
 

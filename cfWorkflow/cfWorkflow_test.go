@@ -127,7 +127,8 @@ var _ = Describe("CfWorkflow", func() {
 
 	Describe("StreamLogs", func() {
 		It("returns a set of commands to stream logs for an app", func() {
-			ctx, _ := context.WithTimeout(context.Background(), time.Second)
+			ctx, cancelFunc := context.WithTimeout(context.Background(), time.Second)
+			defer cancelFunc()
 			cmds := cw.StreamLogs(ctx)
 
 			Expect(cmds).To(Equal(

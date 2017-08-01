@@ -136,7 +136,8 @@ var _ = Describe("CmdRunner", func() {
 		})
 
 		It("doesn't return an error when the context times out", func() {
-			ctx, _ := context.WithTimeout(context.Background(), time.Nanosecond)
+			ctx, cancelFunc := context.WithTimeout(context.Background(), time.Nanosecond)
+			defer cancelFunc()
 			time.Sleep(time.Millisecond)
 			fakeCmdStartWaiter.WaitReturns(context.DeadlineExceeded)
 

@@ -3,7 +3,6 @@ package measurement_test
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os/exec"
 
 	"github.com/cloudfoundry/uptimer/appLogValidator/appLogValidatorfakes"
@@ -19,8 +18,6 @@ import (
 var _ = Describe("RecentLogs", func() {
 	var (
 		commands             []cmdStartWaiter.CmdStartWaiter
-		logger               *log.Logger
-		logBuf               *bytes.Buffer
 		fakeResultSet        *measurementfakes.FakeResultSet
 		fakeAppLogValidator  *appLogValidatorfakes.FakeAppLogValidator
 		fakeCmdGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
@@ -32,7 +29,6 @@ var _ = Describe("RecentLogs", func() {
 	)
 
 	BeforeEach(func() {
-		logBuf = bytes.NewBuffer([]byte{})
 		outBuf = bytes.NewBuffer([]byte{})
 		errBuf = bytes.NewBuffer([]byte{})
 
@@ -43,7 +39,6 @@ var _ = Describe("RecentLogs", func() {
 		fakeCmdGeneratorFunc = func() []cmdStartWaiter.CmdStartWaiter {
 			return commands
 		}
-		logger = log.New(logBuf, "", 0)
 		fakeResultSet = &measurementfakes.FakeResultSet{}
 
 		rlm = NewRecentLogs(fakeCmdGeneratorFunc, fakeCommandRunner, outBuf, errBuf, fakeAppLogValidator)
