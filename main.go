@@ -45,7 +45,7 @@ func main() {
 	}
 	logger.Println("Finished building included app")
 
-	baseTmpDir, pushTmpDir, err := createTmpDirs()
+	orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, err := createTmpDirs()
 	if err != nil {
 		logger.Println("Failed to create temp dir:", err)
 		os.Exit(1)
@@ -64,10 +64,17 @@ func main() {
 	}
 	logger.Println("Finished setting up push workflow")
 
-	orcCmdGenerator := cfCmdGenerator.New(baseTmpDir)
+	orcCmdGenerator := cfCmdGenerator.New(orcTmpDir)
 	orcWorkflow := createWorkflow(cfg.CF, appPath)
 	stdOutAndErrRunner := cmdRunner.New(os.Stdout, os.Stderr, io.Copy)
-	measurements := createMeasurements(logger, orcWorkflow, pushWorkflow, orcCmdGenerator, pushCmdGenerator)
+	measurements := createMeasurements(
+		logger,
+		orcWorkflow,
+		pushWorkflow,
+		cfCmdGenerator.New(recentLogsTmpDir),
+		cfCmdGenerator.New(streamingLogsTmpDir),
+		pushCmdGenerator,
+	)
 
 	orc := orchestrator.New(cfg.While, logger, orcWorkflow, stdOutAndErrRunner, measurements)
 
@@ -101,17 +108,25 @@ func loadConfig() (*config.Config, error) {
 	return cfg, nil
 }
 
-func createTmpDirs() (string, string, error) {
-	baseTmpDir, err := ioutil.TempDir("", "uptimer")
+func createTmpDirs() (string, string, string, string, error) {
+	orcTmpDir, err := ioutil.TempDir("", "uptimer")
 	if err != nil {
-		return "", "", err
+		return "", "", "", "", err
+	}
+	recentLogsTmpDir, err := ioutil.TempDir("", "uptimer")
+	if err != nil {
+		return "", "", "", "", err
+	}
+	streamingLogsTmpDir, err := ioutil.TempDir("", "uptimer")
+	if err != nil {
+		return "", "", "", "", err
 	}
 	pushTmpDir, err := ioutil.TempDir("", "uptimer")
 	if err != nil {
-		return "", "", err
+		return "", "", "", "", err
 	}
 
-	return baseTmpDir, pushTmpDir, nil
+	return orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, nil
 }
 
 func compileIncludedApp() (string, error) {
@@ -136,11 +151,11 @@ func createWorkflow(cfc *config.CfConfig, appPath string) cfWorkflow.CfWorkflow 
 	)
 }
 
-func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow.CfWorkflow, orcCmdGenerator, pushCmdGenerator cfCmdGenerator.CfCmdGenerator) []measurement.Measurement {
+func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow.CfWorkflow, recentLogsCmdGenerator, streamingLogsCmdGenerator, pushCmdGenerator cfCmdGenerator.CfCmdGenerator) []measurement.Measurement {
 	recentLogsBufferRunner, recentLogsRunnerOutBuf, recentLogsRunnerErrBuf := createBufferedRunner()
 	recentLogsMeasurement := measurement.NewRecentLogs(
 		func() []cmdStartWaiter.CmdStartWaiter {
-			return orcWorkflow.RecentLogs(orcCmdGenerator)
+			return orcWorkflow.RecentLogs(recentLogsCmdGenerator)
 		},
 		recentLogsBufferRunner,
 		recentLogsRunnerOutBuf,
@@ -152,7 +167,7 @@ func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow
 	streamLogsMeasurement := measurement.NewStreamLogs(
 		func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter) {
 			ctx, cancelFunc := context.WithTimeout(context.Background(), 15*time.Second)
-			return ctx, cancelFunc, orcWorkflow.StreamLogs(ctx, orcCmdGenerator)
+			return ctx, cancelFunc, orcWorkflow.StreamLogs(ctx, streamingLogsCmdGenerator)
 		},
 		streamLogsBufferRunner,
 		streamLogsRunnerOutBuf,
