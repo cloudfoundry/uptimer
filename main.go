@@ -37,18 +37,20 @@ func main() {
 		os.Exit(1)
 	}
 
+	performMeasurements := true
+
 	logger.Println("Building included app")
 	appPath, err := compileIncludedApp()
 	if err != nil {
 		logger.Println("Failed to build included app: ", err)
-		os.Exit(1)
+		performMeasurements = false
 	}
 	logger.Println("Finished building included app")
 
 	orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, err := createTmpDirs()
 	if err != nil {
 		logger.Println("Failed to create temp dir:", err)
-		os.Exit(1)
+		performMeasurements = false
 	}
 
 	logger.Println("Setting up push workflow")
@@ -57,12 +59,10 @@ func main() {
 	discardRunner := cmdRunner.New(ioutil.Discard, ioutil.Discard, io.Copy)
 	if err := discardRunner.RunInSequence(pushWorkflow.Setup(pushCmdGenerator)...); err != nil {
 		logger.Println("Failed push workflow setup: ", err)
-		if err := discardRunner.RunInSequence(pushWorkflow.TearDown(pushCmdGenerator)...); err != nil {
-			logger.Println("Failed push workflow teardown: ", err)
-		}
-		os.Exit(1)
+		performMeasurements = false
+	} else {
+		logger.Println("Finished setting up push workflow")
 	}
-	logger.Println("Finished setting up push workflow")
 
 	orcCmdGenerator := cfCmdGenerator.New(orcTmpDir)
 	orcWorkflow := createWorkflow(cfg.CF, appPath)
@@ -81,13 +81,14 @@ func main() {
 	logger.Println("Setting up")
 	if err := orc.Setup(orcCmdGenerator); err != nil {
 		logger.Println("Failed setup:", err)
-		tearDownAndExit(orc, orcCmdGenerator, logger, pushWorkflow, pushCmdGenerator, stdOutAndErrRunner, 1)
+		performMeasurements = false
+	} else {
+		logger.Println("Finished setup")
 	}
 
-	exitCode, err := orc.Run(true)
+	exitCode, err := orc.Run(performMeasurements)
 	if err != nil {
 		logger.Println("Failed run:", err)
-		tearDownAndExit(orc, orcCmdGenerator, logger, pushWorkflow, pushCmdGenerator, stdOutAndErrRunner, exitCode)
 	}
 
 	tearDownAndExit(orc, orcCmdGenerator, logger, pushWorkflow, pushCmdGenerator, stdOutAndErrRunner, exitCode)
@@ -237,7 +238,8 @@ func createBufferedRunner() (cmdRunner.CmdRunner, *bytes.Buffer, *bytes.Buffer) 
 func tearDownAndExit(orc orchestrator.Orchestrator, orcCmdGenerator cfCmdGenerator.CfCmdGenerator, logger *log.Logger, pushWorkflow cfWorkflow.CfWorkflow, pushCmdGenerator cfCmdGenerator.CfCmdGenerator, runner cmdRunner.CmdRunner, exitCode int) {
 	logger.Println("Tearing down")
 	if err := orc.TearDown(orcCmdGenerator); err != nil {
-		logger.Fatalln("Failed main teardown:", err)
+		logger.Println("Failed main teardown:", err)
+		exitCode = 1
 	}
 	if err := runner.RunInSequence(pushWorkflow.TearDown(pushCmdGenerator)...); err != nil {
 		logger.Println("Failed push workflow teardown: ", err)
