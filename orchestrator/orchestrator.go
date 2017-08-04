@@ -15,7 +15,7 @@ import (
 //go:generate counterfeiter . Orchestrator
 type Orchestrator interface {
 	Setup(cfCmdGenerator.CfCmdGenerator) error
-	Run() (int, error)
+	Run(bool) (int, error)
 	TearDown(cfCmdGenerator.CfCmdGenerator) error
 }
 
@@ -41,10 +41,16 @@ func (o *orchestrator) Setup(ccg cfCmdGenerator.CfCmdGenerator) error {
 	return o.runner.RunInSequence(append(o.workflow.Setup(ccg), o.workflow.Push(ccg)...)...)
 }
 
-func (o *orchestrator) Run() (int, error) {
-	for _, m := range o.measurements {
-		o.logger.Printf("Starting measurement: %s\n", m.Name())
-		go m.Start()
+func (o *orchestrator) Run(performMeasurements bool) (int, error) {
+	if !performMeasurements {
+		o.logger.Println("*****NOT PERFORMING ANY MEASUREMENTS*****")
+	}
+
+	if performMeasurements {
+		for _, m := range o.measurements {
+			o.logger.Printf("Starting measurement: %s\n", m.Name())
+			go m.Start()
+		}
 	}
 
 	var exitCode int
@@ -53,21 +59,23 @@ func (o *orchestrator) Run() (int, error) {
 		return exitCode, err
 	}
 
-	for _, m := range o.measurements {
-		o.logger.Printf("Stopping measurement: %s\n", m.Name())
-		m.Stop()
-	}
-
-	o.logger.Println("Measurement summaries:")
-	for _, m := range o.measurements {
-		if m.Failed() {
-			exitCode = 1
-			o.logger.Printf("\x1b[31m%s\x1b[0m\n", m.Summary())
-
-		} else {
-			o.logger.Printf("\x1b[32m%s\x1b[0m\n", m.Summary())
+	if performMeasurements {
+		for _, m := range o.measurements {
+			o.logger.Printf("Stopping measurement: %s\n", m.Name())
+			m.Stop()
 		}
 
+		o.logger.Println("Measurement summaries:")
+		for _, m := range o.measurements {
+			if m.Failed() {
+				exitCode = 1
+				o.logger.Printf("\x1b[31m%s\x1b[0m\n", m.Summary())
+
+			} else {
+				o.logger.Printf("\x1b[32m%s\x1b[0m\n", m.Summary())
+			}
+
+		}
 	}
 
 	return exitCode, nil

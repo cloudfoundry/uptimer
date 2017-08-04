@@ -84,7 +84,7 @@ func main() {
 		tearDownAndExit(orc, orcCmdGenerator, logger, pushWorkflow, pushCmdGenerator, stdOutAndErrRunner, 1)
 	}
 
-	exitCode, err := orc.Run()
+	exitCode, err := orc.Run(true)
 	if err != nil {
 		logger.Println("Failed run:", err)
 		tearDownAndExit(orc, orcCmdGenerator, logger, pushWorkflow, pushCmdGenerator, stdOutAndErrRunner, exitCode)

@@ -100,7 +100,7 @@ var _ = Describe("Orchestrator", func() {
 	Describe("Run", func() {
 		Context("when all the while commands pass", func() {
 			It("runs all the given while commands", func() {
-				_, err := orc.Run()
+				_, err := orc.Run(true)
 
 				Expect(err).NotTo(HaveOccurred())
 				Expect(fakeRunner.RunCallCount()).To(Equal(2))
@@ -113,7 +113,7 @@ var _ = Describe("Orchestrator", func() {
 			It("returns an error with exit code 64 and doesn't run the second command", func() {
 				fakeRunner.RunReturns(fmt.Errorf("oh boy"))
 
-				exitCode, err := orc.Run()
+				exitCode, err := orc.Run(true)
 
 				Expect(fakeRunner.RunArgsForCall(0)).To(Equal(exec.Command("sleep", "10")))
 				Expect(fakeRunner.RunCallCount()).To(Equal(1))
@@ -126,7 +126,7 @@ var _ = Describe("Orchestrator", func() {
 			It("returns an error with exit code 64", func() {
 				fakeRunner.RunReturnsOnCall(1, fmt.Errorf("oh boy"))
 
-				exitCode, err := orc.Run()
+				exitCode, err := orc.Run(true)
 
 				Expect(fakeRunner.RunArgsForCall(0)).To(Equal(exec.Command("sleep", "10")))
 				Expect(fakeRunner.RunArgsForCall(1)).To(Equal(exec.Command("sleep", "15")))
@@ -136,60 +136,142 @@ var _ = Describe("Orchestrator", func() {
 			})
 		})
 
-		It("prints a list of all measurements starting", func() {
-			orc.Run()
+		Context("When performMeasurements is false", func() {
+			var (
+				performMeasurements bool
+			)
 
-			Expect(logBuf.String()).To(ContainSubstring("Starting measurement: name1"))
-			Expect(logBuf.String()).To(ContainSubstring("Starting measurement: name2"))
+			BeforeEach(func() {
+				performMeasurements = false
+			})
+
+			It("Prints a message about not running measurements", func() {
+				orc.Run(performMeasurements)
+
+				Expect(logBuf.String()).To(ContainSubstring("*****NOT PERFORMING ANY MEASUREMENTS*****"))
+			})
+
+			It("does not print a list of all measurements starting", func() {
+				orc.Run(performMeasurements)
+
+				Expect(logBuf.String()).NotTo(ContainSubstring("Starting measurement: name1"))
+				Expect(logBuf.String()).NotTo(ContainSubstring("Starting measurement: name2"))
+			})
+
+			It("starts no measurements", func() {
+				orc.Run(performMeasurements)
+
+				Eventually(fakeMeasurement1.StartCallCount, 3*time.Second).Should(Equal(0))
+				Eventually(fakeMeasurement2.StartCallCount, 3*time.Second).Should(Equal(0))
+			})
+
+			It("stops no measurements", func() {
+				orc.Run(performMeasurements)
+
+				Expect(fakeMeasurement1.StopCallCount()).To(Equal(0))
+				Expect(fakeMeasurement2.StopCallCount()).To(Equal(0))
+			})
+
+			It("does not print a list of all measurements stopping", func() {
+				orc.Run(performMeasurements)
+
+				Expect(logBuf.String()).NotTo(ContainSubstring("Stopping measurement: name1"))
+				Expect(logBuf.String()).NotTo(ContainSubstring("Stopping measurement: name2"))
+			})
+
+			It("does not gather the sumaries and print them all with a header", func() {
+				fakeMeasurement1.SummaryReturns("summary1")
+				fakeMeasurement1.FailedReturns(true)
+				fakeMeasurement2.SummaryReturns("summary2")
+
+				orc.Run(performMeasurements)
+
+				Expect(fakeMeasurement1.SummaryCallCount()).To(Equal(0))
+				Expect(fakeMeasurement2.SummaryCallCount()).To(Equal(0))
+				Expect(logBuf.String()).NotTo(ContainSubstring("Measurement summaries:"))
+				Expect(logBuf.String()).NotTo(ContainSubstring("\x1b[31msummary1\x1b[0m"))
+				Expect(logBuf.String()).NotTo(ContainSubstring("\x1b[32msummary2\x1b[0m"))
+			})
+
+			It("returns an exit code of 0 when the while commands succeed", func() {
+				ec, _ := orc.Run(performMeasurements)
+
+				Expect(ec).To(Equal(0))
+			})
+
+			It("returns the exit code of 64 when while commands fail", func() {
+				fakeRunner.RunReturns(fmt.Errorf("oh boy"))
+
+				ec, _ := orc.Run(performMeasurements)
+
+				Expect(ec).To(Equal(64))
+			})
 		})
 
-		It("starts all the measurements once", func() {
-			orc.Run()
+		Context("When peformMeasurements is true", func() {
+			var (
+				performMeasurements bool
+			)
 
-			Eventually(fakeMeasurement1.StartCallCount, 3*time.Second).Should(Equal(1))
-			Eventually(fakeMeasurement2.StartCallCount, 3*time.Second).Should(Equal(1))
-		})
+			BeforeEach(func() {
+				performMeasurements = true
+			})
 
-		It("stops all the measurements once", func() {
-			orc.Run()
+			It("prints a list of all measurements starting", func() {
+				orc.Run(performMeasurements)
 
-			Expect(fakeMeasurement1.StopCallCount()).To(Equal(1))
-			Expect(fakeMeasurement2.StopCallCount()).To(Equal(1))
-		})
+				Expect(logBuf.String()).To(ContainSubstring("Starting measurement: name1"))
+				Expect(logBuf.String()).To(ContainSubstring("Starting measurement: name2"))
+			})
 
-		It("prints a list of all measurements stopping", func() {
-			orc.Run()
+			It("starts all the measurements once", func() {
+				orc.Run(performMeasurements)
 
-			Expect(logBuf.String()).To(ContainSubstring("Stopping measurement: name1"))
-			Expect(logBuf.String()).To(ContainSubstring("Stopping measurement: name2"))
-		})
+				Eventually(fakeMeasurement1.StartCallCount, 3*time.Second).Should(Equal(1))
+				Eventually(fakeMeasurement2.StartCallCount, 3*time.Second).Should(Equal(1))
+			})
 
-		It("gathers the sumaries and prints them all with a header", func() {
-			fakeMeasurement1.SummaryReturns("summary1")
-			fakeMeasurement1.FailedReturns(true)
-			fakeMeasurement2.SummaryReturns("summary2")
+			It("stops all the measurements once", func() {
+				orc.Run(performMeasurements)
 
-			orc.Run()
+				Expect(fakeMeasurement1.StopCallCount()).To(Equal(1))
+				Expect(fakeMeasurement2.StopCallCount()).To(Equal(1))
+			})
 
-			Expect(fakeMeasurement1.SummaryCallCount()).To(Equal(1))
-			Expect(fakeMeasurement2.SummaryCallCount()).To(Equal(1))
-			Expect(logBuf.String()).To(ContainSubstring("Measurement summaries:"))
-			Expect(logBuf.String()).To(ContainSubstring("\x1b[31msummary1\x1b[0m"))
-			Expect(logBuf.String()).To(ContainSubstring("\x1b[32msummary2\x1b[0m"))
-		})
+			It("prints a list of all measurements stopping", func() {
+				orc.Run(performMeasurements)
 
-		It("returns an exit code of 0 when all measurements succeed", func() {
-			ec, _ := orc.Run()
+				Expect(logBuf.String()).To(ContainSubstring("Stopping measurement: name1"))
+				Expect(logBuf.String()).To(ContainSubstring("Stopping measurement: name2"))
+			})
 
-			Expect(ec).To(Equal(0))
-		})
+			It("gathers the sumaries and prints them all with a header", func() {
+				fakeMeasurement1.SummaryReturns("summary1")
+				fakeMeasurement1.FailedReturns(true)
+				fakeMeasurement2.SummaryReturns("summary2")
 
-		It("returns an exit code of 1 when any measurement fails", func() {
-			fakeMeasurement1.FailedReturns(true)
+				orc.Run(performMeasurements)
 
-			ec, _ := orc.Run()
+				Expect(fakeMeasurement1.SummaryCallCount()).To(Equal(1))
+				Expect(fakeMeasurement2.SummaryCallCount()).To(Equal(1))
+				Expect(logBuf.String()).To(ContainSubstring("Measurement summaries:"))
+				Expect(logBuf.String()).To(ContainSubstring("\x1b[31msummary1\x1b[0m"))
+				Expect(logBuf.String()).To(ContainSubstring("\x1b[32msummary2\x1b[0m"))
+			})
 
-			Expect(ec).To(Equal(1))
+			It("returns an exit code of 0 when all measurements succeed", func() {
+				ec, _ := orc.Run(performMeasurements)
+
+				Expect(ec).To(Equal(0))
+			})
+
+			It("returns an exit code of 1 when any measurement fails", func() {
+				fakeMeasurement1.FailedReturns(true)
+
+				ec, _ := orc.Run(performMeasurements)
+
+				Expect(ec).To(Equal(1))
+			})
 		})
 	})
 
