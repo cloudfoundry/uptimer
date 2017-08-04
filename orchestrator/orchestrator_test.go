@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"time"
 
+	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
 	"github.com/cloudfoundry/uptimer/cfWorkflow/cfWorkflowfakes"
 	"github.com/cloudfoundry/uptimer/cmdRunner/cmdRunnerfakes"
 	"github.com/cloudfoundry/uptimer/config"
@@ -29,6 +30,7 @@ var _ = Describe("Orchestrator", func() {
 		fakeRunner       *cmdRunnerfakes.FakeCmdRunner
 		fakeMeasurement1 *measurementfakes.FakeMeasurement
 		fakeMeasurement2 *measurementfakes.FakeMeasurement
+		ccg              cfCmdGenerator.CfCmdGenerator
 
 		orc Orchestrator
 	)
@@ -50,6 +52,7 @@ var _ = Describe("Orchestrator", func() {
 		fakeMeasurement1.NameReturns("name1")
 		fakeMeasurement2 = &measurementfakes.FakeMeasurement{}
 		fakeMeasurement2.NameReturns("name2")
+		ccg = cfCmdGenerator.New("/cfhome")
 
 		orc = New([]*config.CommandConfig{fakeCommand1, fakeCommand2}, logger, fakeWorkflow, fakeRunner, []measurement.Measurement{fakeMeasurement1, fakeMeasurement2})
 	})
@@ -68,11 +71,13 @@ var _ = Describe("Orchestrator", func() {
 				},
 			)
 
-			err := orc.Setup()
+			err := orc.Setup(ccg)
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(fakeWorkflow.SetupCallCount()).To(Equal(1))
+			Expect(fakeWorkflow.SetupArgsForCall(0)).To(Equal(ccg))
 			Expect(fakeWorkflow.PushCallCount()).To(Equal(1))
+			Expect(fakeWorkflow.PushArgsForCall(0)).To(Equal(ccg))
 			Expect(fakeRunner.RunInSequenceCallCount()).To(Equal(1))
 			Expect(fakeRunner.RunInSequenceArgsForCall(0)).To(Equal(
 				[]cmdStartWaiter.CmdStartWaiter{
@@ -86,7 +91,7 @@ var _ = Describe("Orchestrator", func() {
 		It("Returns an error if runner returns an error", func() {
 			fakeRunner.RunInSequenceReturns(fmt.Errorf("uh oh"))
 
-			err := orc.Setup()
+			err := orc.Setup(ccg)
 
 			Expect(err).To(MatchError("uh oh"))
 		})
@@ -197,10 +202,11 @@ var _ = Describe("Orchestrator", func() {
 				},
 			)
 
-			err := orc.TearDown()
+			err := orc.TearDown(ccg)
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(fakeWorkflow.TearDownCallCount()).To(Equal(1))
+			Expect(fakeWorkflow.TearDownArgsForCall(0)).To(Equal(ccg))
 			Expect(fakeRunner.RunInSequenceCallCount()).To(Equal(1))
 			Expect(fakeRunner.RunInSequenceArgsForCall(0)).To(Equal(
 				[]cmdStartWaiter.CmdStartWaiter{
@@ -213,7 +219,7 @@ var _ = Describe("Orchestrator", func() {
 		It("Returns an error if runner returns an error", func() {
 			fakeRunner.RunInSequenceReturns(fmt.Errorf("uh oh"))
 
-			err := orc.TearDown()
+			err := orc.TearDown(ccg)
 
 			Expect(err).To(MatchError("uh oh"))
 		})

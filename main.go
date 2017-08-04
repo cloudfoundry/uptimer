@@ -52,36 +52,38 @@ func main() {
 	}
 
 	logger.Println("Setting up push workflow")
-	pushWorkflow := createWorkflow(cfg.CF, cfCmdGenerator.New(pushTmpDir), appPath)
+	pushCmdGenerator := cfCmdGenerator.New(pushTmpDir)
+	pushWorkflow := createWorkflow(cfg.CF, appPath)
 	discardRunner := cmdRunner.New(ioutil.Discard, ioutil.Discard, io.Copy)
-	if err := discardRunner.RunInSequence(pushWorkflow.Setup()...); err != nil {
+	if err := discardRunner.RunInSequence(pushWorkflow.Setup(pushCmdGenerator)...); err != nil {
 		logger.Println("Failed push workflow setup: ", err)
-		if err := discardRunner.RunInSequence(pushWorkflow.TearDown()...); err != nil {
+		if err := discardRunner.RunInSequence(pushWorkflow.TearDown(pushCmdGenerator)...); err != nil {
 			logger.Println("Failed push workflow teardown: ", err)
 		}
 		os.Exit(1)
 	}
 	logger.Println("Finished setting up push workflow")
 
-	orcWorkflow := createWorkflow(cfg.CF, cfCmdGenerator.New(baseTmpDir), appPath)
+	orcCmdGenerator := cfCmdGenerator.New(baseTmpDir)
+	orcWorkflow := createWorkflow(cfg.CF, appPath)
 	stdOutAndErrRunner := cmdRunner.New(os.Stdout, os.Stderr, io.Copy)
-	measurements := createMeasurements(logger, orcWorkflow, pushWorkflow)
+	measurements := createMeasurements(logger, orcWorkflow, pushWorkflow, orcCmdGenerator, pushCmdGenerator)
 
 	orc := orchestrator.New(cfg.While, logger, orcWorkflow, stdOutAndErrRunner, measurements)
 
 	logger.Println("Setting up")
-	if err := orc.Setup(); err != nil {
+	if err := orc.Setup(orcCmdGenerator); err != nil {
 		logger.Println("Failed setup:", err)
-		tearDownAndExit(orc, logger, pushWorkflow, stdOutAndErrRunner, 1)
+		tearDownAndExit(orc, orcCmdGenerator, logger, pushWorkflow, pushCmdGenerator, stdOutAndErrRunner, 1)
 	}
 
 	exitCode, err := orc.Run()
 	if err != nil {
 		logger.Println("Failed run:", err)
-		tearDownAndExit(orc, logger, pushWorkflow, stdOutAndErrRunner, exitCode)
+		tearDownAndExit(orc, orcCmdGenerator, logger, pushWorkflow, pushCmdGenerator, stdOutAndErrRunner, exitCode)
 	}
 
-	tearDownAndExit(orc, logger, pushWorkflow, stdOutAndErrRunner, exitCode)
+	tearDownAndExit(orc, orcCmdGenerator, logger, pushWorkflow, pushCmdGenerator, stdOutAndErrRunner, exitCode)
 }
 
 func loadConfig() (*config.Config, error) {
@@ -123,10 +125,9 @@ func compileIncludedApp() (string, error) {
 	return appPath, err
 }
 
-func createWorkflow(cfc *config.CfConfig, cg cfCmdGenerator.CfCmdGenerator, appPath string) cfWorkflow.CfWorkflow {
+func createWorkflow(cfc *config.CfConfig, appPath string) cfWorkflow.CfWorkflow {
 	return cfWorkflow.New(
 		cfc,
-		cg,
 		fmt.Sprintf("uptimer-org-%s", uuid.NewV4().String()),
 		fmt.Sprintf("uptimer-space-%s", uuid.NewV4().String()),
 		fmt.Sprintf("uptimer-quota-%s", uuid.NewV4().String()),
@@ -135,10 +136,12 @@ func createWorkflow(cfc *config.CfConfig, cg cfCmdGenerator.CfCmdGenerator, appP
 	)
 }
 
-func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow.CfWorkflow) []measurement.Measurement {
+func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow.CfWorkflow, orcCmdGenerator, pushCmdGenerator cfCmdGenerator.CfCmdGenerator) []measurement.Measurement {
 	recentLogsBufferRunner, recentLogsRunnerOutBuf, recentLogsRunnerErrBuf := createBufferedRunner()
 	recentLogsMeasurement := measurement.NewRecentLogs(
-		orcWorkflow.RecentLogs,
+		func() []cmdStartWaiter.CmdStartWaiter {
+			return orcWorkflow.RecentLogs(orcCmdGenerator)
+		},
 		recentLogsBufferRunner,
 		recentLogsRunnerOutBuf,
 		recentLogsRunnerErrBuf,
@@ -149,7 +152,7 @@ func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow
 	streamLogsMeasurement := measurement.NewStreamLogs(
 		func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter) {
 			ctx, cancelFunc := context.WithTimeout(context.Background(), 15*time.Second)
-			return ctx, cancelFunc, orcWorkflow.StreamLogs(ctx)
+			return ctx, cancelFunc, orcWorkflow.StreamLogs(ctx, orcCmdGenerator)
 		},
 		streamLogsBufferRunner,
 		streamLogsRunnerOutBuf,
@@ -160,7 +163,7 @@ func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow
 	pushRunner, pushRunnerOutBuf, pushRunnerErrBuf := createBufferedRunner()
 	pushabilityMeasurement := measurement.NewPushability(
 		func() []cmdStartWaiter.CmdStartWaiter {
-			return append(pushWorkflow.Push(), pushWorkflow.Delete()...)
+			return append(pushWorkflow.Push(pushCmdGenerator), pushWorkflow.Delete(pushCmdGenerator)...)
 		},
 		pushRunner,
 		pushRunnerOutBuf,
@@ -216,12 +219,12 @@ func createBufferedRunner() (cmdRunner.CmdRunner, *bytes.Buffer, *bytes.Buffer) 
 	return cmdRunner.New(outBuf, errBuf, io.Copy), outBuf, errBuf
 }
 
-func tearDownAndExit(orc orchestrator.Orchestrator, logger *log.Logger, pushWorkflow cfWorkflow.CfWorkflow, runner cmdRunner.CmdRunner, exitCode int) {
+func tearDownAndExit(orc orchestrator.Orchestrator, orcCmdGenerator cfCmdGenerator.CfCmdGenerator, logger *log.Logger, pushWorkflow cfWorkflow.CfWorkflow, pushCmdGenerator cfCmdGenerator.CfCmdGenerator, runner cmdRunner.CmdRunner, exitCode int) {
 	logger.Println("Tearing down")
-	if err := orc.TearDown(); err != nil {
+	if err := orc.TearDown(orcCmdGenerator); err != nil {
 		logger.Fatalln("Failed main teardown:", err)
 	}
-	if err := runner.RunInSequence(pushWorkflow.TearDown()...); err != nil {
+	if err := runner.RunInSequence(pushWorkflow.TearDown(pushCmdGenerator)...); err != nil {
 		logger.Println("Failed push workflow teardown: ", err)
 		exitCode = 1
 	}

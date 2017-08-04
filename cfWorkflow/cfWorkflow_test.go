@@ -40,7 +40,7 @@ var _ = Describe("CfWorkflow", func() {
 		appName = "doraApp"
 		appPath = "this/is/an/app/path"
 
-		cw = New(cfc, ccg, org, space, quota, appName, appPath)
+		cw = New(cfc, org, space, quota, appName, appPath)
 	})
 
 	It("has the correct app url", func() {
@@ -49,7 +49,7 @@ var _ = Describe("CfWorkflow", func() {
 
 	Describe("Push", func() {
 		It("returns a series of commands to push an app", func() {
-			cmds := cw.Push()
+			cmds := cw.Push(ccg)
 
 			Expect(cmds).To(Equal(
 				[]cmdStartWaiter.CmdStartWaiter{
@@ -64,7 +64,7 @@ var _ = Describe("CfWorkflow", func() {
 
 	Describe("Delete", func() {
 		It("returns a series of commands to delete an app", func() {
-			cmds := cw.Delete()
+			cmds := cw.Delete(ccg)
 
 			Expect(cmds).To(Equal(
 				[]cmdStartWaiter.CmdStartWaiter{
@@ -79,7 +79,7 @@ var _ = Describe("CfWorkflow", func() {
 
 	Describe("Setup", func() {
 		It("returns a series of commands to create a new org and space", func() {
-			cmds := cw.Setup()
+			cmds := cw.Setup(ccg)
 
 			Expect(cmds).To(Equal(
 				[]cmdStartWaiter.CmdStartWaiter{
@@ -96,7 +96,7 @@ var _ = Describe("CfWorkflow", func() {
 
 	Describe("TearDown", func() {
 		It("returns a set of commands to delete an org", func() {
-			cmds := cw.TearDown()
+			cmds := cw.TearDown(ccg)
 
 			Expect(cmds).To(Equal(
 				[]cmdStartWaiter.CmdStartWaiter{
@@ -112,7 +112,7 @@ var _ = Describe("CfWorkflow", func() {
 
 	Describe("RecentLogs", func() {
 		It("returns a set of commands to get recent logs for an app", func() {
-			cmds := cw.RecentLogs()
+			cmds := cw.RecentLogs(ccg)
 
 			Expect(cmds).To(Equal(
 				[]cmdStartWaiter.CmdStartWaiter{
@@ -129,7 +129,7 @@ var _ = Describe("CfWorkflow", func() {
 		It("returns a set of commands to stream logs for an app", func() {
 			ctx, cancelFunc := context.WithTimeout(context.Background(), time.Second)
 			defer cancelFunc()
-			cmds := cw.StreamLogs(ctx)
+			cmds := cw.StreamLogs(ctx, ccg)
 
 			Expect(cmds).To(Equal(
 				[]cmdStartWaiter.CmdStartWaiter{

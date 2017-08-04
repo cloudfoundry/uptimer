@@ -13,17 +13,16 @@ import (
 type CfWorkflow interface {
 	AppUrl() string
 
-	Setup() []cmdStartWaiter.CmdStartWaiter
-	Push() []cmdStartWaiter.CmdStartWaiter
-	Delete() []cmdStartWaiter.CmdStartWaiter
-	TearDown() []cmdStartWaiter.CmdStartWaiter
-	RecentLogs() []cmdStartWaiter.CmdStartWaiter
-	StreamLogs(ctx context.Context) []cmdStartWaiter.CmdStartWaiter
+	Setup(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
+	Push(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
+	Delete(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
+	TearDown(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
+	RecentLogs(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
+	StreamLogs(context.Context, cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 }
 
 type cfWorkflow struct {
-	cf             *config.CfConfig
-	cfCmdGenerator cfCmdGenerator.CfCmdGenerator
+	cf *config.CfConfig
 
 	appUrl  string
 	appPath string
@@ -37,74 +36,73 @@ func (c *cfWorkflow) AppUrl() string {
 	return c.appUrl
 }
 
-func New(cfConfig *config.CfConfig, cfCmdGenerator cfCmdGenerator.CfCmdGenerator, org, space, quota, appName, appPath string) CfWorkflow {
+func New(cfConfig *config.CfConfig, org, space, quota, appName, appPath string) CfWorkflow {
 	appUrl := fmt.Sprintf("https://%s.%s", appName, cfConfig.AppDomain)
 
 	return &cfWorkflow{
-		cf:             cfConfig,
-		cfCmdGenerator: cfCmdGenerator,
-		appUrl:         appUrl,
-		appPath:        appPath,
-		org:            org,
-		space:          space,
-		quota:          quota,
-		appName:        appName,
+		cf:      cfConfig,
+		appUrl:  appUrl,
+		appPath: appPath,
+		org:     org,
+		space:   space,
+		quota:   quota,
+		appName: appName,
 	}
 }
 
-func (c *cfWorkflow) Setup() []cmdStartWaiter.CmdStartWaiter {
+func (c *cfWorkflow) Setup(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
 	return []cmdStartWaiter.CmdStartWaiter{
-		c.cfCmdGenerator.Api(c.cf.API),
-		c.cfCmdGenerator.Auth(c.cf.AdminUser, c.cf.AdminPassword),
-		c.cfCmdGenerator.CreateOrg(c.org),
-		c.cfCmdGenerator.CreateSpace(c.org, c.space),
-		c.cfCmdGenerator.CreateQuota(c.quota),
-		c.cfCmdGenerator.SetQuota(c.org, c.quota),
+		ccg.Api(c.cf.API),
+		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
+		ccg.CreateOrg(c.org),
+		ccg.CreateSpace(c.org, c.space),
+		ccg.CreateQuota(c.quota),
+		ccg.SetQuota(c.org, c.quota),
 	}
 }
 
-func (c *cfWorkflow) Push() []cmdStartWaiter.CmdStartWaiter {
+func (c *cfWorkflow) Push(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
 	return []cmdStartWaiter.CmdStartWaiter{
-		c.cfCmdGenerator.Api(c.cf.API),
-		c.cfCmdGenerator.Auth(c.cf.AdminUser, c.cf.AdminPassword),
-		c.cfCmdGenerator.Target(c.org, c.space),
-		c.cfCmdGenerator.Push(c.appName, c.appPath),
+		ccg.Api(c.cf.API),
+		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
+		ccg.Target(c.org, c.space),
+		ccg.Push(c.appName, c.appPath),
 	}
 }
 
-func (c *cfWorkflow) Delete() []cmdStartWaiter.CmdStartWaiter {
+func (c *cfWorkflow) Delete(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
 	return []cmdStartWaiter.CmdStartWaiter{
-		c.cfCmdGenerator.Api(c.cf.API),
-		c.cfCmdGenerator.Auth(c.cf.AdminUser, c.cf.AdminPassword),
-		c.cfCmdGenerator.Target(c.org, c.space),
-		c.cfCmdGenerator.Delete(c.appName),
+		ccg.Api(c.cf.API),
+		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
+		ccg.Target(c.org, c.space),
+		ccg.Delete(c.appName),
 	}
 }
 
-func (c *cfWorkflow) TearDown() []cmdStartWaiter.CmdStartWaiter {
+func (c *cfWorkflow) TearDown(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
 	return []cmdStartWaiter.CmdStartWaiter{
-		c.cfCmdGenerator.Api(c.cf.API),
-		c.cfCmdGenerator.Auth(c.cf.AdminUser, c.cf.AdminPassword),
-		c.cfCmdGenerator.DeleteOrg(c.org),
-		c.cfCmdGenerator.DeleteQuota(c.quota),
-		c.cfCmdGenerator.LogOut(),
+		ccg.Api(c.cf.API),
+		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
+		ccg.DeleteOrg(c.org),
+		ccg.DeleteQuota(c.quota),
+		ccg.LogOut(),
 	}
 }
 
-func (c *cfWorkflow) RecentLogs() []cmdStartWaiter.CmdStartWaiter {
+func (c *cfWorkflow) RecentLogs(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
 	return []cmdStartWaiter.CmdStartWaiter{
-		c.cfCmdGenerator.Api(c.cf.API),
-		c.cfCmdGenerator.Auth(c.cf.AdminUser, c.cf.AdminPassword),
-		c.cfCmdGenerator.Target(c.org, c.space),
-		c.cfCmdGenerator.RecentLogs(c.appName),
+		ccg.Api(c.cf.API),
+		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
+		ccg.Target(c.org, c.space),
+		ccg.RecentLogs(c.appName),
 	}
 }
 
-func (c *cfWorkflow) StreamLogs(ctx context.Context) []cmdStartWaiter.CmdStartWaiter {
+func (c *cfWorkflow) StreamLogs(ctx context.Context, ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
 	return []cmdStartWaiter.CmdStartWaiter{
-		c.cfCmdGenerator.Api(c.cf.API),
-		c.cfCmdGenerator.Auth(c.cf.AdminUser, c.cf.AdminPassword),
-		c.cfCmdGenerator.Target(c.org, c.space),
-		c.cfCmdGenerator.StreamLogs(ctx, c.appName),
+		ccg.Api(c.cf.API),
+		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
+		ccg.Target(c.org, c.space),
+		ccg.StreamLogs(ctx, c.appName),
 	}
 }

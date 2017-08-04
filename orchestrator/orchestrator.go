@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
 	"github.com/cloudfoundry/uptimer/cfWorkflow"
 	"github.com/cloudfoundry/uptimer/cmdRunner"
 	"github.com/cloudfoundry/uptimer/config"
@@ -13,9 +14,9 @@ import (
 
 //go:generate counterfeiter . Orchestrator
 type Orchestrator interface {
-	Setup() error
+	Setup(cfCmdGenerator.CfCmdGenerator) error
 	Run() (int, error)
-	TearDown() error
+	TearDown(cfCmdGenerator.CfCmdGenerator) error
 }
 
 type orchestrator struct {
@@ -36,8 +37,8 @@ func New(whileConfig []*config.CommandConfig, logger *log.Logger, workflow cfWor
 	}
 }
 
-func (o *orchestrator) Setup() error {
-	return o.runner.RunInSequence(append(o.workflow.Setup(), o.workflow.Push()...)...)
+func (o *orchestrator) Setup(ccg cfCmdGenerator.CfCmdGenerator) error {
+	return o.runner.RunInSequence(append(o.workflow.Setup(ccg), o.workflow.Push(ccg)...)...)
 }
 
 func (o *orchestrator) Run() (int, error) {
@@ -72,8 +73,8 @@ func (o *orchestrator) Run() (int, error) {
 	return exitCode, nil
 }
 
-func (o *orchestrator) TearDown() error {
-	return o.runner.RunInSequence(o.workflow.TearDown()...)
+func (o *orchestrator) TearDown(ccg cfCmdGenerator.CfCmdGenerator) error {
+	return o.runner.RunInSequence(o.workflow.TearDown(ccg)...)
 }
 
 func (o *orchestrator) runWhileCommands() (int, error) {

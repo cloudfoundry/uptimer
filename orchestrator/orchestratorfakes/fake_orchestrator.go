@@ -4,14 +4,17 @@ package orchestratorfakes
 import (
 	"sync"
 
+	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
 	"github.com/cloudfoundry/uptimer/orchestrator"
 )
 
 type FakeOrchestrator struct {
-	SetupStub        func() error
+	SetupStub        func(cfCmdGenerator.CfCmdGenerator) error
 	setupMutex       sync.RWMutex
-	setupArgsForCall []struct{}
-	setupReturns     struct {
+	setupArgsForCall []struct {
+		arg1 cfCmdGenerator.CfCmdGenerator
+	}
+	setupReturns struct {
 		result1 error
 	}
 	setupReturnsOnCall map[int]struct {
@@ -28,10 +31,12 @@ type FakeOrchestrator struct {
 		result1 int
 		result2 error
 	}
-	TearDownStub        func() error
+	TearDownStub        func(cfCmdGenerator.CfCmdGenerator) error
 	tearDownMutex       sync.RWMutex
-	tearDownArgsForCall []struct{}
-	tearDownReturns     struct {
+	tearDownArgsForCall []struct {
+		arg1 cfCmdGenerator.CfCmdGenerator
+	}
+	tearDownReturns struct {
 		result1 error
 	}
 	tearDownReturnsOnCall map[int]struct {
@@ -41,14 +46,16 @@ type FakeOrchestrator struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeOrchestrator) Setup() error {
+func (fake *FakeOrchestrator) Setup(arg1 cfCmdGenerator.CfCmdGenerator) error {
 	fake.setupMutex.Lock()
 	ret, specificReturn := fake.setupReturnsOnCall[len(fake.setupArgsForCall)]
-	fake.setupArgsForCall = append(fake.setupArgsForCall, struct{}{})
-	fake.recordInvocation("Setup", []interface{}{})
+	fake.setupArgsForCall = append(fake.setupArgsForCall, struct {
+		arg1 cfCmdGenerator.CfCmdGenerator
+	}{arg1})
+	fake.recordInvocation("Setup", []interface{}{arg1})
 	fake.setupMutex.Unlock()
 	if fake.SetupStub != nil {
-		return fake.SetupStub()
+		return fake.SetupStub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
@@ -60,6 +67,12 @@ func (fake *FakeOrchestrator) SetupCallCount() int {
 	fake.setupMutex.RLock()
 	defer fake.setupMutex.RUnlock()
 	return len(fake.setupArgsForCall)
+}
+
+func (fake *FakeOrchestrator) SetupArgsForCall(i int) cfCmdGenerator.CfCmdGenerator {
+	fake.setupMutex.RLock()
+	defer fake.setupMutex.RUnlock()
+	return fake.setupArgsForCall[i].arg1
 }
 
 func (fake *FakeOrchestrator) SetupReturns(result1 error) {
@@ -124,14 +137,16 @@ func (fake *FakeOrchestrator) RunReturnsOnCall(i int, result1 int, result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeOrchestrator) TearDown() error {
+func (fake *FakeOrchestrator) TearDown(arg1 cfCmdGenerator.CfCmdGenerator) error {
 	fake.tearDownMutex.Lock()
 	ret, specificReturn := fake.tearDownReturnsOnCall[len(fake.tearDownArgsForCall)]
-	fake.tearDownArgsForCall = append(fake.tearDownArgsForCall, struct{}{})
-	fake.recordInvocation("TearDown", []interface{}{})
+	fake.tearDownArgsForCall = append(fake.tearDownArgsForCall, struct {
+		arg1 cfCmdGenerator.CfCmdGenerator
+	}{arg1})
+	fake.recordInvocation("TearDown", []interface{}{arg1})
 	fake.tearDownMutex.Unlock()
 	if fake.TearDownStub != nil {
-		return fake.TearDownStub()
+		return fake.TearDownStub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
@@ -143,6 +158,12 @@ func (fake *FakeOrchestrator) TearDownCallCount() int {
 	fake.tearDownMutex.RLock()
 	defer fake.tearDownMutex.RUnlock()
 	return len(fake.tearDownArgsForCall)
+}
+
+func (fake *FakeOrchestrator) TearDownArgsForCall(i int) cfCmdGenerator.CfCmdGenerator {
+	fake.tearDownMutex.RLock()
+	defer fake.tearDownMutex.RUnlock()
+	return fake.tearDownArgsForCall[i].arg1
 }
 
 func (fake *FakeOrchestrator) TearDownReturns(result1 error) {
