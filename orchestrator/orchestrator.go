@@ -1,13 +1,16 @@
+// +build !windows
+
 package orchestrator
 
 import (
 	"log"
 	"os/exec"
-	"strings"
+	"syscall"
 
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
 	"github.com/cloudfoundry/uptimer/cfWorkflow"
 	"github.com/cloudfoundry/uptimer/cmdRunner"
+	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	"github.com/cloudfoundry/uptimer/config"
 	"github.com/cloudfoundry/uptimer/measurement"
 )
@@ -53,11 +56,13 @@ func (o *orchestrator) Run(performMeasurements bool) (int, error) {
 		}
 	}
 
-	var exitCode int
-	exitCode, err := o.runWhileCommands()
+	o.logger.Println("Running commands...")
+	exitCode := 0
+	err := o.runner.RunInSequence(o.createWhileCmds()...)
 	if err != nil {
-		return exitCode, err
+		exitCode = getExitCodeFromErr(err)
 	}
+	o.logger.Printf("\nFinished running commands\n")
 
 	if performMeasurements {
 		for _, m := range o.measurements {
@@ -68,33 +73,42 @@ func (o *orchestrator) Run(performMeasurements bool) (int, error) {
 		o.logger.Println("Measurement summaries:")
 		for _, m := range o.measurements {
 			if m.Failed() {
-				exitCode = 1
+				if exitCode == 0 {
+					exitCode = 64
+				}
 				o.logger.Printf("\x1b[31m%s\x1b[0m\n", m.Summary())
 
 			} else {
 				o.logger.Printf("\x1b[32m%s\x1b[0m\n", m.Summary())
 			}
-
 		}
 	}
 
-	return exitCode, nil
+	return exitCode, err
 }
 
 func (o *orchestrator) TearDown(ccg cfCmdGenerator.CfCmdGenerator) error {
 	return o.runner.RunInSequence(o.workflow.TearDown(ccg)...)
 }
 
-func (o *orchestrator) runWhileCommands() (int, error) {
-	for _, cfg := range o.whileConfig {
-		cmd := exec.Command(cfg.Command, cfg.CommandArgs...)
-		o.logger.Printf("Running command: `%s %s`\n", o.whileConfig[0].Command, strings.Join(o.whileConfig[0].CommandArgs, " "))
-		if err := o.runner.Run(cmd); err != nil {
-			return 64, err
-		}
-		o.logger.Println()
+type Syser interface {
+	Sys() interface{}
+}
 
-		o.logger.Println("Finished running command")
+func (o *orchestrator) createWhileCmds() []cmdStartWaiter.CmdStartWaiter {
+	cmds := []cmdStartWaiter.CmdStartWaiter{}
+	for _, cfg := range o.whileConfig {
+		cmds = append(cmds, exec.Command(cfg.Command, cfg.CommandArgs...))
 	}
-	return 0, nil
+
+	return cmds
+}
+
+func getExitCodeFromErr(err error) int {
+	if _, ok := err.(Syser); ok {
+		errorCode := err.(Syser).Sys().(syscall.WaitStatus).ExitStatus()
+		return errorCode
+	}
+
+	return -1
 }

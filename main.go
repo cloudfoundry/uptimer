@@ -91,7 +91,11 @@ func main() {
 		logger.Println("Failed run:", err)
 	}
 
-	tearDownAndExit(orc, orcCmdGenerator, logger, pushWorkflow, pushCmdGenerator, stdOutAndErrRunner, exitCode)
+	logger.Println("Tearing down")
+	tearDown(orc, orcCmdGenerator, logger, pushWorkflow, pushCmdGenerator, stdOutAndErrRunner)
+	logger.Println("Finished tearing down")
+
+	os.Exit(exitCode)
 }
 
 func loadConfig() (*config.Config, error) {
@@ -238,26 +242,19 @@ func createBufferedRunner() (cmdRunner.CmdRunner, *bytes.Buffer, *bytes.Buffer) 
 	return cmdRunner.New(outBuf, errBuf, io.Copy), outBuf, errBuf
 }
 
-func tearDownAndExit(
+func tearDown(
 	orc orchestrator.Orchestrator,
 	orcCmdGenerator cfCmdGenerator.CfCmdGenerator,
 	logger *log.Logger,
 	pushWorkflow cfWorkflow.CfWorkflow,
 	pushCmdGenerator cfCmdGenerator.CfCmdGenerator,
 	runner cmdRunner.CmdRunner,
-	exitCode int,
 ) {
-	logger.Println("Tearing down")
 	if err := orc.TearDown(orcCmdGenerator); err != nil {
 		logger.Println("Failed main teardown:", err)
-		exitCode = 1
 	}
 
 	if err := runner.RunInSequence(pushWorkflow.TearDown(pushCmdGenerator)...); err != nil {
 		logger.Println("Failed push workflow teardown: ", err)
-		exitCode = 1
 	}
-
-	logger.Println("Finished tearing down")
-	os.Exit(exitCode)
 }

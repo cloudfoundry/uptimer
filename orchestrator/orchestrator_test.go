@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"syscall"
 	"time"
 
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
@@ -98,41 +99,52 @@ var _ = Describe("Orchestrator", func() {
 	})
 
 	Describe("Run", func() {
-		Context("when all the while commands pass", func() {
-			It("runs all the given while commands", func() {
-				_, err := orc.Run(true)
+		It("runs all the given while commands", func() {
+			_, err := orc.Run(true)
 
-				Expect(err).NotTo(HaveOccurred())
-				Expect(fakeRunner.RunCallCount()).To(Equal(2))
-				Expect(fakeRunner.RunArgsForCall(0)).To(Equal(exec.Command("sleep", "10")))
-				Expect(fakeRunner.RunArgsForCall(1)).To(Equal(exec.Command("sleep", "15")))
-			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(fakeRunner.RunInSequenceCallCount()).To(Equal(1))
+			Expect(fakeRunner.RunInSequenceArgsForCall(0)).To(Equal(
+				[]cmdStartWaiter.CmdStartWaiter{
+					exec.Command("sleep", "10"),
+					exec.Command("sleep", "15"),
+				},
+			))
 		})
 
-		Context("when the first while command fails", func() {
-			It("returns an error with exit code 64 and doesn't run the second command", func() {
-				fakeRunner.RunReturns(fmt.Errorf("oh boy"))
+		Context("when a while command fails", func() {
+			It("returns an error with exit code of the failed while command", func() {
+				exitError := &fakeSyser{
+					WS: 512,
+				}
+				fakeRunner.RunInSequenceReturns(exitError)
+
+				exitCode, _ := orc.Run(true)
+
+				Expect(fakeRunner.RunInSequenceArgsForCall(0)).To(Equal(
+					[]cmdStartWaiter.CmdStartWaiter{
+						exec.Command("sleep", "10"),
+						exec.Command("sleep", "15"),
+					},
+				))
+				Expect(fakeRunner.RunInSequenceCallCount()).To(Equal(1))
+				Expect(exitCode).To(Equal(2))
+			})
+
+			It("returns an error with exit code of -1 if the failed while command's error is not an exiterror", func() {
+				fakeRunner.RunInSequenceReturns(fmt.Errorf("hey dude"))
 
 				exitCode, err := orc.Run(true)
 
-				Expect(fakeRunner.RunArgsForCall(0)).To(Equal(exec.Command("sleep", "10")))
-				Expect(fakeRunner.RunCallCount()).To(Equal(1))
-				Expect(exitCode).To(Equal(64))
-				Expect(err).To(MatchError("oh boy"))
-			})
-		})
-
-		Context("when the second command fails", func() {
-			It("returns an error with exit code 64", func() {
-				fakeRunner.RunReturnsOnCall(1, fmt.Errorf("oh boy"))
-
-				exitCode, err := orc.Run(true)
-
-				Expect(fakeRunner.RunArgsForCall(0)).To(Equal(exec.Command("sleep", "10")))
-				Expect(fakeRunner.RunArgsForCall(1)).To(Equal(exec.Command("sleep", "15")))
-				Expect(fakeRunner.RunCallCount()).To(Equal(2))
-				Expect(exitCode).To(Equal(64))
-				Expect(err).To(MatchError("oh boy"))
+				Expect(fakeRunner.RunInSequenceArgsForCall(0)).To(Equal(
+					[]cmdStartWaiter.CmdStartWaiter{
+						exec.Command("sleep", "10"),
+						exec.Command("sleep", "15"),
+					},
+				))
+				Expect(fakeRunner.RunInSequenceCallCount()).To(Equal(1))
+				Expect(exitCode).To(Equal(-1))
+				Expect(err).To(MatchError("hey dude"))
 			})
 		})
 
@@ -199,12 +211,15 @@ var _ = Describe("Orchestrator", func() {
 				Expect(ec).To(Equal(0))
 			})
 
-			It("returns the exit code of 64 when while commands fail", func() {
-				fakeRunner.RunReturns(fmt.Errorf("oh boy"))
+			It("returns the exit code of the failed while command when a while command fails", func() {
+				exitError := &fakeSyser{
+					WS: 512,
+				}
+				fakeRunner.RunInSequenceReturns(exitError)
 
 				ec, _ := orc.Run(performMeasurements)
 
-				Expect(ec).To(Equal(64))
+				Expect(ec).To(Equal(2))
 			})
 		})
 
@@ -259,18 +274,41 @@ var _ = Describe("Orchestrator", func() {
 				Expect(logBuf.String()).To(ContainSubstring("\x1b[32msummary2\x1b[0m"))
 			})
 
-			It("returns an exit code of 0 when all measurements succeed", func() {
+			It("returns an exit code of 0 when all measurements succeed and the while commands all succeed", func() {
 				ec, _ := orc.Run(performMeasurements)
 
 				Expect(ec).To(Equal(0))
 			})
 
-			It("returns an exit code of 1 when any measurement fails", func() {
+			It("returns an exit code of 64 when any measurement fails and the while commands all succeed", func() {
 				fakeMeasurement1.FailedReturns(true)
 
 				ec, _ := orc.Run(performMeasurements)
 
-				Expect(ec).To(Equal(1))
+				Expect(ec).To(Equal(64))
+			})
+
+			It("returns the failed while command's exit code even when measurements succeed", func() {
+				exitError := &fakeSyser{
+					WS: 512,
+				}
+				fakeRunner.RunInSequenceReturns(exitError)
+
+				exitCode, _ := orc.Run(performMeasurements)
+
+				Expect(exitCode).To(Equal(2))
+			})
+
+			It("returns the failed while command's exit code even when measurements also fail", func() {
+				fakeMeasurement1.FailedReturns(true)
+				exitError := &fakeSyser{
+					WS: 512,
+				}
+				fakeRunner.RunInSequenceReturns(exitError)
+
+				exitCode, _ := orc.Run(performMeasurements)
+
+				Expect(exitCode).To(Equal(2))
 			})
 		})
 	})
@@ -307,3 +345,15 @@ var _ = Describe("Orchestrator", func() {
 		})
 	})
 })
+
+type fakeSyser struct {
+	WS syscall.WaitStatus
+}
+
+func (f *fakeSyser) Sys() interface{} {
+	return f.WS
+}
+
+func (f *fakeSyser) Error() string {
+	return ""
+}
