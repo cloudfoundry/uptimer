@@ -17,31 +17,31 @@ import (
 
 //go:generate counterfeiter . Orchestrator
 type Orchestrator interface {
-	Setup(cfCmdGenerator.CfCmdGenerator) error
+	Setup(cmdRunner.CmdRunner, cfCmdGenerator.CfCmdGenerator) error
 	Run(bool) (int, error)
-	TearDown(cfCmdGenerator.CfCmdGenerator) error
+	TearDown(cmdRunner.CmdRunner, cfCmdGenerator.CfCmdGenerator) error
 }
 
 type orchestrator struct {
-	logger       *log.Logger
-	whileConfig  []*config.CommandConfig
-	workflow     cfWorkflow.CfWorkflow
-	runner       cmdRunner.CmdRunner
-	measurements []measurement.Measurement
+	logger              *log.Logger
+	whileConfig         []*config.CommandConfig
+	workflow            cfWorkflow.CfWorkflow
+	whileCommandsRunner cmdRunner.CmdRunner
+	measurements        []measurement.Measurement
 }
 
 func New(whileConfig []*config.CommandConfig, logger *log.Logger, workflow cfWorkflow.CfWorkflow, runner cmdRunner.CmdRunner, measurements []measurement.Measurement) Orchestrator {
 	return &orchestrator{
-		logger:       logger,
-		whileConfig:  whileConfig,
-		workflow:     workflow,
-		runner:       runner,
-		measurements: measurements,
+		logger:              logger,
+		whileConfig:         whileConfig,
+		workflow:            workflow,
+		whileCommandsRunner: runner,
+		measurements:        measurements,
 	}
 }
 
-func (o *orchestrator) Setup(ccg cfCmdGenerator.CfCmdGenerator) error {
-	return o.runner.RunInSequence(append(o.workflow.Setup(ccg), o.workflow.Push(ccg)...)...)
+func (o *orchestrator) Setup(runner cmdRunner.CmdRunner, ccg cfCmdGenerator.CfCmdGenerator) error {
+	return runner.RunInSequence(append(o.workflow.Setup(ccg), o.workflow.Push(ccg)...)...)
 }
 
 func (o *orchestrator) Run(performMeasurements bool) (int, error) {
@@ -58,11 +58,11 @@ func (o *orchestrator) Run(performMeasurements bool) (int, error) {
 
 	o.logger.Println("Running commands...")
 	exitCode := 0
-	err := o.runner.RunInSequence(o.createWhileCmds()...)
+	err := o.whileCommandsRunner.RunInSequence(o.createWhileCmds()...)
 	if err != nil {
 		exitCode = getExitCodeFromErr(err)
 	}
-	o.logger.Printf("\nFinished running commands\n")
+	o.logger.Println("Finished running commands")
 
 	if performMeasurements {
 		for _, m := range o.measurements {
@@ -87,8 +87,8 @@ func (o *orchestrator) Run(performMeasurements bool) (int, error) {
 	return exitCode, err
 }
 
-func (o *orchestrator) TearDown(ccg cfCmdGenerator.CfCmdGenerator) error {
-	return o.runner.RunInSequence(o.workflow.TearDown(ccg)...)
+func (o *orchestrator) TearDown(runner cmdRunner.CmdRunner, ccg cfCmdGenerator.CfCmdGenerator) error {
+	return runner.RunInSequence(o.workflow.TearDown(ccg)...)
 }
 
 type Syser interface {

@@ -39,7 +39,7 @@ func main() {
 
 	performMeasurements := true
 
-	logger.Println("Building included app")
+	logger.Println("Building included app...")
 	appPath, err := compileIncludedApp()
 	if err != nil {
 		logger.Println("Failed to build included app: ", err)
@@ -53,12 +53,13 @@ func main() {
 		performMeasurements = false
 	}
 
+	bufferedRunner, runnerOutBuf, runnerErrBuf := createBufferedRunner()
+
 	pushCmdGenerator := cfCmdGenerator.New(pushTmpDir)
 	pushWorkflow, pushOrg := createWorkflow(cfg.CF, appPath)
-	logger.Println("Setting up push workflow with org", pushOrg)
-	discardRunner := cmdRunner.New(ioutil.Discard, ioutil.Discard, io.Copy)
-	if err := discardRunner.RunInSequence(pushWorkflow.Setup(pushCmdGenerator)...); err != nil {
-		logger.Println("Failed push workflow setup: ", err)
+	logger.Printf("Setting up push workflow with org %s...", pushOrg)
+	if err := bufferedRunner.RunInSequence(pushWorkflow.Setup(pushCmdGenerator)...); err != nil {
+		logBufferedRunnerFailure(logger, "push workflow setup", err, runnerOutBuf, runnerErrBuf)
 		performMeasurements = false
 	} else {
 		logger.Println("Finished setting up push workflow")
@@ -75,15 +76,14 @@ func main() {
 		pushCmdGenerator,
 	)
 
-	stdOutAndErrRunner := cmdRunner.New(os.Stdout, os.Stderr, io.Copy)
-	orc := orchestrator.New(cfg.While, logger, orcWorkflow, stdOutAndErrRunner, measurements)
+	orc := orchestrator.New(cfg.While, logger, orcWorkflow, cmdRunner.New(os.Stdout, os.Stderr, io.Copy), measurements)
 
-	logger.Println("Setting up with org", orcOrg)
-	if err := orc.Setup(orcCmdGenerator); err != nil {
-		logger.Println("Failed setup:", err)
+	logger.Printf("Setting up main workflow with org %s...", orcOrg)
+	if err := orc.Setup(bufferedRunner, orcCmdGenerator); err != nil {
+		logBufferedRunnerFailure(logger, "main workflow setup", err, runnerOutBuf, runnerErrBuf)
 		performMeasurements = false
 	} else {
-		logger.Println("Finished setup")
+		logger.Println("Finished setting up main workflow")
 	}
 
 	exitCode, err := orc.Run(performMeasurements)
@@ -91,8 +91,17 @@ func main() {
 		logger.Println("Failed run:", err)
 	}
 
-	logger.Println("Tearing down")
-	tearDown(orc, orcCmdGenerator, logger, pushWorkflow, pushCmdGenerator, stdOutAndErrRunner)
+	logger.Println("Tearing down...")
+	tearDown(
+		orc,
+		orcCmdGenerator,
+		logger,
+		pushWorkflow,
+		pushCmdGenerator,
+		bufferedRunner,
+		runnerOutBuf,
+		runnerErrBuf,
+	)
 	logger.Println("Finished tearing down")
 
 	os.Exit(exitCode)
@@ -242,6 +251,23 @@ func createBufferedRunner() (cmdRunner.CmdRunner, *bytes.Buffer, *bytes.Buffer) 
 	return cmdRunner.New(outBuf, errBuf, io.Copy), outBuf, errBuf
 }
 
+func logBufferedRunnerFailure(
+	logger *log.Logger,
+	whatFailed string,
+	err error,
+	outBuf, errBuf *bytes.Buffer,
+) {
+	logger.Printf(
+		"Failed %s: %v\nstdout:\n%s\nstderr:\n%s\n",
+		whatFailed,
+		err,
+		outBuf.String(),
+		errBuf.String(),
+	)
+	outBuf.Reset()
+	errBuf.Reset()
+}
+
 func tearDown(
 	orc orchestrator.Orchestrator,
 	orcCmdGenerator cfCmdGenerator.CfCmdGenerator,
@@ -249,12 +275,14 @@ func tearDown(
 	pushWorkflow cfWorkflow.CfWorkflow,
 	pushCmdGenerator cfCmdGenerator.CfCmdGenerator,
 	runner cmdRunner.CmdRunner,
+	runnerOutBuf *bytes.Buffer,
+	runnerErrBuf *bytes.Buffer,
 ) {
-	if err := orc.TearDown(orcCmdGenerator); err != nil {
-		logger.Println("Failed main teardown:", err)
+	if err := orc.TearDown(runner, orcCmdGenerator); err != nil {
+		logBufferedRunnerFailure(logger, "main teardown", err, runnerOutBuf, runnerErrBuf)
 	}
 
 	if err := runner.RunInSequence(pushWorkflow.TearDown(pushCmdGenerator)...); err != nil {
-		logger.Println("Failed push workflow teardown: ", err)
+		logBufferedRunnerFailure(logger, "push workflow teardown", err, runnerOutBuf, runnerErrBuf)
 	}
 }

@@ -72,7 +72,7 @@ var _ = Describe("Orchestrator", func() {
 				},
 			)
 
-			err := orc.Setup(ccg)
+			err := orc.Setup(fakeRunner, ccg)
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(fakeWorkflow.SetupCallCount()).To(Equal(1))
@@ -92,7 +92,7 @@ var _ = Describe("Orchestrator", func() {
 		It("Returns an error if runner returns an error", func() {
 			fakeRunner.RunInSequenceReturns(fmt.Errorf("uh oh"))
 
-			err := orc.Setup(ccg)
+			err := orc.Setup(fakeRunner, ccg)
 
 			Expect(err).To(MatchError("uh oh"))
 		})
@@ -322,7 +322,7 @@ var _ = Describe("Orchestrator", func() {
 				},
 			)
 
-			err := orc.TearDown(ccg)
+			err := orc.TearDown(fakeRunner, ccg)
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(fakeWorkflow.TearDownCallCount()).To(Equal(1))
@@ -339,7 +339,7 @@ var _ = Describe("Orchestrator", func() {
 		It("Returns an error if runner returns an error", func() {
 			fakeRunner.RunInSequenceReturns(fmt.Errorf("uh oh"))
 
-			err := orc.TearDown(ccg)
+			err := orc.TearDown(fakeRunner, ccg)
 
 			Expect(err).To(MatchError("uh oh"))
 		})
