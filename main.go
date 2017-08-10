@@ -33,7 +33,7 @@ func main() {
 	logger := log.New(os.Stdout, "\n[UPTIMER] ", log.Ldate|log.Ltime|log.LUTC)
 
 	configPath := flag.String("configFile", "", "Path to the config file")
-	showVersion := flag.Bool("v", false, "Prints the git version and exits")
+	showVersion := flag.Bool("v", false, "Prints the version of uptimer and exits")
 	flag.Parse()
 
 	if *showVersion {
