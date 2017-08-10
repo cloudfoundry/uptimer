@@ -26,9 +26,8 @@ import (
 	"github.com/cloudfoundry/uptimer/config"
 	"github.com/cloudfoundry/uptimer/measurement"
 	"github.com/cloudfoundry/uptimer/orchestrator"
+	"github.com/cloudfoundry/uptimer/version"
 )
-
-var gitVersion = "No git version provided"
 
 func main() {
 	logger := log.New(os.Stdout, "\n[UPTIMER] ", log.Ldate|log.Ltime|log.LUTC)
@@ -38,7 +37,7 @@ func main() {
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Printf("version: %s\n", gitVersion)
+		fmt.Printf("version: %s\n", version.Version)
 		os.Exit(0)
 	}
 
