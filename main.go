@@ -28,10 +28,26 @@ import (
 	"github.com/cloudfoundry/uptimer/orchestrator"
 )
 
+var gitVersion = "No git version provided"
+
 func main() {
 	logger := log.New(os.Stdout, "\n[UPTIMER] ", log.Ldate|log.Ltime|log.LUTC)
 
-	cfg, err := loadConfig()
+	configPath := flag.String("configFile", "", "Path to the config file")
+	showVersion := flag.Bool("v", false, "Prints the git version and exits")
+	flag.Parse()
+
+	if *showVersion {
+		fmt.Printf("version: %s\n", gitVersion)
+		os.Exit(0)
+	}
+
+	if *configPath == "" {
+		logger.Println("Failed to load config: ", fmt.Errorf("'-configFile' flag required"))
+		os.Exit(1)
+	}
+
+	cfg, err := loadConfig(*configPath)
 	if err != nil {
 		logger.Println("Failed to load config: ", err)
 		os.Exit(1)
@@ -107,14 +123,8 @@ func main() {
 	os.Exit(exitCode)
 }
 
-func loadConfig() (*config.Config, error) {
-	configPath := flag.String("configFile", "", "Path to the config file")
-	flag.Parse()
-	if *configPath == "" {
-		return nil, fmt.Errorf("'-configFile' flag required")
-	}
-
-	cfg, err := config.Load(*configPath)
+func loadConfig(configPath string) (*config.Config, error) {
+	cfg, err := config.Load(configPath)
 	if err != nil {
 		return nil, err
 	}
