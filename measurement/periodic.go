@@ -13,6 +13,7 @@ type periodic struct {
 	clock           clock.Clock
 	freq            time.Duration
 	baseMeasurement BaseMeasurement
+	shouldRetryFunc ShouldRetryFunc
 
 	resultSet ResultSet
 	stopChan  chan int
@@ -39,13 +40,22 @@ func (p *periodic) Start() {
 }
 
 func (p *periodic) performMeasurement() {
-	if msg, stdOut, stdErr, ok := p.baseMeasurement.PerformMeasurement(); !ok {
+	if msg, stdOut, stdErr, ok := p.performWithSingleRetry(); !ok {
 		p.logFailure(msg, stdOut, stdErr)
 		p.resultSet.RecordFailure()
 		return
 	}
 
 	p.resultSet.RecordSuccess()
+}
+
+func (p *periodic) performWithSingleRetry() (string, string, string, bool) {
+	msg, stdOut, stdErr, ok := p.baseMeasurement.PerformMeasurement()
+	if !ok && p.shouldRetryFunc(stdOut, stdErr) {
+		return p.baseMeasurement.PerformMeasurement()
+	}
+
+	return msg, stdOut, stdErr, ok
 }
 
 func (p *periodic) logFailure(msg, stdOut, stdErr string) {

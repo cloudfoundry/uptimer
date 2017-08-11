@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/benbjohnson/clock"
@@ -220,6 +221,11 @@ func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow
 		},
 	)
 
+	authFailedRetryFunc := func(stdOut, stdErr string) bool {
+		authFailedMessage := "Authentication has expired.  Please log back in to re-authenticate."
+		return strings.Contains(stdOut, authFailedMessage) || strings.Contains(stdErr, authFailedMessage)
+	}
+
 	clock := clock.New()
 	return []measurement.Measurement{
 		measurement.NewPeriodic(
@@ -228,6 +234,7 @@ func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow
 			time.Second,
 			availabilityMeasurement,
 			measurement.NewResultSet(),
+			func(string, string) bool { return false },
 		),
 		measurement.NewPeriodic(
 			logger,
@@ -235,6 +242,7 @@ func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow
 			time.Minute,
 			pushabilityMeasurement,
 			measurement.NewResultSet(),
+			authFailedRetryFunc,
 		),
 		measurement.NewPeriodic(
 			logger,
@@ -242,6 +250,7 @@ func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow
 			10*time.Second,
 			recentLogsMeasurement,
 			measurement.NewResultSet(),
+			authFailedRetryFunc,
 		),
 		measurement.NewPeriodic(
 			logger,
@@ -249,6 +258,7 @@ func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow
 			30*time.Second,
 			streamLogsMeasurement,
 			measurement.NewResultSet(),
+			authFailedRetryFunc,
 		),
 	}
 }

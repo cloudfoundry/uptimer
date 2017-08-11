@@ -24,12 +24,22 @@ type Measurement interface {
 	Summary() string
 }
 
-func NewPeriodic(logger *log.Logger, clock clock.Clock, freq time.Duration, baseMeasurement BaseMeasurement, resultSet ResultSet) Measurement {
+type ShouldRetryFunc func(stdOut, stdErr string) bool
+
+func NewPeriodic(
+	logger *log.Logger,
+	clock clock.Clock,
+	freq time.Duration,
+	baseMeasurement BaseMeasurement,
+	resultSet ResultSet,
+	shouldRetryFunc ShouldRetryFunc,
+) Measurement {
 	return &periodic{
 		logger:          logger,
 		clock:           clock,
 		freq:            freq,
 		baseMeasurement: baseMeasurement,
+		shouldRetryFunc: shouldRetryFunc,
 
 		stopChan:  make(chan int),
 		resultSet: resultSet,
