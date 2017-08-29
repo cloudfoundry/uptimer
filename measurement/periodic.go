@@ -93,7 +93,7 @@ func (p *periodic) Stop() {
 }
 
 func (p *periodic) Failed() bool {
-	return p.baseMeasurement.Failed(p.resultSet)
+	return p.resultSet.Failed() > 0
 }
 
 func (p *periodic) Summary() string {

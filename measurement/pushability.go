@@ -34,7 +34,3 @@ func (p *pushability) PerformMeasurement() (string, string, string, bool) {
 
 	return "", "", "", true
 }
-
-func (p *pushability) Failed(rs ResultSet) bool {
-	return rs.Failed() > 0
-}

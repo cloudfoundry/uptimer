@@ -50,7 +50,6 @@ func NewPeriodic(
 type BaseMeasurement interface {
 	Name() string
 	PerformMeasurement() (string, string, string, bool)
-	Failed(rs ResultSet) bool
 	SummaryPhrase() string
 }
 

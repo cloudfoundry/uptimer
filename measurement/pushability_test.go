@@ -98,22 +98,4 @@ var _ = Describe("Pushability", func() {
 			Expect(errBuf.Len()).To(Equal(0))
 		})
 	})
-
-	Describe("Failed", func() {
-		It("returns false when the measurement has succeeded", func() {
-			fakeResultSet.FailedReturns(0)
-
-			pm.PerformMeasurement()
-
-			Expect(pm.Failed(fakeResultSet)).To(BeFalse())
-		})
-
-		It("returns true when the measurement has failed", func() {
-			fakeResultSet.FailedReturns(1)
-
-			pm.PerformMeasurement()
-
-			Expect(pm.Failed(fakeResultSet)).To(BeTrue())
-		})
-	})
 })

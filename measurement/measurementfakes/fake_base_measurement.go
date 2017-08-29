@@ -32,17 +32,6 @@ type FakeBaseMeasurement struct {
 		result3 string
 		result4 bool
 	}
-	FailedStub        func(rs measurement.ResultSet) bool
-	failedMutex       sync.RWMutex
-	failedArgsForCall []struct {
-		rs measurement.ResultSet
-	}
-	failedReturns struct {
-		result1 bool
-	}
-	failedReturnsOnCall map[int]struct {
-		result1 bool
-	}
 	SummaryPhraseStub        func() string
 	summaryPhraseMutex       sync.RWMutex
 	summaryPhraseArgsForCall []struct{}
@@ -145,54 +134,6 @@ func (fake *FakeBaseMeasurement) PerformMeasurementReturnsOnCall(i int, result1 
 	}{result1, result2, result3, result4}
 }
 
-func (fake *FakeBaseMeasurement) Failed(rs measurement.ResultSet) bool {
-	fake.failedMutex.Lock()
-	ret, specificReturn := fake.failedReturnsOnCall[len(fake.failedArgsForCall)]
-	fake.failedArgsForCall = append(fake.failedArgsForCall, struct {
-		rs measurement.ResultSet
-	}{rs})
-	fake.recordInvocation("Failed", []interface{}{rs})
-	fake.failedMutex.Unlock()
-	if fake.FailedStub != nil {
-		return fake.FailedStub(rs)
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	return fake.failedReturns.result1
-}
-
-func (fake *FakeBaseMeasurement) FailedCallCount() int {
-	fake.failedMutex.RLock()
-	defer fake.failedMutex.RUnlock()
-	return len(fake.failedArgsForCall)
-}
-
-func (fake *FakeBaseMeasurement) FailedArgsForCall(i int) measurement.ResultSet {
-	fake.failedMutex.RLock()
-	defer fake.failedMutex.RUnlock()
-	return fake.failedArgsForCall[i].rs
-}
-
-func (fake *FakeBaseMeasurement) FailedReturns(result1 bool) {
-	fake.FailedStub = nil
-	fake.failedReturns = struct {
-		result1 bool
-	}{result1}
-}
-
-func (fake *FakeBaseMeasurement) FailedReturnsOnCall(i int, result1 bool) {
-	fake.FailedStub = nil
-	if fake.failedReturnsOnCall == nil {
-		fake.failedReturnsOnCall = make(map[int]struct {
-			result1 bool
-		})
-	}
-	fake.failedReturnsOnCall[i] = struct {
-		result1 bool
-	}{result1}
-}
-
 func (fake *FakeBaseMeasurement) SummaryPhrase() string {
 	fake.summaryPhraseMutex.Lock()
 	ret, specificReturn := fake.summaryPhraseReturnsOnCall[len(fake.summaryPhraseArgsForCall)]
@@ -240,8 +181,6 @@ func (fake *FakeBaseMeasurement) Invocations() map[string][][]interface{} {
 	defer fake.nameMutex.RUnlock()
 	fake.performMeasurementMutex.RLock()
 	defer fake.performMeasurementMutex.RUnlock()
-	fake.failedMutex.RLock()
-	defer fake.failedMutex.RUnlock()
 	fake.summaryPhraseMutex.RLock()
 	defer fake.summaryPhraseMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}

@@ -33,7 +33,3 @@ func (a *availability) PerformMeasurement() (string, string, string, bool) {
 
 	return "", "", "", true
 }
-
-func (a *availability) Failed(rs ResultSet) bool {
-	return rs.Failed() > 0
-}

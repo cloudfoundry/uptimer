@@ -55,7 +55,3 @@ func (s *streamLogs) PerformMeasurement() (string, string, string, bool) {
 
 	return "", "", "", true
 }
-
-func (s *streamLogs) Failed(rs ResultSet) bool {
-	return rs.Failed() > 0
-}

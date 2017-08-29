@@ -254,16 +254,21 @@ var _ = Describe("Periodic", func() {
 	})
 
 	Describe("Failed", func() {
-		It("Returns the base measurement's failed state", func() {
-			fakeBaseMeasurement.FailedReturns(true)
+		It("Returns true if failure count > 1", func() {
+			fakeResultSet.FailedReturns(1)
 
 			Expect(p.Failed()).To(BeTrue())
+		})
+
+		It("Returns false if failure count == 0", func() {
+			fakeResultSet.FailedReturns(0)
+
+			Expect(p.Failed()).To(BeFalse())
 		})
 	})
 
 	Describe("Summary", func() {
 		It("returns a success summary if none failed", func() {
-			fakeBaseMeasurement.FailedReturns(false)
 			fakeResultSet.FailedReturns(0)
 			fakeResultSet.TotalReturns(4)
 
@@ -271,7 +276,6 @@ var _ = Describe("Periodic", func() {
 		})
 
 		It("returns a failed summary if there are failures", func() {
-			fakeBaseMeasurement.FailedReturns(true)
 			fakeResultSet.FailedReturns(3)
 			fakeResultSet.TotalReturns(7)
 
@@ -279,7 +283,6 @@ var _ = Describe("Periodic", func() {
 		})
 
 		It("returns a failed summary with additional last x succeeded if there are successes since the last failure", func() {
-			fakeBaseMeasurement.FailedReturns(true)
 			fakeResultSet.FailedReturns(3)
 			fakeResultSet.TotalReturns(7)
 			fakeResultSet.SuccessesSinceLastFailureReturns(2, time.Time{})

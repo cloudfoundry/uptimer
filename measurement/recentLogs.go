@@ -50,7 +50,3 @@ func (r *recentLogs) PerformMeasurement() (string, string, string, bool) {
 
 	return "", "", "", true
 }
-
-func (r *recentLogs) Failed(rs ResultSet) bool {
-	return rs.Failed() > 0
-}
