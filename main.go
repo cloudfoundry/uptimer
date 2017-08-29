@@ -90,6 +90,7 @@ func main() {
 		cfCmdGenerator.New(recentLogsTmpDir),
 		cfCmdGenerator.New(streamingLogsTmpDir),
 		pushCmdGenerator,
+		cfg.AllowedFailures,
 	)
 
 	orc := orchestrator.New(cfg.While, logger, orcWorkflow, cmdRunner.New(os.Stdout, os.Stderr, io.Copy), measurements)
@@ -178,7 +179,12 @@ func createWorkflow(cfc *config.Cf, appPath string) (cfWorkflow.CfWorkflow, stri
 		workflowOrg
 }
 
-func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow.CfWorkflow, recentLogsCmdGenerator, streamingLogsCmdGenerator, pushCmdGenerator cfCmdGenerator.CfCmdGenerator) []measurement.Measurement {
+func createMeasurements(
+	logger *log.Logger,
+	orcWorkflow, pushWorkflow cfWorkflow.CfWorkflow,
+	recentLogsCmdGenerator, streamingLogsCmdGenerator, pushCmdGenerator cfCmdGenerator.CfCmdGenerator,
+	allowedFailures *config.AllowedFailures,
+) []measurement.Measurement {
 	recentLogsBufferRunner, recentLogsRunnerOutBuf, recentLogsRunnerErrBuf := createBufferedRunner()
 	recentLogsMeasurement := measurement.NewRecentLogs(
 		func() []cmdStartWaiter.CmdStartWaiter {
@@ -234,6 +240,7 @@ func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow
 			time.Second,
 			availabilityMeasurement,
 			measurement.NewResultSet(),
+			allowedFailures.HttpAvailability,
 			func(string, string) bool { return false },
 		),
 		measurement.NewPeriodic(
@@ -242,6 +249,7 @@ func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow
 			time.Minute,
 			pushabilityMeasurement,
 			measurement.NewResultSet(),
+			allowedFailures.AppPushability,
 			authFailedRetryFunc,
 		),
 		measurement.NewPeriodic(
@@ -250,6 +258,7 @@ func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow
 			10*time.Second,
 			recentLogsMeasurement,
 			measurement.NewResultSet(),
+			allowedFailures.RecentLogsFetching,
 			authFailedRetryFunc,
 		),
 		measurement.NewPeriodic(
@@ -258,6 +267,7 @@ func createMeasurements(logger *log.Logger, orcWorkflow, pushWorkflow cfWorkflow
 			30*time.Second,
 			streamLogsMeasurement,
 			measurement.NewResultSet(),
+			allowedFailures.StreamingLogs,
 			authFailedRetryFunc,
 		),
 	}

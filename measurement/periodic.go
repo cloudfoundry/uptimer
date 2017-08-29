@@ -14,6 +14,7 @@ type periodic struct {
 	freq            time.Duration
 	baseMeasurement BaseMeasurement
 	shouldRetryFunc ShouldRetryFunc
+	allowedFailures int
 
 	resultSet ResultSet
 	stopChan  chan int
@@ -93,7 +94,7 @@ func (p *periodic) Stop() {
 }
 
 func (p *periodic) Failed() bool {
-	return p.resultSet.Failed() > 0
+	return p.resultSet.Failed() > p.allowedFailures
 }
 
 func (p *periodic) Summary() string {

@@ -22,6 +22,7 @@ var _ = Describe("Periodic", func() {
 		freq                time.Duration
 		fakeBaseMeasurement *measurementfakes.FakeBaseMeasurement
 		fakeResultSet       *measurementfakes.FakeResultSet
+		allowedFailures     int
 		shouldRetry         bool
 
 		p Measurement
@@ -36,9 +37,10 @@ var _ = Describe("Periodic", func() {
 		fakeBaseMeasurement.NameReturns("foo measurement")
 		fakeBaseMeasurement.SummaryPhraseReturns("wingdang the foobrizzle")
 		fakeResultSet = &measurementfakes.FakeResultSet{}
+		allowedFailures = 0
 		shouldRetry = false
 
-		p = NewPeriodic(logger, mockClock, freq, fakeBaseMeasurement, fakeResultSet, func(string, string) bool { return shouldRetry })
+		p = NewPeriodic(logger, mockClock, freq, fakeBaseMeasurement, fakeResultSet, allowedFailures, func(string, string) bool { return shouldRetry })
 	})
 
 	Describe("Name", func() {
@@ -254,14 +256,24 @@ var _ = Describe("Periodic", func() {
 	})
 
 	Describe("Failed", func() {
-		It("Returns true if failure count > 1", func() {
-			fakeResultSet.FailedReturns(1)
+		BeforeEach(func() {
+			p = NewPeriodic(logger, mockClock, freq, fakeBaseMeasurement, fakeResultSet, 5, func(string, string) bool { return shouldRetry })
+		})
+
+		It("Returns true if failure count > allowed number of failures", func() {
+			fakeResultSet.FailedReturns(6)
 
 			Expect(p.Failed()).To(BeTrue())
 		})
 
-		It("Returns false if failure count == 0", func() {
-			fakeResultSet.FailedReturns(0)
+		It("Returns false if failure count < allowed number of failures", func() {
+			fakeResultSet.FailedReturns(4)
+
+			Expect(p.Failed()).To(BeFalse())
+		})
+
+		It("Returns false if failure count == allowed number of failures", func() {
+			fakeResultSet.FailedReturns(5)
 
 			Expect(p.Failed()).To(BeFalse())
 		})

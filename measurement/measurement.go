@@ -32,6 +32,7 @@ func NewPeriodic(
 	freq time.Duration,
 	baseMeasurement BaseMeasurement,
 	resultSet ResultSet,
+	allowedFailures int,
 	shouldRetryFunc ShouldRetryFunc,
 ) Measurement {
 	return &periodic{
@@ -40,6 +41,7 @@ func NewPeriodic(
 		freq:            freq,
 		baseMeasurement: baseMeasurement,
 		shouldRetryFunc: shouldRetryFunc,
+		allowedFailures: allowedFailures,
 
 		stopChan:  make(chan int),
 		resultSet: resultSet,
