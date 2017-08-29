@@ -76,7 +76,7 @@ func (p *periodic) logFailure(msg, stdOut, stdErr string) {
 	}
 
 	p.logger.Printf(
-		"\x1b[31mFAILURE(%s): %s%s\x1b[0m\n%s%s\n",
+		"\x1b[31mFAILURE (%s): %s%s\x1b[0m\n%s%s\n",
 		p.baseMeasurement.Name(),
 		msg,
 		lfMsg,
@@ -98,26 +98,17 @@ func (p *periodic) Failed() bool {
 }
 
 func (p *periodic) Summary() string {
+	msg := "SUCCESS (%s): %d failed attempts to %s did not exceed the threshold of %d allowed failures (Total attempts: %d)"
 	if p.Failed() {
-		failMsg := fmt.Sprintf(
-			"FAILED(%s): %d of %d attempts to %s failed",
-			p.baseMeasurement.Name(),
-			p.resultSet.Failed(),
-			p.resultSet.Total(),
-			p.baseMeasurement.SummaryPhrase(),
-		)
-
-		if sslf, _ := p.resultSet.SuccessesSinceLastFailure(); sslf > 0 {
-			failMsg = fmt.Sprintf("%s (the last %d succeeded)", failMsg, sslf)
-		}
-
-		return failMsg
+		msg = "FAILED (%s): %d failed attempts to %s exceeded the threshold of %d allowed failures (Total attempts: %d)"
 	}
 
 	return fmt.Sprintf(
-		"SUCCESS(%s): All %d attempts to %s succeeded",
+		msg,
 		p.baseMeasurement.Name(),
-		p.resultSet.Total(),
+		p.resultSet.Failed(),
 		p.baseMeasurement.SummaryPhrase(),
+		p.allowedFailures,
+		p.resultSet.Total(),
 	)
 }

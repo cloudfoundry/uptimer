@@ -73,7 +73,7 @@ func main() {
 
 	pushCmdGenerator := cfCmdGenerator.New(pushTmpDir)
 	pushWorkflow, pushOrg := createWorkflow(cfg.CF, appPath)
-	logger.Printf("Setting up push workflow with org %s...", pushOrg)
+	logger.Printf("Setting up push workflow with org %s ...", pushOrg)
 	if err := bufferedRunner.RunInSequence(pushWorkflow.Setup(pushCmdGenerator)...); err != nil {
 		logBufferedRunnerFailure(logger, "push workflow setup", err, runnerOutBuf, runnerErrBuf)
 		performMeasurements = false
@@ -95,7 +95,7 @@ func main() {
 
 	orc := orchestrator.New(cfg.While, logger, orcWorkflow, cmdRunner.New(os.Stdout, os.Stderr, io.Copy), measurements)
 
-	logger.Printf("Setting up main workflow with org %s...", orcOrg)
+	logger.Printf("Setting up main workflow with org %s ...", orcOrg)
 	if err := orc.Setup(bufferedRunner, orcCmdGenerator); err != nil {
 		logBufferedRunnerFailure(logger, "main workflow setup", err, runnerOutBuf, runnerErrBuf)
 		performMeasurements = false
