@@ -15,7 +15,7 @@ import (
 
 var _ = Describe("CfWorkflow", func() {
 	var (
-		cfc     *config.CfConfig
+		cfc     *config.Cf
 		ccg     cfCmdGenerator.CfCmdGenerator
 		org     string
 		space   string
@@ -27,7 +27,7 @@ var _ = Describe("CfWorkflow", func() {
 	)
 
 	BeforeEach(func() {
-		cfc = &config.CfConfig{
+		cfc = &config.Cf{
 			API:           "jigglypuff.cf-app.com",
 			AppDomain:     "app.jigglypuff.cf-app.com",
 			AdminUser:     "pika",

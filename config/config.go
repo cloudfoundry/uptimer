@@ -6,20 +6,28 @@ import (
 )
 
 type Config struct {
-	While []*CommandConfig `json:"while"`
-	CF    *CfConfig        `json:"cf"`
+	While           []*Command       `json:"while"`
+	CF              *Cf              `json:"cf"`
+	AllowedFailures *AllowedFailures `json:"allowed_failures"`
 }
 
-type CommandConfig struct {
+type Command struct {
 	Command     string   `json:"command"`
 	CommandArgs []string `json:"command_args"`
 }
 
-type CfConfig struct {
+type Cf struct {
 	API           string `json:"api"`
 	AppDomain     string `json:"app_domain"`
 	AdminUser     string `json:"admin_user"`
 	AdminPassword string `json:"admin_password"`
+}
+
+type AllowedFailures struct {
+	AppPushability     int `json:"app_pushability"`
+	HttpAvailability   int `json:"http_availability"`
+	RecentLogsFetching int `json:"recent_logs_fetching"`
+	StreamingLogs      int `json:"streaming_logs"`
 }
 
 func Load(filename string) (*Config, error) {

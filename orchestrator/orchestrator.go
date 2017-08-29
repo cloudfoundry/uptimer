@@ -24,13 +24,13 @@ type Orchestrator interface {
 
 type orchestrator struct {
 	logger              *log.Logger
-	whileConfig         []*config.CommandConfig
+	whileConfig         []*config.Command
 	workflow            cfWorkflow.CfWorkflow
 	whileCommandsRunner cmdRunner.CmdRunner
 	measurements        []measurement.Measurement
 }
 
-func New(whileConfig []*config.CommandConfig, logger *log.Logger, workflow cfWorkflow.CfWorkflow, runner cmdRunner.CmdRunner, measurements []measurement.Measurement) Orchestrator {
+func New(whileConfig []*config.Command, logger *log.Logger, workflow cfWorkflow.CfWorkflow, runner cmdRunner.CmdRunner, measurements []measurement.Measurement) Orchestrator {
 	return &orchestrator{
 		logger:              logger,
 		whileConfig:         whileConfig,

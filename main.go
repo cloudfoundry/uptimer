@@ -164,7 +164,7 @@ func compileIncludedApp() (string, error) {
 	return appPath, err
 }
 
-func createWorkflow(cfc *config.CfConfig, appPath string) (cfWorkflow.CfWorkflow, string) {
+func createWorkflow(cfc *config.Cf, appPath string) (cfWorkflow.CfWorkflow, string) {
 	workflowOrg := fmt.Sprintf("uptimer-org-%s", uuid.NewV4().String())
 
 	return cfWorkflow.New(

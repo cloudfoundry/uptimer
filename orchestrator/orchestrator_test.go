@@ -23,8 +23,8 @@ import (
 
 var _ = Describe("Orchestrator", func() {
 	var (
-		fakeCommand1     *config.CommandConfig
-		fakeCommand2     *config.CommandConfig
+		fakeCommand1     *config.Command
+		fakeCommand2     *config.Command
 		logBuf           *bytes.Buffer
 		logger           *log.Logger
 		fakeWorkflow     *cfWorkflowfakes.FakeCfWorkflow
@@ -37,11 +37,11 @@ var _ = Describe("Orchestrator", func() {
 	)
 
 	BeforeEach(func() {
-		fakeCommand1 = &config.CommandConfig{
+		fakeCommand1 = &config.Command{
 			Command:     "sleep",
 			CommandArgs: []string{"10"},
 		}
-		fakeCommand2 = &config.CommandConfig{
+		fakeCommand2 = &config.Command{
 			Command:     "sleep",
 			CommandArgs: []string{"15"},
 		}
@@ -55,7 +55,7 @@ var _ = Describe("Orchestrator", func() {
 		fakeMeasurement2.NameReturns("name2")
 		ccg = cfCmdGenerator.New("/cfhome")
 
-		orc = New([]*config.CommandConfig{fakeCommand1, fakeCommand2}, logger, fakeWorkflow, fakeRunner, []measurement.Measurement{fakeMeasurement1, fakeMeasurement2})
+		orc = New([]*config.Command{fakeCommand1, fakeCommand2}, logger, fakeWorkflow, fakeRunner, []measurement.Measurement{fakeMeasurement1, fakeMeasurement2})
 	})
 
 	Describe("Setup", func() {

@@ -22,7 +22,7 @@ type CfWorkflow interface {
 }
 
 type cfWorkflow struct {
-	cf *config.CfConfig
+	cf *config.Cf
 
 	appUrl  string
 	appPath string
@@ -36,7 +36,7 @@ func (c *cfWorkflow) AppUrl() string {
 	return c.appUrl
 }
 
-func New(cfConfig *config.CfConfig, org, space, quota, appName, appPath string) CfWorkflow {
+func New(cfConfig *config.Cf, org, space, quota, appName, appPath string) CfWorkflow {
 	appUrl := fmt.Sprintf("https://%s.%s", appName, cfConfig.AppDomain)
 
 	return &cfWorkflow{
