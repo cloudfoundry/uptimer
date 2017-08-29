@@ -44,9 +44,16 @@ Here is an example config `json`:
         "app_domain": "my-cf.com",
         "admin_user": "admin",
         "admin_password": "PASS"
+    },
+    "allowed_failures": {
+        "app_pushability": 2,
+        "http_availability": 5,
+        "recent_logs": 2,
+        "streaming_logs": 2
     }
 }
 ```
+### While (required)
 The `while` section is an array of commands.
 These are executed in order while the measurement is run.
 When the last while command exits,
@@ -67,6 +74,7 @@ to just run up-timer for some period:
 }]
 ```
 
+### Cf (required)
 The `cf` section contains information necessary
 to perform the `cf auth` and `cf login` commands
 on the target environment.
@@ -74,6 +82,20 @@ on the target environment.
 Uptimer requires an admin user
 because it creates and configures an org and space
 during test setup.
+
+### Allowed Failures (optional)
+The `allowed_failures` section contains failure thresholds,
+expressed as integers.
+In the example above, the `app_pushability` measurement
+can fail at most two times before
+the measurement is marked as failed.
+
+This allows users to tolerate variance in downtime
+to suit their needs.
+
+If this config section is not specified,
+the default threshold will be 0
+for each measurement.
 
 ## CI
 If you wish to run uptimer in CI

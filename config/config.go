@@ -6,9 +6,9 @@ import (
 )
 
 type Config struct {
-	While           []*Command       `json:"while"`
-	CF              *Cf              `json:"cf"`
-	AllowedFailures *AllowedFailures `json:"allowed_failures"`
+	While           []*Command      `json:"while"`
+	CF              *Cf             `json:"cf"`
+	AllowedFailures AllowedFailures `json:"allowed_failures"`
 }
 
 type Command struct {

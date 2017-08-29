@@ -183,7 +183,7 @@ func createMeasurements(
 	logger *log.Logger,
 	orcWorkflow, pushWorkflow cfWorkflow.CfWorkflow,
 	recentLogsCmdGenerator, streamingLogsCmdGenerator, pushCmdGenerator cfCmdGenerator.CfCmdGenerator,
-	allowedFailures *config.AllowedFailures,
+	allowedFailures config.AllowedFailures,
 ) []measurement.Measurement {
 	recentLogsBufferRunner, recentLogsRunnerOutBuf, recentLogsRunnerErrBuf := createBufferedRunner()
 	recentLogsMeasurement := measurement.NewRecentLogs(
