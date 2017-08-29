@@ -55,7 +55,7 @@ type BaseMeasurement interface {
 	SummaryPhrase() string
 }
 
-func NewAvailability(url string, client *http.Client) BaseMeasurement {
+func NewHTTPAvailability(url string, client *http.Client) BaseMeasurement {
 	return &availability{
 		name:          "HTTP availability",
 		summaryPhrase: "perform get requests",
@@ -72,7 +72,7 @@ func NewRecentLogs(
 	appLogValidator appLogValidator.AppLogValidator,
 ) BaseMeasurement {
 	return &recentLogs{
-		name:                           "Recent logs fetching",
+		name:                           "Recent logs",
 		summaryPhrase:                  "fetch recent logs",
 		recentLogsCommandGeneratorFunc: recentLogsCommandGeneratorFunc,
 		runner:          runner,
@@ -82,7 +82,7 @@ func NewRecentLogs(
 	}
 }
 
-func NewStreamLogs(
+func NewStreamingLogs(
 	streamLogsCommandGeneratorFunc func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter),
 	runner cmdRunner.CmdRunner,
 	runnerOutBuf *bytes.Buffer,
@@ -100,7 +100,7 @@ func NewStreamLogs(
 	}
 }
 
-func NewPushability(
+func NewAppPushability(
 	pushAndDeleteAppCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter,
 	runner cmdRunner.CmdRunner,
 	runnerOutBuf *bytes.Buffer,

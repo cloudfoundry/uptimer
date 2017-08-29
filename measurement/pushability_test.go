@@ -35,7 +35,7 @@ var _ = Describe("Pushability", func() {
 		outBuf = bytes.NewBuffer([]byte{})
 		errBuf = bytes.NewBuffer([]byte{})
 
-		pm = NewPushability(fakeCmdGeneratorFunc, fakeCommandRunner, outBuf, errBuf)
+		pm = NewAppPushability(fakeCmdGeneratorFunc, fakeCommandRunner, outBuf, errBuf)
 	})
 
 	Describe("Name", func() {

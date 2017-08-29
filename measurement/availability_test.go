@@ -44,7 +44,7 @@ var _ = Describe("Availability", func() {
 		}
 		fakeResultSet = &measurementfakes.FakeResultSet{}
 
-		am = NewAvailability(url, client)
+		am = NewHTTPAvailability(url, client)
 	})
 
 	Describe("Name", func() {

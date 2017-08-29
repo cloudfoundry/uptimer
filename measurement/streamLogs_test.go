@@ -51,7 +51,7 @@ var _ = Describe("StreamLogs", func() {
 		}
 		fakeResultSet = &measurementfakes.FakeResultSet{}
 
-		slm = NewStreamLogs(fakeCmdGeneratorFunc, fakeCommandRunner, outBuf, errBuf, fakeAppLogValidator)
+		slm = NewStreamingLogs(fakeCmdGeneratorFunc, fakeCommandRunner, outBuf, errBuf, fakeAppLogValidator)
 	})
 
 	Describe("Name", func() {

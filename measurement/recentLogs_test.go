@@ -46,7 +46,7 @@ var _ = Describe("RecentLogs", func() {
 
 	Describe("Name", func() {
 		It("returns the name", func() {
-			Expect(rlm.Name()).To(Equal("Recent logs fetching"))
+			Expect(rlm.Name()).To(Equal("Recent logs"))
 		})
 	})
 

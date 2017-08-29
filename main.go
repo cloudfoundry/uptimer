@@ -196,20 +196,20 @@ func createMeasurements(
 		appLogValidator.New(),
 	)
 
-	streamLogsBufferRunner, streamLogsRunnerOutBuf, streamLogsRunnerErrBuf := createBufferedRunner()
-	streamLogsMeasurement := measurement.NewStreamLogs(
+	streamingLogsBufferRunner, streamingLogsRunnerOutBuf, streamingLogsRunnerErrBuf := createBufferedRunner()
+	streamingLogsMeasurement := measurement.NewStreamingLogs(
 		func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter) {
 			ctx, cancelFunc := context.WithTimeout(context.Background(), 15*time.Second)
 			return ctx, cancelFunc, orcWorkflow.StreamLogs(ctx, streamingLogsCmdGenerator)
 		},
-		streamLogsBufferRunner,
-		streamLogsRunnerOutBuf,
-		streamLogsRunnerErrBuf,
+		streamingLogsBufferRunner,
+		streamingLogsRunnerOutBuf,
+		streamingLogsRunnerErrBuf,
 		appLogValidator.New(),
 	)
 
 	pushRunner, pushRunnerOutBuf, pushRunnerErrBuf := createBufferedRunner()
-	pushabilityMeasurement := measurement.NewPushability(
+	appPushabilityMeasurement := measurement.NewAppPushability(
 		func() []cmdStartWaiter.CmdStartWaiter {
 			return append(pushWorkflow.Push(pushCmdGenerator), pushWorkflow.Delete(pushCmdGenerator)...)
 		},
@@ -218,7 +218,7 @@ func createMeasurements(
 		pushRunnerErrBuf,
 	)
 
-	availabilityMeasurement := measurement.NewAvailability(
+	httpAvailabilityMeasurement := measurement.NewHTTPAvailability(
 		orcWorkflow.AppUrl(),
 		&http.Client{
 			Transport: &http.Transport{
@@ -238,7 +238,7 @@ func createMeasurements(
 			logger,
 			clock,
 			time.Second,
-			availabilityMeasurement,
+			httpAvailabilityMeasurement,
 			measurement.NewResultSet(),
 			allowedFailures.HttpAvailability,
 			func(string, string) bool { return false },
@@ -247,7 +247,7 @@ func createMeasurements(
 			logger,
 			clock,
 			time.Minute,
-			pushabilityMeasurement,
+			appPushabilityMeasurement,
 			measurement.NewResultSet(),
 			allowedFailures.AppPushability,
 			authFailedRetryFunc,
@@ -258,14 +258,14 @@ func createMeasurements(
 			10*time.Second,
 			recentLogsMeasurement,
 			measurement.NewResultSet(),
-			allowedFailures.RecentLogsFetching,
+			allowedFailures.RecentLogs,
 			authFailedRetryFunc,
 		),
 		measurement.NewPeriodic(
 			logger,
 			clock,
 			30*time.Second,
-			streamLogsMeasurement,
+			streamingLogsMeasurement,
 			measurement.NewResultSet(),
 			allowedFailures.StreamingLogs,
 			authFailedRetryFunc,

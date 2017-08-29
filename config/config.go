@@ -24,10 +24,10 @@ type Cf struct {
 }
 
 type AllowedFailures struct {
-	AppPushability     int `json:"app_pushability"`
-	HttpAvailability   int `json:"http_availability"`
-	RecentLogsFetching int `json:"recent_logs_fetching"`
-	StreamingLogs      int `json:"streaming_logs"`
+	AppPushability   int `json:"app_pushability"`
+	HttpAvailability int `json:"http_availability"`
+	RecentLogs       int `json:"recent_logs"`
+	StreamingLogs    int `json:"streaming_logs"`
 }
 
 func Load(filename string) (*Config, error) {
