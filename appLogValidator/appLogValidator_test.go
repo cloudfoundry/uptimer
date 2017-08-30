@@ -49,6 +49,12 @@ var _ = Describe("AppLogValidator", func() {
 				Expect(err).To(MatchError("cannot find any app logs"))
 			})
 
+			It("returns a failure when the app exits", func() {
+				_, err := alv.IsNewer("[APP OUT Exit status 143")
+
+				Expect(err).To(MatchError("app exited"))
+			})
+
 			It("returns an error if called with a log line that doesn't have an epoch", func() {
 				_, err := alv.IsNewer("[APP OUT notAnEpoch")
 

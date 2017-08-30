@@ -67,5 +67,9 @@ func getLogEpoch(line string) (int, error) {
 	outSplit := strings.SplitAfter(line, "OUT")
 	afterOut := strings.TrimSpace(outSplit[len(outSplit)-1])
 
+	if afterOut == "Exit status 143" {
+		return 0, fmt.Errorf("app exited")
+	}
+
 	return strconv.Atoi(afterOut)
 }
