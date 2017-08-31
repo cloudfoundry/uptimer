@@ -105,7 +105,8 @@ var _ = Describe("CfCmdGenerator", func() {
 	Describe("Push", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "push", "appName", "-p", "path/to/app", "-b", "binary_buildpack", "-c", "./app", "-i", "2")
-			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
+			expectedCmd.Env = append(expectedCmd.Env, fmt.Sprintf("CF_HOME=%s", cfHome))
+			expectedCmd.Env = append(expectedCmd.Env, "CF_STAGING_TIMEOUT=1")
 
 			cmd := generator.Push("appName", "path/to/app")
 

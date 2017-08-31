@@ -34,8 +34,13 @@ func New(cfHome string) CfCmdGenerator {
 	return &cfCmdGenerator{cfHome: cfHome}
 }
 
-func (c *cfCmdGenerator) addCfHome(cmd *exec.Cmd) cmdStartWaiter.CmdStartWaiter {
-	cmd.Env = []string{fmt.Sprintf("CF_HOME=%s", c.cfHome)}
+func (c *cfCmdGenerator) addCfHome(cmd *exec.Cmd) *exec.Cmd {
+	cmd.Env = append(cmd.Env, fmt.Sprintf("CF_HOME=%s", c.cfHome))
+	return cmd
+}
+
+func (c *cfCmdGenerator) addCfStagingTimeout(cmd *exec.Cmd) *exec.Cmd {
+	cmd.Env = append(cmd.Env, "CF_STAGING_TIMEOUT=1")
 	return cmd
 }
 
@@ -104,13 +109,15 @@ func (c *cfCmdGenerator) Target(org string, space string) cmdStartWaiter.CmdStar
 }
 
 func (c *cfCmdGenerator) Push(name string, path string) cmdStartWaiter.CmdStartWaiter {
-	return c.addCfHome(
-		exec.Command(
-			"cf", "push", name,
-			"-p", path,
-			"-b", "binary_buildpack",
-			"-c", "./app",
-			"-i", "2",
+	return c.addCfStagingTimeout(
+		c.addCfHome(
+			exec.Command(
+				"cf", "push", name,
+				"-p", path,
+				"-b", "binary_buildpack",
+				"-c", "./app",
+				"-i", "2",
+			),
 		),
 	)
 }
