@@ -17,7 +17,7 @@ type CfCmdGenerator interface {
 	CreateOrg(org string) cmdStartWaiter.CmdStartWaiter
 	CreateSpace(org, space string) cmdStartWaiter.CmdStartWaiter
 	Target(org, space string) cmdStartWaiter.CmdStartWaiter
-	Push(name, path string) cmdStartWaiter.CmdStartWaiter
+	Push(name, domain, path string) cmdStartWaiter.CmdStartWaiter
 	Delete(name string) cmdStartWaiter.CmdStartWaiter
 	DeleteOrg(org string) cmdStartWaiter.CmdStartWaiter
 	DeleteQuota(quota string) cmdStartWaiter.CmdStartWaiter
@@ -108,11 +108,12 @@ func (c *cfCmdGenerator) Target(org string, space string) cmdStartWaiter.CmdStar
 	)
 }
 
-func (c *cfCmdGenerator) Push(name string, path string) cmdStartWaiter.CmdStartWaiter {
+func (c *cfCmdGenerator) Push(name string, domain string, path string) cmdStartWaiter.CmdStartWaiter {
 	return c.addCfStagingTimeout(
 		c.addCfHome(
 			exec.Command(
 				"cf", "push", name,
+				"-d", domain,
 				"-p", path,
 				"-b", "binary_buildpack",
 				"-c", "./app",
