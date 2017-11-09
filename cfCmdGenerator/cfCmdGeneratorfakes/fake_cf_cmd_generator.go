@@ -91,11 +91,12 @@ type FakeCfCmdGenerator struct {
 	targetReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	PushStub        func(name, path string) cmdStartWaiter.CmdStartWaiter
+	PushStub        func(name, domain, path string) cmdStartWaiter.CmdStartWaiter
 	pushMutex       sync.RWMutex
 	pushArgsForCall []struct {
-		name string
-		path string
+		name   string
+		domain string
+		path   string
 	}
 	pushReturns struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -512,17 +513,18 @@ func (fake *FakeCfCmdGenerator) TargetReturnsOnCall(i int, result1 cmdStartWaite
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) Push(name string, path string) cmdStartWaiter.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) Push(name string, domain string, path string) cmdStartWaiter.CmdStartWaiter {
 	fake.pushMutex.Lock()
 	ret, specificReturn := fake.pushReturnsOnCall[len(fake.pushArgsForCall)]
 	fake.pushArgsForCall = append(fake.pushArgsForCall, struct {
-		name string
-		path string
-	}{name, path})
-	fake.recordInvocation("Push", []interface{}{name, path})
+		name   string
+		domain string
+		path   string
+	}{name, domain, path})
+	fake.recordInvocation("Push", []interface{}{name, domain, path})
 	fake.pushMutex.Unlock()
 	if fake.PushStub != nil {
-		return fake.PushStub(name, path)
+		return fake.PushStub(name, domain, path)
 	}
 	if specificReturn {
 		return ret.result1
@@ -536,10 +538,10 @@ func (fake *FakeCfCmdGenerator) PushCallCount() int {
 	return len(fake.pushArgsForCall)
 }
 
-func (fake *FakeCfCmdGenerator) PushArgsForCall(i int) (string, string) {
+func (fake *FakeCfCmdGenerator) PushArgsForCall(i int) (string, string, string) {
 	fake.pushMutex.RLock()
 	defer fake.pushMutex.RUnlock()
-	return fake.pushArgsForCall[i].name, fake.pushArgsForCall[i].path
+	return fake.pushArgsForCall[i].name, fake.pushArgsForCall[i].domain, fake.pushArgsForCall[i].path
 }
 
 func (fake *FakeCfCmdGenerator) PushReturns(result1 cmdStartWaiter.CmdStartWaiter) {
