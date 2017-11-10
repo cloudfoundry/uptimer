@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"os"
@@ -16,31 +15,24 @@ func main() {
 		log.Fatal(err)
 	}
 	defer l.Close()
-	log.Println("Listening on " + os.Getenv("PORT"))
 
 	for {
 		conn, err := l.Accept()
-
-		log.Println("Accepted connection")
 		if err != nil {
-			log.Printf("Error accepting: %s", err)
 			continue
 		}
-		go handleConnection(conn)
+
+		go func() {
+			defer conn.Close()
+			handleConnection(conn)
+		}()
 	}
 }
 
 func handleConnection(conn net.Conn) {
-	defer conn.Close()
-
 	msg := rfc5424.Message{}
 	for {
-		_, err := msg.ReadFrom(conn)
-		if err != nil {
-			if err == io.EOF {
-				return
-			}
-			log.Printf("ReadFrom err: %s", err)
+		if _, err := msg.ReadFrom(conn); err != nil {
 			return
 		}
 
