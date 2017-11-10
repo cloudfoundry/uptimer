@@ -25,6 +25,9 @@ type CfCmdGenerator interface {
 	RecentLogs(appName string) cmdStartWaiter.CmdStartWaiter
 	StreamLogs(ctx context.Context, appName string) cmdStartWaiter.CmdStartWaiter
 	MapRoute(appName, domain string) cmdStartWaiter.CmdStartWaiter
+	CreateUserProvidedService(serviceName, syslogURL string) cmdStartWaiter.CmdStartWaiter
+	BindService(appName, serviceName string) cmdStartWaiter.CmdStartWaiter
+	Restage(appName string) cmdStartWaiter.CmdStartWaiter
 }
 
 type cfCmdGenerator struct {
@@ -182,6 +185,31 @@ func (c *cfCmdGenerator) MapRoute(name, domain string) cmdStartWaiter.CmdStartWa
 		exec.Command(
 			"cf", "map-route", name, domain,
 			"--random-port",
+		),
+	)
+}
+
+func (c *cfCmdGenerator) CreateUserProvidedService(serviceName, syslogURL string) cmdStartWaiter.CmdStartWaiter {
+	return c.addCfHome(
+		exec.Command(
+			"cf", "create-user-provided-service", serviceName,
+			"-l", syslogURL,
+		),
+	)
+}
+
+func (c *cfCmdGenerator) BindService(appName, serviceName string) cmdStartWaiter.CmdStartWaiter {
+	return c.addCfHome(
+		exec.Command(
+			"cf", "bind-service", appName, serviceName,
+		),
+	)
+}
+
+func (c *cfCmdGenerator) Restage(appName string) cmdStartWaiter.CmdStartWaiter {
+	return c.addCfHome(
+		exec.Command(
+			"cf", "restage", appName,
 		),
 	)
 }

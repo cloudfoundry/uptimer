@@ -192,4 +192,37 @@ var _ = Describe("CfCmdGenerator", func() {
 			Expect(cmd).To(Equal(expectedCmd))
 		})
 	})
+
+	Describe("CreateUserProvidedService", func() {
+		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "create-user-provided-service", "serviceName", "-l", "syslog://tcp.example.com:54321")
+			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
+
+			cmd := generator.CreateUserProvidedService("serviceName", "syslog://tcp.example.com:54321")
+
+			Expect(cmd).To(Equal(expectedCmd))
+		})
+	})
+
+	Describe("BindService", func() {
+		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "bind-service", "appName", "serviceName")
+			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
+
+			cmd := generator.BindService("appName", "serviceName")
+
+			Expect(cmd).To(Equal(expectedCmd))
+		})
+	})
+
+	Describe("Restage", func() {
+		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "restage", "appName")
+			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
+
+			cmd := generator.Restage("appName")
+
+			Expect(cmd).To(Equal(expectedCmd))
+		})
+	})
 })
