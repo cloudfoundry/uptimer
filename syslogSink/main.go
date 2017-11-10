@@ -23,7 +23,7 @@ func main() {
 
 		log.Println("Accepted connection")
 		if err != nil {
-			log.Println("Error accepting: %s", err)
+			log.Printf("Error accepting: %s", err)
 			continue
 		}
 		go handleConnection(conn)

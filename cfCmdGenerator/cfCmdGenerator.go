@@ -24,6 +24,7 @@ type CfCmdGenerator interface {
 	LogOut() cmdStartWaiter.CmdStartWaiter
 	RecentLogs(appName string) cmdStartWaiter.CmdStartWaiter
 	StreamLogs(ctx context.Context, appName string) cmdStartWaiter.CmdStartWaiter
+	MapRoute(appName, domain string) cmdStartWaiter.CmdStartWaiter
 }
 
 type cfCmdGenerator struct {
@@ -172,6 +173,15 @@ func (c *cfCmdGenerator) StreamLogs(ctx context.Context, appName string) cmdStar
 	return c.addCfHome(
 		exec.CommandContext(ctx,
 			"cf", "logs", appName,
+		),
+	)
+}
+
+func (c *cfCmdGenerator) MapRoute(name, domain string) cmdStartWaiter.CmdStartWaiter {
+	return c.addCfHome(
+		exec.Command(
+			"cf", "map-route", name, domain,
+			"--random-port",
 		),
 	)
 }

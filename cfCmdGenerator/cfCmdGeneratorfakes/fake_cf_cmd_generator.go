@@ -169,6 +169,18 @@ type FakeCfCmdGenerator struct {
 	streamLogsReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
+	MapRouteStub        func(appName, domain string) cmdStartWaiter.CmdStartWaiter
+	mapRouteMutex       sync.RWMutex
+	mapRouteArgsForCall []struct {
+		appName string
+		domain  string
+	}
+	mapRouteReturns struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
+	mapRouteReturnsOnCall map[int]struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
@@ -844,6 +856,55 @@ func (fake *FakeCfCmdGenerator) StreamLogsReturnsOnCall(i int, result1 cmdStartW
 	}{result1}
 }
 
+func (fake *FakeCfCmdGenerator) MapRoute(appName string, domain string) cmdStartWaiter.CmdStartWaiter {
+	fake.mapRouteMutex.Lock()
+	ret, specificReturn := fake.mapRouteReturnsOnCall[len(fake.mapRouteArgsForCall)]
+	fake.mapRouteArgsForCall = append(fake.mapRouteArgsForCall, struct {
+		appName string
+		domain  string
+	}{appName, domain})
+	fake.recordInvocation("MapRoute", []interface{}{appName, domain})
+	fake.mapRouteMutex.Unlock()
+	if fake.MapRouteStub != nil {
+		return fake.MapRouteStub(appName, domain)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.mapRouteReturns.result1
+}
+
+func (fake *FakeCfCmdGenerator) MapRouteCallCount() int {
+	fake.mapRouteMutex.RLock()
+	defer fake.mapRouteMutex.RUnlock()
+	return len(fake.mapRouteArgsForCall)
+}
+
+func (fake *FakeCfCmdGenerator) MapRouteArgsForCall(i int) (string, string) {
+	fake.mapRouteMutex.RLock()
+	defer fake.mapRouteMutex.RUnlock()
+	return fake.mapRouteArgsForCall[i].appName, fake.mapRouteArgsForCall[i].domain
+}
+
+func (fake *FakeCfCmdGenerator) MapRouteReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.MapRouteStub = nil
+	fake.mapRouteReturns = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfCmdGenerator) MapRouteReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.MapRouteStub = nil
+	if fake.mapRouteReturnsOnCall == nil {
+		fake.mapRouteReturnsOnCall = make(map[int]struct {
+			result1 cmdStartWaiter.CmdStartWaiter
+		})
+	}
+	fake.mapRouteReturnsOnCall[i] = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
 func (fake *FakeCfCmdGenerator) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -875,6 +936,8 @@ func (fake *FakeCfCmdGenerator) Invocations() map[string][][]interface{} {
 	defer fake.recentLogsMutex.RUnlock()
 	fake.streamLogsMutex.RLock()
 	defer fake.streamLogsMutex.RUnlock()
+	fake.mapRouteMutex.RLock()
+	defer fake.mapRouteMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

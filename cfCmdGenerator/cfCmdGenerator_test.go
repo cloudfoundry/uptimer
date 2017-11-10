@@ -181,4 +181,15 @@ var _ = Describe("CfCmdGenerator", func() {
 			Expect(cmd).To(Equal(expectedCmd))
 		})
 	})
+
+	Describe("MapRoute", func() {
+		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "map-route", "appName", "tcp.example.com", "--random-port")
+			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
+
+			cmd := generator.MapRoute("appName", "tcp.example.com")
+
+			Expect(cmd).To(Equal(expectedCmd))
+		})
+	})
 })
