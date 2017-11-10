@@ -56,12 +56,19 @@ func main() {
 	performMeasurements := true
 
 	logger.Println("Building included app...")
-	appPath, err := compileIncludedApp()
+	appPath, err := compileIncludedApp("app")
 	if err != nil {
 		logger.Println("Failed to build included app: ", err)
 		performMeasurements = false
 	}
 	logger.Println("Finished building included app")
+
+	logger.Println("Building included syslog sink app...")
+	_, err = compileIncludedApp("syslogSink")
+	if err != nil {
+		logger.Println("Failed to build included syslog sink app: ", err)
+	}
+	logger.Println("Finished building included syslog sink app")
 
 	orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, err := createTmpDirs()
 	if err != nil {
@@ -154,12 +161,19 @@ func createTmpDirs() (string, string, string, string, error) {
 	return orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, nil
 }
 
-func compileIncludedApp() (string, error) {
-	appPath := path.Join(os.Getenv("GOPATH"), "/src/github.com/cloudfoundry/uptimer/app")
+func compileIncludedApp(appName string) (string, error) {
+	appPath := path.Join(
+		os.Getenv("GOPATH"),
+		fmt.Sprintf("/src/github.com/cloudfoundry/uptimer/%s", appName),
+	)
 
 	buildCmd := exec.Command("go", "build")
 	buildCmd.Dir = appPath
-	buildCmd.Env = []string{"GOOS=linux", "GOARCH=amd64"}
+	buildCmd.Env = []string{
+		"GOOS=linux",
+		"GOARCH=amd64",
+		fmt.Sprintf("GOPATH=%s", os.Getenv("GOPATH")),
+	}
 	err := buildCmd.Run()
 
 	return appPath, err

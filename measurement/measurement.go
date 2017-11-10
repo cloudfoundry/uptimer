@@ -82,6 +82,24 @@ func NewRecentLogs(
 	}
 }
 
+func NewSyslogDrain(
+	recentLogsCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter,
+	runner cmdRunner.CmdRunner,
+	runnerOutBuf *bytes.Buffer,
+	runnerErrBuf *bytes.Buffer,
+	appLogValidator appLogValidator.AppLogValidator,
+) BaseMeasurement {
+	return &recentLogs{
+		name:                           "App syslog availability",
+		summaryPhrase:                  "check of application syslogs",
+		recentLogsCommandGeneratorFunc: recentLogsCommandGeneratorFunc,
+		runner:          runner,
+		runnerOutBuf:    runnerOutBuf,
+		runnerErrBuf:    runnerErrBuf,
+		appLogValidator: appLogValidator,
+	}
+}
+
 func NewStreamingLogs(
 	streamLogsCommandGeneratorFunc func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter),
 	runner cmdRunner.CmdRunner,

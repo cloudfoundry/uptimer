@@ -2,3 +2,4 @@
 config.json
 app/app
 uptimer
+syslogSink/syslogSink
