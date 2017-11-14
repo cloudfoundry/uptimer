@@ -368,7 +368,7 @@ func createAppSyslogAvailabilityMeasurement(
 		appLogValidator.New(),
 	)
 
-	return measurement.NewPeriodic(
+	return measurement.NewPeriodicWithoutMeasuringImmediately(
 		logger,
 		clock,
 		30*time.Second,

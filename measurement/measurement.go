@@ -26,6 +26,29 @@ type Measurement interface {
 
 type ShouldRetryFunc func(stdOut, stdErr string) bool
 
+func NewPeriodicWithoutMeasuringImmediately(
+	logger *log.Logger,
+	clock clock.Clock,
+	freq time.Duration,
+	baseMeasurement BaseMeasurement,
+	resultSet ResultSet,
+	allowedFailures int,
+	shouldRetryFunc ShouldRetryFunc,
+) Measurement {
+	return &periodic{
+		logger:             logger,
+		clock:              clock,
+		freq:               freq,
+		baseMeasurement:    baseMeasurement,
+		shouldRetryFunc:    shouldRetryFunc,
+		allowedFailures:    allowedFailures,
+		measureImmediately: false,
+
+		stopChan:  make(chan int),
+		resultSet: resultSet,
+	}
+}
+
 func NewPeriodic(
 	logger *log.Logger,
 	clock clock.Clock,
@@ -36,12 +59,13 @@ func NewPeriodic(
 	shouldRetryFunc ShouldRetryFunc,
 ) Measurement {
 	return &periodic{
-		logger:          logger,
-		clock:           clock,
-		freq:            freq,
-		baseMeasurement: baseMeasurement,
-		shouldRetryFunc: shouldRetryFunc,
-		allowedFailures: allowedFailures,
+		logger:             logger,
+		clock:              clock,
+		freq:               freq,
+		baseMeasurement:    baseMeasurement,
+		shouldRetryFunc:    shouldRetryFunc,
+		allowedFailures:    allowedFailures,
+		measureImmediately: true,
 
 		stopChan:  make(chan int),
 		resultSet: resultSet,

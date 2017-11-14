@@ -9,12 +9,13 @@ import (
 )
 
 type periodic struct {
-	logger          *log.Logger
-	clock           clock.Clock
-	freq            time.Duration
-	baseMeasurement BaseMeasurement
-	shouldRetryFunc ShouldRetryFunc
-	allowedFailures int
+	logger             *log.Logger
+	clock              clock.Clock
+	freq               time.Duration
+	baseMeasurement    BaseMeasurement
+	shouldRetryFunc    ShouldRetryFunc
+	allowedFailures    int
+	measureImmediately bool
 
 	resultSet ResultSet
 	stopChan  chan int
@@ -27,7 +28,9 @@ func (p *periodic) Name() string {
 func (p *periodic) Start() {
 	ticker := p.clock.Ticker(p.freq)
 	go func() {
-		p.performMeasurement()
+		if p.measureImmediately {
+			p.performMeasurement()
+		}
 		for {
 			select {
 			case <-ticker.C:

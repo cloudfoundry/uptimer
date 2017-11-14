@@ -40,7 +40,15 @@ var _ = Describe("Periodic", func() {
 		allowedFailures = 0
 		shouldRetry = false
 
-		p = NewPeriodic(logger, mockClock, freq, fakeBaseMeasurement, fakeResultSet, allowedFailures, func(string, string) bool { return shouldRetry })
+		p = NewPeriodic(
+			logger,
+			mockClock,
+			freq,
+			fakeBaseMeasurement,
+			fakeResultSet,
+			allowedFailures,
+			func(string, string) bool { return shouldRetry },
+		)
 	})
 
 	Describe("Name", func() {
@@ -53,19 +61,48 @@ var _ = Describe("Periodic", func() {
 		AfterEach(func() {
 			p.Stop()
 		})
+		Context("with measure immediately", func() {
+			It("runs the base measurement immediately, before one frequency elapses", func() {
+				p.Start()
+				mockClock.Add(freq - time.Nanosecond)
 
-		It("runs the base measurement immediately, before one frequency elapses", func() {
-			p.Start()
-			mockClock.Add(freq - time.Nanosecond)
+				Expect(fakeBaseMeasurement.PerformMeasurementCallCount()).To(Equal(1))
+			})
 
-			Expect(fakeBaseMeasurement.PerformMeasurementCallCount()).To(Equal(1))
+			It("runs the base measurement with given frequency", func() {
+				p.Start()
+				mockClock.Add(3 * freq)
+
+				Expect(fakeBaseMeasurement.PerformMeasurementCallCount()).To(Equal(4))
+			})
 		})
 
-		It("runs the base measurement with given frequency", func() {
-			p.Start()
-			mockClock.Add(3 * freq)
+		Context("without measure immediately", func() {
+			BeforeEach(func() {
+				p = NewPeriodicWithoutMeasuringImmediately(
+					logger,
+					mockClock,
+					freq,
+					fakeBaseMeasurement,
+					fakeResultSet,
+					allowedFailures,
+					func(string, string) bool { return shouldRetry },
+				)
+			})
 
-			Expect(fakeBaseMeasurement.PerformMeasurementCallCount()).To(Equal(4))
+			It("does not measure until one time frequency has passed", func() {
+				p.Start()
+				mockClock.Add(freq - time.Nanosecond)
+
+				Expect(fakeBaseMeasurement.PerformMeasurementCallCount()).To(Equal(0))
+			})
+
+			It("runs the base measurement with given frequency, starting after one frequency has passed", func() {
+				p.Start()
+				mockClock.Add(3 * freq)
+
+				Expect(fakeBaseMeasurement.PerformMeasurementCallCount()).To(Equal(3))
+			})
 		})
 
 		Context("when shouldRetry is false", func() {
