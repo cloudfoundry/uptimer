@@ -56,7 +56,9 @@ func getLatestAppNumber(log string) (int, error) {
 func getLastAppLogLine(log string) (string, error) {
 	lines := strings.Split(log, "\n")
 	for i := len(lines) - 1; i >= 0; i-- {
-		if strings.Contains(lines[i], appLogMarker) && !strings.Contains(lines[i], appExitedMarker) {
+		if strings.Contains(lines[i], appLogMarker) &&
+			!strings.Contains(lines[i], appExitedMarker) &&
+			!strings.Contains(lines[i], "HTTP") {
 			return strings.TrimSpace(lines[i]), nil
 		}
 	}
