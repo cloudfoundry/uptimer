@@ -15,13 +15,14 @@ import (
 
 var _ = Describe("CfWorkflow", func() {
 	var (
-		cfc     *config.Cf
-		ccg     cfCmdGenerator.CfCmdGenerator
-		org     string
-		space   string
-		quota   string
-		appName string
-		appPath string
+		cfc        *config.Cf
+		ccg        cfCmdGenerator.CfCmdGenerator
+		org        string
+		space      string
+		quota      string
+		appName    string
+		appPath    string
+		appCommand string
 
 		cw CfWorkflow
 	)
@@ -32,6 +33,9 @@ var _ = Describe("CfWorkflow", func() {
 			AppDomain:     "app.jigglypuff.cf-app.com",
 			AdminUser:     "pika",
 			AdminPassword: "chu",
+
+			TCPDomain:     "tcp.jigglypuff.cf-app.com",
+			AvailablePort: 1025,
 		}
 		ccg = cfCmdGenerator.New("/cfhome")
 		org = "someOrg"
@@ -39,8 +43,9 @@ var _ = Describe("CfWorkflow", func() {
 		quota = "someQuota"
 		appName = "doraApp"
 		appPath = "this/is/an/app/path"
+		appCommand = "./app-command"
 
-		cw = New(cfc, org, space, quota, appName, appPath)
+		cw = New(cfc, org, space, quota, appName, appPath, appCommand)
 	})
 
 	It("has the correct app url", func() {
@@ -56,7 +61,7 @@ var _ = Describe("CfWorkflow", func() {
 					ccg.Api("jigglypuff.cf-app.com"),
 					ccg.Auth("pika", "chu"),
 					ccg.Target("someOrg", "someSpace"),
-					ccg.Push("doraApp", "app.jigglypuff.cf-app.com", "this/is/an/app/path"),
+					ccg.Push("doraApp", "app.jigglypuff.cf-app.com", "this/is/an/app/path", "./app-command"),
 				},
 			))
 		})
@@ -137,6 +142,38 @@ var _ = Describe("CfWorkflow", func() {
 					ccg.Auth("pika", "chu"),
 					ccg.Target("someOrg", "someSpace"),
 					ccg.StreamLogs(ctx, "doraApp"),
+				},
+			))
+		})
+	})
+
+	Describe("MapRoute", func() {
+		It("returns a set of commands to map a route to a syslog sink app", func() {
+			cmds := cw.MapRoute(ccg)
+
+			Expect(cmds).To(Equal(
+				[]cmdStartWaiter.CmdStartWaiter{
+					ccg.Api("jigglypuff.cf-app.com"),
+					ccg.Auth("pika", "chu"),
+					ccg.Target("someOrg", "someSpace"),
+					ccg.MapRoute("doraApp", "tcp.jigglypuff.cf-app.com", 1025),
+				},
+			))
+		})
+	})
+
+	Describe("CreateAndBindSyslogDrainService", func() {
+		It("Creates and binds a user-provided syslog drain service to an app and restages the app", func() {
+			cmds := cw.CreateAndBindSyslogDrainService(ccg, "syslogUPS")
+
+			Expect(cmds).To(Equal(
+				[]cmdStartWaiter.CmdStartWaiter{
+					ccg.Api("jigglypuff.cf-app.com"),
+					ccg.Auth("pika", "chu"),
+					ccg.Target("someOrg", "someSpace"),
+					ccg.CreateUserProvidedService("syslogUPS", "syslog://tcp.jigglypuff.cf-app.com:1025"),
+					ccg.BindService("doraApp", "syslogUPS"),
+					ccg.Restage("doraApp"),
 				},
 			))
 		})

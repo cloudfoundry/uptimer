@@ -60,7 +60,14 @@ var _ = Describe("CfCmdGenerator", func() {
 
 	Describe("CreateQuota", func() {
 		It("Generates the correct command", func() {
-			expectedCmd := exec.Command("cf", "create-quota", "someQuota", "-m", "10G", "-i", "1G", "-r", "1000", "-s", "100")
+			expectedCmd := exec.Command(
+				"cf", "create-quota", "someQuota",
+				"-m", "10G",
+				"-i", "1G",
+				"-r", "1000",
+				"-s", "100",
+				"--reserved-route-ports", "1",
+			)
 			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
 
 			cmd := generator.CreateQuota("someQuota")
@@ -104,11 +111,11 @@ var _ = Describe("CfCmdGenerator", func() {
 
 	Describe("Push", func() {
 		It("Generates the correct command", func() {
-			expectedCmd := exec.Command("cf", "push", "appName", "-d", "apps.example.com", "-p", "path/to/app", "-b", "binary_buildpack", "-c", "./app", "-i", "2")
+			expectedCmd := exec.Command("cf", "push", "appName", "-d", "apps.example.com", "-p", "path/to/app", "-b", "binary_buildpack", "-c", "./start-command", "-i", "2")
 			expectedCmd.Env = append(expectedCmd.Env, fmt.Sprintf("CF_HOME=%s", cfHome))
 			expectedCmd.Env = append(expectedCmd.Env, "CF_STAGING_TIMEOUT=1")
 
-			cmd := generator.Push("appName", "apps.example.com", "path/to/app")
+			cmd := generator.Push("appName", "apps.example.com", "path/to/app", "./start-command")
 
 			Expect(cmd).To(Equal(expectedCmd))
 		})
@@ -184,10 +191,10 @@ var _ = Describe("CfCmdGenerator", func() {
 
 	Describe("MapRoute", func() {
 		It("Generates the correct command", func() {
-			expectedCmd := exec.Command("cf", "map-route", "appName", "tcp.example.com", "--random-port")
+			expectedCmd := exec.Command("cf", "map-route", "appName", "tcp.example.com", "--port", "1025")
 			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
 
-			cmd := generator.MapRoute("appName", "tcp.example.com")
+			cmd := generator.MapRoute("appName", "tcp.example.com", 1025)
 
 			Expect(cmd).To(Equal(expectedCmd))
 		})

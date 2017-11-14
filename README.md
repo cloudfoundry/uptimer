@@ -10,6 +10,9 @@ It measures:
   and by periodically initiating live log streaming.
 - push availability,
   by periodically pushing a very simple app.
+- app syslog availability,
+  by periodically checking that app logs
+  drain to a syslog sink.
 
 The CF Release Integration team uses it
 to monitor availability during migrations
@@ -43,13 +46,19 @@ Here is an example config `json`:
         "api": "api.my-cf.com",
         "app_domain": "my-cf.com",
         "admin_user": "admin",
-        "admin_password": "PASS"
+        "admin_password": "PASS",
+        "tcp_domain": "tcp.my-cf.com",
+        "available_port": 1025
+    },
+    "optional_tests": {
+      "run_app_syslog_availability": true
     },
     "allowed_failures": {
         "app_pushability": 2,
         "http_availability": 5,
         "recent_logs": 2,
-        "streaming_logs": 2
+        "streaming_logs": 2,
+        "app_syslog_availability": 2
     }
 }
 ```
@@ -74,7 +83,7 @@ to just run up-timer for some period:
 }]
 ```
 
-### Cf (required)
+### Cf (mostly required)
 The `cf` section contains information necessary
 to perform the `cf auth` and `cf login` commands
 on the target environment.
@@ -82,6 +91,22 @@ on the target environment.
 Uptimer requires an admin user
 because it creates and configures an org and space
 during test setup.
+
+The `tcp_domain` and `available_port` values
+are not required
+_unless_ you elect to run the `app_syslog_availability` test.
+
+### Optional tests (optional)
+The `optional_tests` section is optional,
+as are each entry in the section.
+If these values are omitted,
+they are assumed to be false.
+
+For the `run_app_syslog_availability` test,
+TCP routing is required,
+and you must specify
+the `tcp_domain` and `available_port` values
+in the `Cf` section of the configuration.
 
 ### Allowed Failures (optional)
 The `allowed_failures` section contains failure thresholds,

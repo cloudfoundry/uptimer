@@ -91,12 +91,13 @@ type FakeCfCmdGenerator struct {
 	targetReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	PushStub        func(name, domain, path string) cmdStartWaiter.CmdStartWaiter
+	PushStub        func(name, domain, path, command string) cmdStartWaiter.CmdStartWaiter
 	pushMutex       sync.RWMutex
 	pushArgsForCall []struct {
-		name   string
-		domain string
-		path   string
+		name    string
+		domain  string
+		path    string
+		command string
 	}
 	pushReturns struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -169,11 +170,12 @@ type FakeCfCmdGenerator struct {
 	streamLogsReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	MapRouteStub        func(appName, domain string) cmdStartWaiter.CmdStartWaiter
+	MapRouteStub        func(appName, domain string, port int) cmdStartWaiter.CmdStartWaiter
 	mapRouteMutex       sync.RWMutex
 	mapRouteArgsForCall []struct {
 		appName string
 		domain  string
+		port    int
 	}
 	mapRouteReturns struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -560,18 +562,19 @@ func (fake *FakeCfCmdGenerator) TargetReturnsOnCall(i int, result1 cmdStartWaite
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) Push(name string, domain string, path string) cmdStartWaiter.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) Push(name string, domain string, path string, command string) cmdStartWaiter.CmdStartWaiter {
 	fake.pushMutex.Lock()
 	ret, specificReturn := fake.pushReturnsOnCall[len(fake.pushArgsForCall)]
 	fake.pushArgsForCall = append(fake.pushArgsForCall, struct {
-		name   string
-		domain string
-		path   string
-	}{name, domain, path})
-	fake.recordInvocation("Push", []interface{}{name, domain, path})
+		name    string
+		domain  string
+		path    string
+		command string
+	}{name, domain, path, command})
+	fake.recordInvocation("Push", []interface{}{name, domain, path, command})
 	fake.pushMutex.Unlock()
 	if fake.PushStub != nil {
-		return fake.PushStub(name, domain, path)
+		return fake.PushStub(name, domain, path, command)
 	}
 	if specificReturn {
 		return ret.result1
@@ -585,10 +588,10 @@ func (fake *FakeCfCmdGenerator) PushCallCount() int {
 	return len(fake.pushArgsForCall)
 }
 
-func (fake *FakeCfCmdGenerator) PushArgsForCall(i int) (string, string, string) {
+func (fake *FakeCfCmdGenerator) PushArgsForCall(i int) (string, string, string, string) {
 	fake.pushMutex.RLock()
 	defer fake.pushMutex.RUnlock()
-	return fake.pushArgsForCall[i].name, fake.pushArgsForCall[i].domain, fake.pushArgsForCall[i].path
+	return fake.pushArgsForCall[i].name, fake.pushArgsForCall[i].domain, fake.pushArgsForCall[i].path, fake.pushArgsForCall[i].command
 }
 
 func (fake *FakeCfCmdGenerator) PushReturns(result1 cmdStartWaiter.CmdStartWaiter) {
@@ -891,17 +894,18 @@ func (fake *FakeCfCmdGenerator) StreamLogsReturnsOnCall(i int, result1 cmdStartW
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) MapRoute(appName string, domain string) cmdStartWaiter.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) MapRoute(appName string, domain string, port int) cmdStartWaiter.CmdStartWaiter {
 	fake.mapRouteMutex.Lock()
 	ret, specificReturn := fake.mapRouteReturnsOnCall[len(fake.mapRouteArgsForCall)]
 	fake.mapRouteArgsForCall = append(fake.mapRouteArgsForCall, struct {
 		appName string
 		domain  string
-	}{appName, domain})
-	fake.recordInvocation("MapRoute", []interface{}{appName, domain})
+		port    int
+	}{appName, domain, port})
+	fake.recordInvocation("MapRoute", []interface{}{appName, domain, port})
 	fake.mapRouteMutex.Unlock()
 	if fake.MapRouteStub != nil {
-		return fake.MapRouteStub(appName, domain)
+		return fake.MapRouteStub(appName, domain, port)
 	}
 	if specificReturn {
 		return ret.result1
@@ -915,10 +919,10 @@ func (fake *FakeCfCmdGenerator) MapRouteCallCount() int {
 	return len(fake.mapRouteArgsForCall)
 }
 
-func (fake *FakeCfCmdGenerator) MapRouteArgsForCall(i int) (string, string) {
+func (fake *FakeCfCmdGenerator) MapRouteArgsForCall(i int) (string, string, int) {
 	fake.mapRouteMutex.RLock()
 	defer fake.mapRouteMutex.RUnlock()
-	return fake.mapRouteArgsForCall[i].appName, fake.mapRouteArgsForCall[i].domain
+	return fake.mapRouteArgsForCall[i].appName, fake.mapRouteArgsForCall[i].domain, fake.mapRouteArgsForCall[i].port
 }
 
 func (fake *FakeCfCmdGenerator) MapRouteReturns(result1 cmdStartWaiter.CmdStartWaiter) {

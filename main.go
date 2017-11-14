@@ -63,14 +63,16 @@ func main() {
 	}
 	logger.Println("Finished building included app")
 
-	logger.Println("Building included syslog sink app...")
-	_, err = compileIncludedApp("syslogSink")
-	if err != nil {
-		logger.Println("Failed to build included syslog sink app: ", err)
+	var sinkAppPath string
+	if cfg.OptionalTests.RunAppSyslogAvailability {
+		logger.Println("Building included syslog sink app...")
+		sinkAppPath, err = compileIncludedApp("syslogSink")
+		if err != nil {
+			logger.Println("Failed to build included syslog sink app: ", err)
+		}
+		logger.Println("Finished building included syslog sink app")
 	}
-	logger.Println("Finished building included syslog sink app")
-
-	orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, err := createTmpDirs()
+	orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, sinkTmpDir, err := createTmpDirs()
 	if err != nil {
 		logger.Println("Failed to create temp dir:", err)
 		performMeasurements = false
@@ -79,7 +81,7 @@ func main() {
 	bufferedRunner, runnerOutBuf, runnerErrBuf := createBufferedRunner()
 
 	pushCmdGenerator := cfCmdGenerator.New(pushTmpDir)
-	pushWorkflow, pushOrg := createWorkflow(cfg.CF, appPath)
+	pushWorkflow, pushOrg, _ := createWorkflow(cfg.CF, appPath, "./app")
 	logger.Printf("Setting up push workflow with org %s ...", pushOrg)
 	if err := bufferedRunner.RunInSequence(pushWorkflow.Setup(pushCmdGenerator)...); err != nil {
 		logBufferedRunnerFailure(logger, "push workflow setup", err, runnerOutBuf, runnerErrBuf)
@@ -88,9 +90,36 @@ func main() {
 		logger.Println("Finished setting up push workflow")
 	}
 
+	var sinkWorkflow cfWorkflow.CfWorkflow
+	var sinkCmdGenerator cfCmdGenerator.CfCmdGenerator
+	if cfg.OptionalTests.RunAppSyslogAvailability {
+		sinkCmdGenerator = cfCmdGenerator.New(sinkTmpDir)
+		var sinkOrg string
+		sinkWorkflow, sinkOrg, _ = createWorkflow(cfg.CF, sinkAppPath, "./syslogSink")
+		logger.Printf("Setting up sink workflow with org %s ...", sinkOrg)
+		err = bufferedRunner.RunInSequence(
+			append(append(
+				sinkWorkflow.Setup(sinkCmdGenerator),
+				sinkWorkflow.Push(sinkCmdGenerator)...),
+				sinkWorkflow.MapRoute(sinkCmdGenerator)...)...)
+		if err != nil {
+			logBufferedRunnerFailure(logger, "sink workflow setup", err, runnerOutBuf, runnerErrBuf)
+			performMeasurements = false
+		} else {
+			logger.Println("Finished setting up sink workflow")
+		}
+	}
+
 	orcCmdGenerator := cfCmdGenerator.New(orcTmpDir)
-	orcWorkflow, orcOrg := createWorkflow(cfg.CF, appPath)
+	orcWorkflow, orcOrg, _ := createWorkflow(cfg.CF, appPath, "./app")
+
+	authFailedRetryFunc := func(stdOut, stdErr string) bool {
+		authFailedMessage := "Authentication has expired.  Please log back in to re-authenticate."
+		return strings.Contains(stdOut, authFailedMessage) || strings.Contains(stdErr, authFailedMessage)
+	}
+	clock := clock.New()
 	measurements := createMeasurements(
+		clock,
 		logger,
 		orcWorkflow,
 		pushWorkflow,
@@ -98,18 +127,47 @@ func main() {
 		cfCmdGenerator.New(streamingLogsTmpDir),
 		pushCmdGenerator,
 		cfg.AllowedFailures,
+		authFailedRetryFunc,
 	)
 
-	orc := orchestrator.New(cfg.While, logger, orcWorkflow, cmdRunner.New(os.Stdout, os.Stderr, io.Copy), measurements)
+	if cfg.OptionalTests.RunAppSyslogAvailability {
+		measurements = append(
+			measurements,
+			createAppSyslogAvailabilityMeasurement(
+				clock,
+				logger,
+				sinkWorkflow,
+				sinkCmdGenerator,
+				cfg.AllowedFailures,
+				authFailedRetryFunc,
+			),
+		)
+	}
 
 	logger.Printf("Setting up main workflow with org %s ...", orcOrg)
-	if err := orc.Setup(bufferedRunner, orcCmdGenerator); err != nil {
+	cmds := orcWorkflow.Setup(orcCmdGenerator)
+	cmds = append(cmds, orcWorkflow.Push(orcCmdGenerator)...)
+	if cfg.OptionalTests.RunAppSyslogAvailability {
+		cmds = append(
+			cmds,
+			orcWorkflow.CreateAndBindSyslogDrainService(orcCmdGenerator, fmt.Sprintf("uptimer-srv-%s", uuid.NewV4().String()))...,
+		)
+	}
+
+	err = bufferedRunner.RunInSequence(cmds...)
+	if err != nil {
 		logBufferedRunnerFailure(logger, "main workflow setup", err, runnerOutBuf, runnerErrBuf)
 		performMeasurements = false
 	} else {
 		logger.Println("Finished setting up main workflow")
+		logger.Printf("stdout:\n%s\n\nstderr:\n%s\n", runnerOutBuf, runnerErrBuf)
 	}
 
+	if !cfg.OptionalTests.RunAppSyslogAvailability {
+		logger.Println("*NOT* running measurement: App syslog availability")
+	}
+
+	orc := orchestrator.New(cfg.While, logger, orcWorkflow, cmdRunner.New(os.Stdout, os.Stderr, io.Copy), measurements)
 	exitCode, err := orc.Run(performMeasurements)
 	if err != nil {
 		logger.Println("Failed run:", err)
@@ -122,6 +180,8 @@ func main() {
 		logger,
 		pushWorkflow,
 		pushCmdGenerator,
+		sinkWorkflow,
+		sinkCmdGenerator,
 		bufferedRunner,
 		runnerOutBuf,
 		runnerErrBuf,
@@ -140,25 +200,29 @@ func loadConfig(configPath string) (*config.Config, error) {
 	return cfg, nil
 }
 
-func createTmpDirs() (string, string, string, string, error) {
+func createTmpDirs() (string, string, string, string, string, error) {
 	orcTmpDir, err := ioutil.TempDir("", "uptimer")
 	if err != nil {
-		return "", "", "", "", err
+		return "", "", "", "", "", err
 	}
 	recentLogsTmpDir, err := ioutil.TempDir("", "uptimer")
 	if err != nil {
-		return "", "", "", "", err
+		return "", "", "", "", "", err
 	}
 	streamingLogsTmpDir, err := ioutil.TempDir("", "uptimer")
 	if err != nil {
-		return "", "", "", "", err
+		return "", "", "", "", "", err
 	}
 	pushTmpDir, err := ioutil.TempDir("", "uptimer")
 	if err != nil {
-		return "", "", "", "", err
+		return "", "", "", "", "", err
+	}
+	sinkTmpDir, err := ioutil.TempDir("", "uptimer")
+	if err != nil {
+		return "", "", "", "", "", err
 	}
 
-	return orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, nil
+	return orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, sinkTmpDir, nil
 }
 
 func compileIncludedApp(appName string) (string, error) {
@@ -179,25 +243,30 @@ func compileIncludedApp(appName string) (string, error) {
 	return appPath, err
 }
 
-func createWorkflow(cfc *config.Cf, appPath string) (cfWorkflow.CfWorkflow, string) {
-	workflowOrg := fmt.Sprintf("uptimer-org-%s", uuid.NewV4().String())
+func createWorkflow(cfc *config.Cf, appPath, appCommand string) (cfWorkflow.CfWorkflow, string, string) {
+	org := fmt.Sprintf("uptimer-org-%s", uuid.NewV4().String())
+	app := fmt.Sprintf("uptimer-app-%s", uuid.NewV4().String())
 
 	return cfWorkflow.New(
 			cfc,
-			workflowOrg,
+			org,
 			fmt.Sprintf("uptimer-space-%s", uuid.NewV4().String()),
 			fmt.Sprintf("uptimer-quota-%s", uuid.NewV4().String()),
-			fmt.Sprintf("uptimer-app-%s", uuid.NewV4().String()),
+			app,
 			appPath,
+			appCommand,
 		),
-		workflowOrg
+		org,
+		app
 }
 
 func createMeasurements(
+	clock clock.Clock,
 	logger *log.Logger,
 	orcWorkflow, pushWorkflow cfWorkflow.CfWorkflow,
 	recentLogsCmdGenerator, streamingLogsCmdGenerator, pushCmdGenerator cfCmdGenerator.CfCmdGenerator,
 	allowedFailures config.AllowedFailures,
+	authFailedRetryFunc func(stdOut, stdErr string) bool,
 ) []measurement.Measurement {
 	recentLogsBufferRunner, recentLogsRunnerOutBuf, recentLogsRunnerErrBuf := createBufferedRunner()
 	recentLogsMeasurement := measurement.NewRecentLogs(
@@ -241,12 +310,6 @@ func createMeasurements(
 		},
 	)
 
-	authFailedRetryFunc := func(stdOut, stdErr string) bool {
-		authFailedMessage := "Authentication has expired.  Please log back in to re-authenticate."
-		return strings.Contains(stdOut, authFailedMessage) || strings.Contains(stdErr, authFailedMessage)
-	}
-
-	clock := clock.New()
 	return []measurement.Measurement{
 		measurement.NewPeriodic(
 			logger,
@@ -287,6 +350,36 @@ func createMeasurements(
 	}
 }
 
+func createAppSyslogAvailabilityMeasurement(
+	clock clock.Clock,
+	logger *log.Logger,
+	sinkWorkflow cfWorkflow.CfWorkflow,
+	sinkCmdGenerator cfCmdGenerator.CfCmdGenerator,
+	allowedFailures config.AllowedFailures,
+	authFailedRetryFunc func(stdOut, stdErr string) bool,
+) measurement.Measurement {
+	syslogAvailabilityBufferRunner, syslogAvailabilityRunnerOutBuf, syslogAvailabilityRunnerErrBuf := createBufferedRunner()
+	syslogAvailabilityMeasurement := measurement.NewSyslogDrain(
+		func() []cmdStartWaiter.CmdStartWaiter {
+			return sinkWorkflow.RecentLogs(sinkCmdGenerator)
+		},
+		syslogAvailabilityBufferRunner,
+		syslogAvailabilityRunnerOutBuf,
+		syslogAvailabilityRunnerErrBuf,
+		appLogValidator.New(),
+	)
+
+	return measurement.NewPeriodic(
+		logger,
+		clock,
+		30*time.Second,
+		syslogAvailabilityMeasurement,
+		measurement.NewResultSet(),
+		allowedFailures.AppSyslogAvailability,
+		authFailedRetryFunc,
+	)
+}
+
 func createBufferedRunner() (cmdRunner.CmdRunner, *bytes.Buffer, *bytes.Buffer) {
 	outBuf := bytes.NewBuffer([]byte{})
 	errBuf := bytes.NewBuffer([]byte{})
@@ -317,6 +410,8 @@ func tearDown(
 	logger *log.Logger,
 	pushWorkflow cfWorkflow.CfWorkflow,
 	pushCmdGenerator cfCmdGenerator.CfCmdGenerator,
+	sinkWorkflow cfWorkflow.CfWorkflow,
+	sinkCmdGenerator cfCmdGenerator.CfCmdGenerator,
 	runner cmdRunner.CmdRunner,
 	runnerOutBuf *bytes.Buffer,
 	runnerErrBuf *bytes.Buffer,
@@ -327,5 +422,11 @@ func tearDown(
 
 	if err := runner.RunInSequence(pushWorkflow.TearDown(pushCmdGenerator)...); err != nil {
 		logBufferedRunnerFailure(logger, "push workflow teardown", err, runnerOutBuf, runnerErrBuf)
+	}
+
+	if sinkWorkflow != nil {
+		if err := runner.RunInSequence(sinkWorkflow.TearDown(sinkCmdGenerator)...); err != nil {
+			logBufferedRunnerFailure(logger, "sink workflow teardown", err, runnerOutBuf, runnerErrBuf)
+		}
 	}
 }

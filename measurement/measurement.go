@@ -91,7 +91,7 @@ func NewSyslogDrain(
 ) BaseMeasurement {
 	return &recentLogs{
 		name:                           "App syslog availability",
-		summaryPhrase:                  "check of application syslogs",
+		summaryPhrase:                  "check application syslogs",
 		recentLogsCommandGeneratorFunc: recentLogsCommandGeneratorFunc,
 		runner:          runner,
 		runnerOutBuf:    runnerOutBuf,

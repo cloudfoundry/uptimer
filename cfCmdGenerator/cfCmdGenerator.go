@@ -17,14 +17,14 @@ type CfCmdGenerator interface {
 	CreateOrg(org string) cmdStartWaiter.CmdStartWaiter
 	CreateSpace(org, space string) cmdStartWaiter.CmdStartWaiter
 	Target(org, space string) cmdStartWaiter.CmdStartWaiter
-	Push(name, domain, path string) cmdStartWaiter.CmdStartWaiter
+	Push(name, domain, path, command string) cmdStartWaiter.CmdStartWaiter
 	Delete(name string) cmdStartWaiter.CmdStartWaiter
 	DeleteOrg(org string) cmdStartWaiter.CmdStartWaiter
 	DeleteQuota(quota string) cmdStartWaiter.CmdStartWaiter
 	LogOut() cmdStartWaiter.CmdStartWaiter
 	RecentLogs(appName string) cmdStartWaiter.CmdStartWaiter
 	StreamLogs(ctx context.Context, appName string) cmdStartWaiter.CmdStartWaiter
-	MapRoute(appName, domain string) cmdStartWaiter.CmdStartWaiter
+	MapRoute(appName, domain string, port int) cmdStartWaiter.CmdStartWaiter
 	CreateUserProvidedService(serviceName, syslogURL string) cmdStartWaiter.CmdStartWaiter
 	BindService(appName, serviceName string) cmdStartWaiter.CmdStartWaiter
 	Restage(appName string) cmdStartWaiter.CmdStartWaiter
@@ -73,6 +73,7 @@ func (c *cfCmdGenerator) CreateQuota(quota string) cmdStartWaiter.CmdStartWaiter
 			"-i", "1G",
 			"-r", "1000",
 			"-s", "100",
+			"--reserved-route-ports", "1",
 		),
 	)
 }
@@ -112,7 +113,7 @@ func (c *cfCmdGenerator) Target(org string, space string) cmdStartWaiter.CmdStar
 	)
 }
 
-func (c *cfCmdGenerator) Push(name string, domain string, path string) cmdStartWaiter.CmdStartWaiter {
+func (c *cfCmdGenerator) Push(name, domain, path, command string) cmdStartWaiter.CmdStartWaiter {
 	return c.addCfStagingTimeout(
 		c.addCfHome(
 			exec.Command(
@@ -120,7 +121,7 @@ func (c *cfCmdGenerator) Push(name string, domain string, path string) cmdStartW
 				"-d", domain,
 				"-p", path,
 				"-b", "binary_buildpack",
-				"-c", "./app",
+				"-c", command,
 				"-i", "2",
 			),
 		),
@@ -180,11 +181,11 @@ func (c *cfCmdGenerator) StreamLogs(ctx context.Context, appName string) cmdStar
 	)
 }
 
-func (c *cfCmdGenerator) MapRoute(name, domain string) cmdStartWaiter.CmdStartWaiter {
+func (c *cfCmdGenerator) MapRoute(name, domain string, port int) cmdStartWaiter.CmdStartWaiter {
 	return c.addCfHome(
 		exec.Command(
 			"cf", "map-route", name, domain,
-			"--random-port",
+			"--port", fmt.Sprintf("%d", port),
 		),
 	)
 }

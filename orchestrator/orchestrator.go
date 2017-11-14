@@ -3,6 +3,7 @@
 package orchestrator
 
 import (
+	"fmt"
 	"log"
 	"os/exec"
 	"syscall"
@@ -13,6 +14,7 @@ import (
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	"github.com/cloudfoundry/uptimer/config"
 	"github.com/cloudfoundry/uptimer/measurement"
+	uuid "github.com/satori/go.uuid"
 )
 
 //go:generate counterfeiter . Orchestrator
@@ -41,7 +43,13 @@ func New(whileConfig []*config.Command, logger *log.Logger, workflow cfWorkflow.
 }
 
 func (o *orchestrator) Setup(runner cmdRunner.CmdRunner, ccg cfCmdGenerator.CfCmdGenerator) error {
-	return runner.RunInSequence(append(o.workflow.Setup(ccg), o.workflow.Push(ccg)...)...)
+	serviceName := fmt.Sprintf("uptimer-srv-%s", uuid.NewV4().String())
+
+	cmds := o.workflow.Setup(ccg)
+	cmds = append(cmds, o.workflow.Push(ccg)...)
+	cmds = append(cmds, o.workflow.CreateAndBindSyslogDrainService(ccg, serviceName)...)
+
+	return runner.RunInSequence(cmds...)
 }
 
 func (o *orchestrator) Run(performMeasurements bool) (int, error) {

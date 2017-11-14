@@ -87,6 +87,29 @@ type FakeCfWorkflow struct {
 	streamLogsReturnsOnCall map[int]struct {
 		result1 []cmdStartWaiter.CmdStartWaiter
 	}
+	MapRouteStub        func(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
+	mapRouteMutex       sync.RWMutex
+	mapRouteArgsForCall []struct {
+		arg1 cfCmdGenerator.CfCmdGenerator
+	}
+	mapRouteReturns struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}
+	mapRouteReturnsOnCall map[int]struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}
+	CreateAndBindSyslogDrainServiceStub        func(cfCmdGenerator.CfCmdGenerator, string) []cmdStartWaiter.CmdStartWaiter
+	createAndBindSyslogDrainServiceMutex       sync.RWMutex
+	createAndBindSyslogDrainServiceArgsForCall []struct {
+		arg1 cfCmdGenerator.CfCmdGenerator
+		arg2 string
+	}
+	createAndBindSyslogDrainServiceReturns struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}
+	createAndBindSyslogDrainServiceReturnsOnCall map[int]struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
@@ -420,6 +443,103 @@ func (fake *FakeCfWorkflow) StreamLogsReturnsOnCall(i int, result1 []cmdStartWai
 	}{result1}
 }
 
+func (fake *FakeCfWorkflow) MapRoute(arg1 cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
+	fake.mapRouteMutex.Lock()
+	ret, specificReturn := fake.mapRouteReturnsOnCall[len(fake.mapRouteArgsForCall)]
+	fake.mapRouteArgsForCall = append(fake.mapRouteArgsForCall, struct {
+		arg1 cfCmdGenerator.CfCmdGenerator
+	}{arg1})
+	fake.recordInvocation("MapRoute", []interface{}{arg1})
+	fake.mapRouteMutex.Unlock()
+	if fake.MapRouteStub != nil {
+		return fake.MapRouteStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.mapRouteReturns.result1
+}
+
+func (fake *FakeCfWorkflow) MapRouteCallCount() int {
+	fake.mapRouteMutex.RLock()
+	defer fake.mapRouteMutex.RUnlock()
+	return len(fake.mapRouteArgsForCall)
+}
+
+func (fake *FakeCfWorkflow) MapRouteArgsForCall(i int) cfCmdGenerator.CfCmdGenerator {
+	fake.mapRouteMutex.RLock()
+	defer fake.mapRouteMutex.RUnlock()
+	return fake.mapRouteArgsForCall[i].arg1
+}
+
+func (fake *FakeCfWorkflow) MapRouteReturns(result1 []cmdStartWaiter.CmdStartWaiter) {
+	fake.MapRouteStub = nil
+	fake.mapRouteReturns = struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfWorkflow) MapRouteReturnsOnCall(i int, result1 []cmdStartWaiter.CmdStartWaiter) {
+	fake.MapRouteStub = nil
+	if fake.mapRouteReturnsOnCall == nil {
+		fake.mapRouteReturnsOnCall = make(map[int]struct {
+			result1 []cmdStartWaiter.CmdStartWaiter
+		})
+	}
+	fake.mapRouteReturnsOnCall[i] = struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfWorkflow) CreateAndBindSyslogDrainService(arg1 cfCmdGenerator.CfCmdGenerator, arg2 string) []cmdStartWaiter.CmdStartWaiter {
+	fake.createAndBindSyslogDrainServiceMutex.Lock()
+	ret, specificReturn := fake.createAndBindSyslogDrainServiceReturnsOnCall[len(fake.createAndBindSyslogDrainServiceArgsForCall)]
+	fake.createAndBindSyslogDrainServiceArgsForCall = append(fake.createAndBindSyslogDrainServiceArgsForCall, struct {
+		arg1 cfCmdGenerator.CfCmdGenerator
+		arg2 string
+	}{arg1, arg2})
+	fake.recordInvocation("CreateAndBindSyslogDrainService", []interface{}{arg1, arg2})
+	fake.createAndBindSyslogDrainServiceMutex.Unlock()
+	if fake.CreateAndBindSyslogDrainServiceStub != nil {
+		return fake.CreateAndBindSyslogDrainServiceStub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.createAndBindSyslogDrainServiceReturns.result1
+}
+
+func (fake *FakeCfWorkflow) CreateAndBindSyslogDrainServiceCallCount() int {
+	fake.createAndBindSyslogDrainServiceMutex.RLock()
+	defer fake.createAndBindSyslogDrainServiceMutex.RUnlock()
+	return len(fake.createAndBindSyslogDrainServiceArgsForCall)
+}
+
+func (fake *FakeCfWorkflow) CreateAndBindSyslogDrainServiceArgsForCall(i int) (cfCmdGenerator.CfCmdGenerator, string) {
+	fake.createAndBindSyslogDrainServiceMutex.RLock()
+	defer fake.createAndBindSyslogDrainServiceMutex.RUnlock()
+	return fake.createAndBindSyslogDrainServiceArgsForCall[i].arg1, fake.createAndBindSyslogDrainServiceArgsForCall[i].arg2
+}
+
+func (fake *FakeCfWorkflow) CreateAndBindSyslogDrainServiceReturns(result1 []cmdStartWaiter.CmdStartWaiter) {
+	fake.CreateAndBindSyslogDrainServiceStub = nil
+	fake.createAndBindSyslogDrainServiceReturns = struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfWorkflow) CreateAndBindSyslogDrainServiceReturnsOnCall(i int, result1 []cmdStartWaiter.CmdStartWaiter) {
+	fake.CreateAndBindSyslogDrainServiceStub = nil
+	if fake.createAndBindSyslogDrainServiceReturnsOnCall == nil {
+		fake.createAndBindSyslogDrainServiceReturnsOnCall = make(map[int]struct {
+			result1 []cmdStartWaiter.CmdStartWaiter
+		})
+	}
+	fake.createAndBindSyslogDrainServiceReturnsOnCall[i] = struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
 func (fake *FakeCfWorkflow) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -437,6 +557,10 @@ func (fake *FakeCfWorkflow) Invocations() map[string][][]interface{} {
 	defer fake.recentLogsMutex.RUnlock()
 	fake.streamLogsMutex.RLock()
 	defer fake.streamLogsMutex.RUnlock()
+	fake.mapRouteMutex.RLock()
+	defer fake.mapRouteMutex.RUnlock()
+	fake.createAndBindSyslogDrainServiceMutex.RLock()
+	defer fake.createAndBindSyslogDrainServiceMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value
