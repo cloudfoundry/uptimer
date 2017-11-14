@@ -6,15 +6,17 @@ import (
 
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
 	"github.com/cloudfoundry/uptimer/cmdRunner"
+	"github.com/cloudfoundry/uptimer/config"
 	"github.com/cloudfoundry/uptimer/orchestrator"
 )
 
 type FakeOrchestrator struct {
-	SetupStub        func(cmdRunner.CmdRunner, cfCmdGenerator.CfCmdGenerator) error
+	SetupStub        func(cmdRunner.CmdRunner, cfCmdGenerator.CfCmdGenerator, config.OptionalTests) error
 	setupMutex       sync.RWMutex
 	setupArgsForCall []struct {
 		arg1 cmdRunner.CmdRunner
 		arg2 cfCmdGenerator.CfCmdGenerator
+		arg3 config.OptionalTests
 	}
 	setupReturns struct {
 		result1 error
@@ -51,17 +53,18 @@ type FakeOrchestrator struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeOrchestrator) Setup(arg1 cmdRunner.CmdRunner, arg2 cfCmdGenerator.CfCmdGenerator) error {
+func (fake *FakeOrchestrator) Setup(arg1 cmdRunner.CmdRunner, arg2 cfCmdGenerator.CfCmdGenerator, arg3 config.OptionalTests) error {
 	fake.setupMutex.Lock()
 	ret, specificReturn := fake.setupReturnsOnCall[len(fake.setupArgsForCall)]
 	fake.setupArgsForCall = append(fake.setupArgsForCall, struct {
 		arg1 cmdRunner.CmdRunner
 		arg2 cfCmdGenerator.CfCmdGenerator
-	}{arg1, arg2})
-	fake.recordInvocation("Setup", []interface{}{arg1, arg2})
+		arg3 config.OptionalTests
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("Setup", []interface{}{arg1, arg2, arg3})
 	fake.setupMutex.Unlock()
 	if fake.SetupStub != nil {
-		return fake.SetupStub(arg1, arg2)
+		return fake.SetupStub(arg1, arg2, arg3)
 	}
 	if specificReturn {
 		return ret.result1
@@ -75,10 +78,10 @@ func (fake *FakeOrchestrator) SetupCallCount() int {
 	return len(fake.setupArgsForCall)
 }
 
-func (fake *FakeOrchestrator) SetupArgsForCall(i int) (cmdRunner.CmdRunner, cfCmdGenerator.CfCmdGenerator) {
+func (fake *FakeOrchestrator) SetupArgsForCall(i int) (cmdRunner.CmdRunner, cfCmdGenerator.CfCmdGenerator, config.OptionalTests) {
 	fake.setupMutex.RLock()
 	defer fake.setupMutex.RUnlock()
-	return fake.setupArgsForCall[i].arg1, fake.setupArgsForCall[i].arg2
+	return fake.setupArgsForCall[i].arg1, fake.setupArgsForCall[i].arg2, fake.setupArgsForCall[i].arg3
 }
 
 func (fake *FakeOrchestrator) SetupReturns(result1 error) {

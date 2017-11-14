@@ -145,17 +145,8 @@ func main() {
 	}
 
 	logger.Printf("Setting up main workflow with org %s ...", orcOrg)
-	cmds := orcWorkflow.Setup(orcCmdGenerator)
-	cmds = append(cmds, orcWorkflow.Push(orcCmdGenerator)...)
-	if cfg.OptionalTests.RunAppSyslogAvailability {
-		cmds = append(
-			cmds,
-			orcWorkflow.CreateAndBindSyslogDrainService(orcCmdGenerator, fmt.Sprintf("uptimer-srv-%s", uuid.NewV4().String()))...,
-		)
-	}
-
-	err = bufferedRunner.RunInSequence(cmds...)
-	if err != nil {
+	orc := orchestrator.New(cfg.While, logger, orcWorkflow, cmdRunner.New(os.Stdout, os.Stderr, io.Copy), measurements)
+	if err = orc.Setup(bufferedRunner, orcCmdGenerator, cfg.OptionalTests); err != nil {
 		logBufferedRunnerFailure(logger, "main workflow setup", err, runnerOutBuf, runnerErrBuf)
 		performMeasurements = false
 	} else {
@@ -166,7 +157,6 @@ func main() {
 		logger.Println("*NOT* running measurement: App syslog availability")
 	}
 
-	orc := orchestrator.New(cfg.While, logger, orcWorkflow, cmdRunner.New(os.Stdout, os.Stderr, io.Copy), measurements)
 	exitCode, err := orc.Run(performMeasurements)
 	if err != nil {
 		logger.Println("Failed run:", err)

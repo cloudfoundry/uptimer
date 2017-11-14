@@ -33,6 +33,8 @@ var _ = Describe("Orchestrator", func() {
 		fakeMeasurement2 *measurementfakes.FakeMeasurement
 		ccg              cfCmdGenerator.CfCmdGenerator
 
+		ot config.OptionalTests
+
 		orc Orchestrator
 	)
 
@@ -59,7 +61,7 @@ var _ = Describe("Orchestrator", func() {
 	})
 
 	Describe("Setup", func() {
-		It("calls workflow to get setup and push stuff and runs it", func() {
+		BeforeEach(func() {
 			fakeWorkflow.SetupReturns(
 				[]cmdStartWaiter.CmdStartWaiter{
 					exec.Command("ls"),
@@ -71,30 +73,81 @@ var _ = Describe("Orchestrator", func() {
 					exec.Command("push", "an", "app"),
 				},
 			)
-
-			err := orc.Setup(fakeRunner, ccg)
-
-			Expect(err).NotTo(HaveOccurred())
-			Expect(fakeWorkflow.SetupCallCount()).To(Equal(1))
-			Expect(fakeWorkflow.SetupArgsForCall(0)).To(Equal(ccg))
-			Expect(fakeWorkflow.PushCallCount()).To(Equal(1))
-			Expect(fakeWorkflow.PushArgsForCall(0)).To(Equal(ccg))
-			Expect(fakeRunner.RunInSequenceCallCount()).To(Equal(1))
-			Expect(fakeRunner.RunInSequenceArgsForCall(0)).To(Equal(
+			fakeWorkflow.CreateAndBindSyslogDrainServiceReturns(
 				[]cmdStartWaiter.CmdStartWaiter{
-					exec.Command("ls"),
-					exec.Command("whoami"),
-					exec.Command("push", "an", "app"),
+					exec.Command("create", "drain"),
+					exec.Command("bind", "stuff"),
 				},
-			))
+			)
+		})
+		Context("not running syslog test", func() {
+			It("calls workflow to get setup and push stuff and runs it", func() {
+				err := orc.Setup(fakeRunner, ccg, ot)
+
+				Expect(err).NotTo(HaveOccurred())
+				Expect(fakeWorkflow.SetupCallCount()).To(Equal(1))
+				Expect(fakeWorkflow.SetupArgsForCall(0)).To(Equal(ccg))
+				Expect(fakeWorkflow.PushCallCount()).To(Equal(1))
+				Expect(fakeWorkflow.PushArgsForCall(0)).To(Equal(ccg))
+				Expect(fakeWorkflow.CreateAndBindSyslogDrainServiceCallCount()).To(Equal(0))
+				Expect(fakeRunner.RunInSequenceCallCount()).To(Equal(1))
+				Expect(fakeRunner.RunInSequenceArgsForCall(0)).To(Equal(
+					[]cmdStartWaiter.CmdStartWaiter{
+						exec.Command("ls"),
+						exec.Command("whoami"),
+						exec.Command("push", "an", "app"),
+					},
+				))
+			})
+
+			It("Returns an error if runner returns an error", func() {
+				fakeRunner.RunInSequenceReturns(fmt.Errorf("uh oh"))
+
+				err := orc.Setup(fakeRunner, ccg, ot)
+
+				Expect(err).To(MatchError("uh oh"))
+			})
 		})
 
-		It("Returns an error if runner returns an error", func() {
-			fakeRunner.RunInSequenceReturns(fmt.Errorf("uh oh"))
+		Context("running syslog test", func() {
+			BeforeEach(func() {
+				ot = config.OptionalTests{RunAppSyslogAvailability: true}
+			})
 
-			err := orc.Setup(fakeRunner, ccg)
+			It("calls workflow to get setup and push stuff and created and binds a service and runs it", func() {
+				err := orc.Setup(fakeRunner, ccg, ot)
 
-			Expect(err).To(MatchError("uh oh"))
+				Expect(err).NotTo(HaveOccurred())
+				Expect(fakeWorkflow.SetupCallCount()).To(Equal(1))
+				Expect(fakeWorkflow.SetupArgsForCall(0)).To(Equal(ccg))
+				Expect(fakeWorkflow.PushCallCount()).To(Equal(1))
+				Expect(fakeWorkflow.PushArgsForCall(0)).To(Equal(ccg))
+				Expect(fakeWorkflow.CreateAndBindSyslogDrainServiceCallCount()).To(Equal(1))
+
+				Expect(fakeWorkflow.CreateAndBindSyslogDrainServiceCallCount()).To(Equal(1))
+				ccgArg, serviceName := fakeWorkflow.CreateAndBindSyslogDrainServiceArgsForCall(0)
+				Expect(ccgArg).To(Equal(ccg))
+				Expect(serviceName).To(ContainSubstring("uptimer-srv-"))
+
+				Expect(fakeRunner.RunInSequenceCallCount()).To(Equal(1))
+				Expect(fakeRunner.RunInSequenceArgsForCall(0)).To(Equal(
+					[]cmdStartWaiter.CmdStartWaiter{
+						exec.Command("ls"),
+						exec.Command("whoami"),
+						exec.Command("push", "an", "app"),
+						exec.Command("create", "drain"),
+						exec.Command("bind", "stuff"),
+					},
+				))
+			})
+
+			It("Returns an error if runner returns an error", func() {
+				fakeRunner.RunInSequenceReturns(fmt.Errorf("uh oh"))
+
+				err := orc.Setup(fakeRunner, ccg, ot)
+
+				Expect(err).To(MatchError("uh oh"))
+			})
 		})
 	})
 

@@ -19,7 +19,7 @@ import (
 
 //go:generate counterfeiter . Orchestrator
 type Orchestrator interface {
-	Setup(cmdRunner.CmdRunner, cfCmdGenerator.CfCmdGenerator) error
+	Setup(cmdRunner.CmdRunner, cfCmdGenerator.CfCmdGenerator, config.OptionalTests) error
 	Run(bool) (int, error)
 	TearDown(cmdRunner.CmdRunner, cfCmdGenerator.CfCmdGenerator) error
 }
@@ -42,12 +42,15 @@ func New(whileConfig []*config.Command, logger *log.Logger, workflow cfWorkflow.
 	}
 }
 
-func (o *orchestrator) Setup(runner cmdRunner.CmdRunner, ccg cfCmdGenerator.CfCmdGenerator) error {
+func (o *orchestrator) Setup(runner cmdRunner.CmdRunner, ccg cfCmdGenerator.CfCmdGenerator, optionalTests config.OptionalTests) error {
 	serviceName := fmt.Sprintf("uptimer-srv-%s", uuid.NewV4().String())
 
 	cmds := o.workflow.Setup(ccg)
 	cmds = append(cmds, o.workflow.Push(ccg)...)
-	cmds = append(cmds, o.workflow.CreateAndBindSyslogDrainService(ccg, serviceName)...)
+
+	if optionalTests.RunAppSyslogAvailability {
+		cmds = append(cmds, o.workflow.CreateAndBindSyslogDrainService(ccg, serviceName)...)
+	}
 
 	return runner.RunInSequence(cmds...)
 }
