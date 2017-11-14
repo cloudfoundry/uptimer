@@ -15,9 +15,6 @@ type appLogValidator struct {
 	lastNumber int
 }
 
-const appLogMarker string = "[APP"
-const appExitedMarker string = "Exit status 143"
-
 func New() AppLogValidator {
 	return &appLogValidator{
 		lastNumber: -1,
@@ -40,30 +37,28 @@ func (v *appLogValidator) IsNewer(log string) (bool, error) {
 }
 
 func getLatestAppNumber(log string) (int, error) {
-	lastLine, err := getLastAppLogLine(log)
+	logEpoch, err := getLastAppLogLine(log)
 	if err != nil {
-		return 0, err
-	}
-
-	logEpoch, err := getLogEpoch(lastLine)
-	if err != nil {
-		return 0, err
+		return -1, err
 	}
 
 	return logEpoch, nil
 }
 
-func getLastAppLogLine(log string) (string, error) {
+func getLastAppLogLine(log string) (int, error) {
 	lines := strings.Split(log, "\n")
 	for i := len(lines) - 1; i >= 0; i-- {
-		if strings.Contains(lines[i], appLogMarker) &&
-			!strings.Contains(lines[i], appExitedMarker) &&
-			!strings.Contains(lines[i], "HTTP") {
-			return strings.TrimSpace(lines[i]), nil
+		if strings.Contains(lines[i], "[APP") {
+			epoch, err := getLogEpoch(strings.TrimSpace(lines[i]))
+			if err != nil {
+				continue
+			}
+
+			return epoch, nil
 		}
 	}
 
-	return "", fmt.Errorf("cannot find any app logs")
+	return -1, fmt.Errorf("cannot find any app logs")
 }
 
 func getLogEpoch(line string) (int, error) {
