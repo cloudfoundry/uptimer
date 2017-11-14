@@ -160,7 +160,6 @@ func main() {
 		performMeasurements = false
 	} else {
 		logger.Println("Finished setting up main workflow")
-		logger.Printf("stdout:\n%s\n\nstderr:\n%s\n", runnerOutBuf, runnerErrBuf)
 	}
 
 	if !cfg.OptionalTests.RunAppSyslogAvailability {
