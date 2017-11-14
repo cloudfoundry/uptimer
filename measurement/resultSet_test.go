@@ -30,6 +30,7 @@ var _ = Describe("ResultSet", func() {
 	Describe("SuccessesSinceLastFailure", func() {
 		It("returns the number of successes since the last failure", func() {
 			rs.RecordFailure()
+			time.Sleep(10 * time.Millisecond)
 
 			rs.RecordSuccess()
 			rs.RecordSuccess()
