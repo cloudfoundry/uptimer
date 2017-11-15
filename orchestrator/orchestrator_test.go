@@ -57,6 +57,8 @@ var _ = Describe("Orchestrator", func() {
 		fakeMeasurement2.NameReturns("name2")
 		ccg = cfCmdGenerator.New("/cfhome")
 
+		ot = config.OptionalTests{RunAppSyslogAvailability: false}
+
 		orc = New([]*config.Command{fakeCommand1, fakeCommand2}, logger, fakeWorkflow, fakeRunner, []measurement.Measurement{fakeMeasurement1, fakeMeasurement2})
 	})
 
