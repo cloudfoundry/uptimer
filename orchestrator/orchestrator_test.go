@@ -278,7 +278,7 @@ var _ = Describe("Orchestrator", func() {
 			})
 		})
 
-		Context("When peformMeasurements is true", func() {
+		Context("When performMeasurements is true", func() {
 			var (
 				performMeasurements bool
 			)

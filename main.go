@@ -17,7 +17,7 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 
 	"github.com/cloudfoundry/uptimer/appLogValidator"
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
@@ -47,9 +47,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	cfg, err := loadConfig(*configPath)
+	cfg, err := config.Load(*configPath)
 	if err != nil {
 		logger.Println("Failed to load config: ", err)
+		os.Exit(1)
+	}
+
+	err = cfg.Validate()
+	if err != nil {
+		logger.Println(err)
 		os.Exit(1)
 	}
 
@@ -178,15 +184,6 @@ func main() {
 	logger.Println("Finished tearing down")
 
 	os.Exit(exitCode)
-}
-
-func loadConfig(configPath string) (*config.Config, error) {
-	cfg, err := config.Load(configPath)
-	if err != nil {
-		return nil, err
-	}
-
-	return cfg, nil
 }
 
 func createTmpDirs() (string, string, string, string, string, error) {

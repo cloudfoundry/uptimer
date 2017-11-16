@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 )
 
@@ -47,9 +48,15 @@ func Load(filename string) (*Config, error) {
 
 	newConfig := &Config{}
 	err = json.Unmarshal(data, newConfig)
-	if err != nil {
-		return nil, err
-	}
 
-	return newConfig, nil
+	return newConfig, err
+}
+
+func (c Config) Validate() error {
+	if c.OptionalTests.RunAppSyslogAvailability {
+		if c.CF != nil && (c.CF.TCPDomain == "" || c.CF.AvailablePort == 0) {
+			return errors.New("`cf.tcp_domain` and `cf.available_port` must be set in order to run App Syslog Availability tests.")
+		}
+	}
+	return nil
 }
