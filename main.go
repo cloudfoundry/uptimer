@@ -30,6 +30,8 @@ import (
 	"github.com/cloudfoundry/uptimer/version"
 )
 
+const appCommand string = "./app"
+
 func main() {
 	logger := log.New(os.Stdout, "\n[UPTIMER] ", log.Ldate|log.Ltime|log.LUTC)
 
@@ -87,13 +89,24 @@ func main() {
 	bufferedRunner, runnerOutBuf, runnerErrBuf := createBufferedRunner()
 
 	pushCmdGenerator := cfCmdGenerator.New(pushTmpDir)
-	pushWorkflow, pushOrg, _ := createWorkflow(cfg.CF, appPath, "./app")
-	logger.Printf("Setting up push workflow with org %s ...", pushOrg)
+	pushWorkflow := createWorkflow(cfg.CF, appPath, appCommand)
+	logger.Printf("Setting up push workflow with org %s ...", pushWorkflow.Org())
 	if err := bufferedRunner.RunInSequence(pushWorkflow.Setup(pushCmdGenerator)...); err != nil {
 		logBufferedRunnerFailure(logger, "push workflow setup", err, runnerOutBuf, runnerErrBuf)
 		performMeasurements = false
 	} else {
 		logger.Println("Finished setting up push workflow")
+	}
+	pushWorkflowGeneratorFunc := func() cfWorkflow.CfWorkflow {
+		return cfWorkflow.New(
+			cfg.CF,
+			pushWorkflow.Org(),
+			pushWorkflow.Space(),
+			pushWorkflow.Quota(),
+			fmt.Sprintf("uptimer-app-%s", uuid.NewV4().String()),
+			appPath,
+			appCommand,
+		)
 	}
 
 	var sinkWorkflow cfWorkflow.CfWorkflow
@@ -101,7 +114,7 @@ func main() {
 	if cfg.OptionalTests.RunAppSyslogAvailability {
 		sinkCmdGenerator = cfCmdGenerator.New(sinkTmpDir)
 		var sinkOrg string
-		sinkWorkflow, sinkOrg, _ = createWorkflow(cfg.CF, sinkAppPath, "./syslogSink")
+		sinkWorkflow = createWorkflow(cfg.CF, sinkAppPath, "./syslogSink")
 		logger.Printf("Setting up sink workflow with org %s ...", sinkOrg)
 		err = bufferedRunner.RunInSequence(
 			append(append(
@@ -117,7 +130,7 @@ func main() {
 	}
 
 	orcCmdGenerator := cfCmdGenerator.New(orcTmpDir)
-	orcWorkflow, orcOrg, _ := createWorkflow(cfg.CF, appPath, "./app")
+	orcWorkflow := createWorkflow(cfg.CF, appPath, appCommand)
 
 	authFailedRetryFunc := func(stdOut, stdErr string) bool {
 		authFailedMessage := "Authentication has expired.  Please log back in to re-authenticate."
@@ -128,7 +141,7 @@ func main() {
 		clock,
 		logger,
 		orcWorkflow,
-		pushWorkflow,
+		pushWorkflowGeneratorFunc,
 		cfCmdGenerator.New(recentLogsTmpDir),
 		cfCmdGenerator.New(streamingLogsTmpDir),
 		pushCmdGenerator,
@@ -150,7 +163,7 @@ func main() {
 		)
 	}
 
-	logger.Printf("Setting up main workflow with org %s ...", orcOrg)
+	logger.Printf("Setting up main workflow with org %s ...", orcWorkflow.Org())
 	orc := orchestrator.New(cfg.While, logger, orcWorkflow, cmdRunner.New(os.Stdout, os.Stderr, io.Copy), measurements)
 	if err = orc.Setup(bufferedRunner, orcCmdGenerator, cfg.OptionalTests); err != nil {
 		logBufferedRunnerFailure(logger, "main workflow setup", err, runnerOutBuf, runnerErrBuf)
@@ -229,27 +242,23 @@ func compileIncludedApp(appName string) (string, error) {
 	return appPath, err
 }
 
-func createWorkflow(cfc *config.Cf, appPath, appCommand string) (cfWorkflow.CfWorkflow, string, string) {
-	org := fmt.Sprintf("uptimer-org-%s", uuid.NewV4().String())
-	app := fmt.Sprintf("uptimer-app-%s", uuid.NewV4().String())
-
+func createWorkflow(cfc *config.Cf, appPath, appCommand string) cfWorkflow.CfWorkflow {
 	return cfWorkflow.New(
-			cfc,
-			org,
-			fmt.Sprintf("uptimer-space-%s", uuid.NewV4().String()),
-			fmt.Sprintf("uptimer-quota-%s", uuid.NewV4().String()),
-			app,
-			appPath,
-			appCommand,
-		),
-		org,
-		app
+		cfc,
+		fmt.Sprintf("uptimer-org-%s", uuid.NewV4().String()),
+		fmt.Sprintf("uptimer-space-%s", uuid.NewV4().String()),
+		fmt.Sprintf("uptimer-quota-%s", uuid.NewV4().String()),
+		fmt.Sprintf("uptimer-app-%s", uuid.NewV4().String()),
+		appPath,
+		appCommand,
+	)
 }
 
 func createMeasurements(
 	clock clock.Clock,
 	logger *log.Logger,
-	orcWorkflow, pushWorkflow cfWorkflow.CfWorkflow,
+	orcWorkflow cfWorkflow.CfWorkflow,
+	pushWorkFlowGeneratorFunc func() cfWorkflow.CfWorkflow,
 	recentLogsCmdGenerator, streamingLogsCmdGenerator, pushCmdGenerator cfCmdGenerator.CfCmdGenerator,
 	allowedFailures config.AllowedFailures,
 	authFailedRetryFunc func(stdOut, stdErr string) bool,
@@ -280,7 +289,11 @@ func createMeasurements(
 	pushRunner, pushRunnerOutBuf, pushRunnerErrBuf := createBufferedRunner()
 	appPushabilityMeasurement := measurement.NewAppPushability(
 		func() []cmdStartWaiter.CmdStartWaiter {
-			return append(pushWorkflow.Push(pushCmdGenerator), pushWorkflow.Delete(pushCmdGenerator)...)
+			w := pushWorkFlowGeneratorFunc()
+			return append(
+				w.Push(pushCmdGenerator),
+				w.Delete(pushCmdGenerator)...,
+			)
 		},
 		pushRunner,
 		pushRunnerOutBuf,

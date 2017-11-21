@@ -11,6 +11,33 @@ import (
 )
 
 type FakeCfWorkflow struct {
+	OrgStub        func() string
+	orgMutex       sync.RWMutex
+	orgArgsForCall []struct{}
+	orgReturns     struct {
+		result1 string
+	}
+	orgReturnsOnCall map[int]struct {
+		result1 string
+	}
+	SpaceStub        func() string
+	spaceMutex       sync.RWMutex
+	spaceArgsForCall []struct{}
+	spaceReturns     struct {
+		result1 string
+	}
+	spaceReturnsOnCall map[int]struct {
+		result1 string
+	}
+	QuotaStub        func() string
+	quotaMutex       sync.RWMutex
+	quotaArgsForCall []struct{}
+	quotaReturns     struct {
+		result1 string
+	}
+	quotaReturnsOnCall map[int]struct {
+		result1 string
+	}
 	AppUrlStub        func() string
 	appUrlMutex       sync.RWMutex
 	appUrlArgsForCall []struct{}
@@ -112,6 +139,126 @@ type FakeCfWorkflow struct {
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
+}
+
+func (fake *FakeCfWorkflow) Org() string {
+	fake.orgMutex.Lock()
+	ret, specificReturn := fake.orgReturnsOnCall[len(fake.orgArgsForCall)]
+	fake.orgArgsForCall = append(fake.orgArgsForCall, struct{}{})
+	fake.recordInvocation("Org", []interface{}{})
+	fake.orgMutex.Unlock()
+	if fake.OrgStub != nil {
+		return fake.OrgStub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.orgReturns.result1
+}
+
+func (fake *FakeCfWorkflow) OrgCallCount() int {
+	fake.orgMutex.RLock()
+	defer fake.orgMutex.RUnlock()
+	return len(fake.orgArgsForCall)
+}
+
+func (fake *FakeCfWorkflow) OrgReturns(result1 string) {
+	fake.OrgStub = nil
+	fake.orgReturns = struct {
+		result1 string
+	}{result1}
+}
+
+func (fake *FakeCfWorkflow) OrgReturnsOnCall(i int, result1 string) {
+	fake.OrgStub = nil
+	if fake.orgReturnsOnCall == nil {
+		fake.orgReturnsOnCall = make(map[int]struct {
+			result1 string
+		})
+	}
+	fake.orgReturnsOnCall[i] = struct {
+		result1 string
+	}{result1}
+}
+
+func (fake *FakeCfWorkflow) Space() string {
+	fake.spaceMutex.Lock()
+	ret, specificReturn := fake.spaceReturnsOnCall[len(fake.spaceArgsForCall)]
+	fake.spaceArgsForCall = append(fake.spaceArgsForCall, struct{}{})
+	fake.recordInvocation("Space", []interface{}{})
+	fake.spaceMutex.Unlock()
+	if fake.SpaceStub != nil {
+		return fake.SpaceStub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.spaceReturns.result1
+}
+
+func (fake *FakeCfWorkflow) SpaceCallCount() int {
+	fake.spaceMutex.RLock()
+	defer fake.spaceMutex.RUnlock()
+	return len(fake.spaceArgsForCall)
+}
+
+func (fake *FakeCfWorkflow) SpaceReturns(result1 string) {
+	fake.SpaceStub = nil
+	fake.spaceReturns = struct {
+		result1 string
+	}{result1}
+}
+
+func (fake *FakeCfWorkflow) SpaceReturnsOnCall(i int, result1 string) {
+	fake.SpaceStub = nil
+	if fake.spaceReturnsOnCall == nil {
+		fake.spaceReturnsOnCall = make(map[int]struct {
+			result1 string
+		})
+	}
+	fake.spaceReturnsOnCall[i] = struct {
+		result1 string
+	}{result1}
+}
+
+func (fake *FakeCfWorkflow) Quota() string {
+	fake.quotaMutex.Lock()
+	ret, specificReturn := fake.quotaReturnsOnCall[len(fake.quotaArgsForCall)]
+	fake.quotaArgsForCall = append(fake.quotaArgsForCall, struct{}{})
+	fake.recordInvocation("Quota", []interface{}{})
+	fake.quotaMutex.Unlock()
+	if fake.QuotaStub != nil {
+		return fake.QuotaStub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.quotaReturns.result1
+}
+
+func (fake *FakeCfWorkflow) QuotaCallCount() int {
+	fake.quotaMutex.RLock()
+	defer fake.quotaMutex.RUnlock()
+	return len(fake.quotaArgsForCall)
+}
+
+func (fake *FakeCfWorkflow) QuotaReturns(result1 string) {
+	fake.QuotaStub = nil
+	fake.quotaReturns = struct {
+		result1 string
+	}{result1}
+}
+
+func (fake *FakeCfWorkflow) QuotaReturnsOnCall(i int, result1 string) {
+	fake.QuotaStub = nil
+	if fake.quotaReturnsOnCall == nil {
+		fake.quotaReturnsOnCall = make(map[int]struct {
+			result1 string
+		})
+	}
+	fake.quotaReturnsOnCall[i] = struct {
+		result1 string
+	}{result1}
 }
 
 func (fake *FakeCfWorkflow) AppUrl() string {
@@ -543,6 +690,12 @@ func (fake *FakeCfWorkflow) CreateAndBindSyslogDrainServiceReturnsOnCall(i int, 
 func (fake *FakeCfWorkflow) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
+	fake.orgMutex.RLock()
+	defer fake.orgMutex.RUnlock()
+	fake.spaceMutex.RLock()
+	defer fake.spaceMutex.RUnlock()
+	fake.quotaMutex.RLock()
+	defer fake.quotaMutex.RUnlock()
 	fake.appUrlMutex.RLock()
 	defer fake.appUrlMutex.RUnlock()
 	fake.setupMutex.RLock()

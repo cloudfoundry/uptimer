@@ -48,8 +48,28 @@ var _ = Describe("CfWorkflow", func() {
 		cw = New(cfc, org, space, quota, appName, appPath, appCommand)
 	})
 
-	It("has the correct app url", func() {
-		Expect(cw.AppUrl()).To(Equal("https://doraApp.app.jigglypuff.cf-app.com"))
+	Describe("Org", func() {
+		It("returns the correct org", func() {
+			Expect(cw.Org()).To(Equal(org))
+		})
+	})
+
+	Describe("Space", func() {
+		It("returns the correct space", func() {
+			Expect(cw.Space()).To(Equal(space))
+		})
+	})
+
+	Describe("Quota", func() {
+		It("returns the correct quota", func() {
+			Expect(cw.Quota()).To(Equal(quota))
+		})
+	})
+
+	Describe("AppUrl", func() {
+		It("returns the correct app url", func() {
+			Expect(cw.AppUrl()).To(Equal("https://doraApp.app.jigglypuff.cf-app.com"))
+		})
 	})
 
 	Describe("Push", func() {

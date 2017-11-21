@@ -11,6 +11,9 @@ import (
 
 //go:generate counterfeiter . CfWorkflow
 type CfWorkflow interface {
+	Org() string
+	Space() string
+	Quota() string
 	AppUrl() string
 
 	Setup(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
@@ -27,7 +30,6 @@ type CfWorkflow interface {
 type cfWorkflow struct {
 	cf *config.Cf
 
-	appUrl     string
 	appPath    string
 	org        string
 	space      string
@@ -36,16 +38,25 @@ type cfWorkflow struct {
 	appCommand string
 }
 
+func (c *cfWorkflow) Org() string {
+	return c.org
+}
+
+func (c *cfWorkflow) Space() string {
+	return c.space
+}
+
+func (c *cfWorkflow) Quota() string {
+	return c.quota
+}
+
 func (c *cfWorkflow) AppUrl() string {
-	return c.appUrl
+	return fmt.Sprintf("https://%s.%s", c.appName, c.cf.AppDomain)
 }
 
 func New(cfConfig *config.Cf, org, space, quota, appName, appPath, appCommand string) CfWorkflow {
-	appUrl := fmt.Sprintf("https://%s.%s", appName, cfConfig.AppDomain)
-
 	return &cfWorkflow{
 		cf:         cfConfig,
-		appUrl:     appUrl,
 		appPath:    appPath,
 		org:        org,
 		space:      space,
