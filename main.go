@@ -113,9 +113,8 @@ func main() {
 	var sinkCmdGenerator cfCmdGenerator.CfCmdGenerator
 	if cfg.OptionalTests.RunAppSyslogAvailability {
 		sinkCmdGenerator = cfCmdGenerator.New(sinkTmpDir)
-		var sinkOrg string
 		sinkWorkflow = createWorkflow(cfg.CF, sinkAppPath, "./syslogSink")
-		logger.Printf("Setting up sink workflow with org %s ...", sinkOrg)
+		logger.Printf("Setting up sink workflow with org %s ...", sinkWorkflow.Org())
 		err = bufferedRunner.RunInSequence(
 			append(append(
 				sinkWorkflow.Setup(sinkCmdGenerator),
