@@ -19,6 +19,12 @@ to monitor availability during migrations
 from `cf-release` to `cf-deployment`,
 and during upgrade deployments.
 
+## Installation
+
+```
+go get github.com/cloudfoundry/uptimer
+```
+
 ## Usage
 `uptimer -configFile config.json`.
 
