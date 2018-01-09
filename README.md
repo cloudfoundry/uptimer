@@ -41,11 +41,11 @@ Here is an example config `json`:
     "while": [
         {
             "command": "bosh",
-            "command_args": ["deploy"]
+            "command_args": ["deploy", "-d", "cf", "interpolated-cf-deployment.yml", "-n"]
         },
         {
             "command": "bosh",
-            "command_args": ["delete-deployment"]
+            "command_args": ["delete-deployment", "-d", "cf", "-n"]
         }
     ],
     "cf": {
