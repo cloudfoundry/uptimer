@@ -1,6 +1,7 @@
 package measurement
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 )
@@ -28,7 +29,9 @@ func (a *availability) PerformMeasurement() (string, string, string, bool) {
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		return fmt.Sprintf("response had status %d; %s", res.StatusCode, res.Status), "", "", false
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(res.Body)
+		return fmt.Sprintf("response had status %d; %s; %s", res.StatusCode, res.Status, buf.String()), "", "", false
 	}
 
 	return "", "", "", true

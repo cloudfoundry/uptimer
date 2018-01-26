@@ -2,6 +2,7 @@ package measurement_test
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"sync"
 
@@ -37,7 +38,7 @@ var _ = Describe("Availability", func() {
 		failResponse = &http.Response{
 			StatusCode: 400,
 			Status:     "Bad Request",
-			Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+			Body:       ioutil.NopCloser(bytes.NewBufferString("Body of the error here")),
 		}
 		fakeRoundTripper.RoundTripReturns(successResponse, nil)
 		client = &http.Client{
@@ -90,7 +91,7 @@ var _ = Describe("Availability", func() {
 
 			msg, _, _, _ := am.PerformMeasurement()
 
-			Expect(msg).To(Equal("response had status 400; Bad Request"))
+			Expect(msg).To(Equal("response had status 400; Bad Request; Body of the error here"))
 		})
 
 		It("returns error output when there is an error", func() {
@@ -147,7 +148,7 @@ type fakeReadCloser struct {
 }
 
 func (rc *fakeReadCloser) Read(p []byte) (n int, err error) {
-	return 0, nil
+	return 0, io.EOF
 }
 
 func (rc *fakeReadCloser) Close() error {
