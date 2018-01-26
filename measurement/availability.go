@@ -28,7 +28,7 @@ func (a *availability) PerformMeasurement() (string, string, string, bool) {
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		return fmt.Sprintf("response had status %d", res.StatusCode), "", "", false
+		return fmt.Sprintf("response had status %d; %s", res.StatusCode, res.Status), "", "", false
 	}
 
 	return "", "", "", true
