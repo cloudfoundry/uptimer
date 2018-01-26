@@ -36,7 +36,6 @@ var _ = Describe("Availability", func() {
 		}
 		failResponse = &http.Response{
 			StatusCode: 400,
-			Status:     "Bad Request",
 			Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 		}
 		fakeRoundTripper.RoundTripReturns(successResponse, nil)
@@ -90,7 +89,7 @@ var _ = Describe("Availability", func() {
 
 			msg, _, _, _ := am.PerformMeasurement()
 
-			Expect(msg).To(Equal("response had status 400; Bad Request"))
+			Expect(msg).To(Equal("response had status 400"))
 		})
 
 		It("returns error output when there is an error", func() {
