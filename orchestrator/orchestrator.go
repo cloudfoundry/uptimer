@@ -79,6 +79,7 @@ func (o *orchestrator) Run(performMeasurements bool) (int, error) {
 		for _, m := range o.measurements {
 			o.logger.Printf("Stopping measurement: %s\n", m.Name())
 			m.Stop()
+			o.logger.Printf("Stopped measurement: %s\n", m.Name())
 		}
 
 		o.logger.Println("Measurement summaries:")

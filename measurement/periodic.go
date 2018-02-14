@@ -36,6 +36,7 @@ func (p *periodic) Start() {
 			case <-ticker.C:
 				p.performMeasurement()
 			case <-p.stopChan:
+				p.logger.Printf("Received stop signal for measurement %s", p.Name())
 				ticker.Stop()
 				return
 			}
@@ -93,7 +94,9 @@ func (p *periodic) Results() ResultSet {
 }
 
 func (p *periodic) Stop() {
+	p.logger.Printf("Sending stop signal for measurement %s", p.Name())
 	p.stopChan <- 0
+	p.logger.Printf("Finished sending stop signal for measurement %s", p.Name())
 }
 
 func (p *periodic) Failed() bool {
