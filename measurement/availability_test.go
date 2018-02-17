@@ -12,6 +12,8 @@ import (
 	"bytes"
 	"io/ioutil"
 
+	"time"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -42,6 +44,7 @@ var _ = Describe("Availability", func() {
 		}
 		fakeRoundTripper.RoundTripReturns(successResponse, nil)
 		client = &http.Client{
+			Timeout:   30 * time.Second,
 			Transport: fakeRoundTripper,
 		}
 		fakeResultSet = &measurementfakes.FakeResultSet{}

@@ -302,6 +302,7 @@ func createMeasurements(
 	httpAvailabilityMeasurement := measurement.NewHTTPAvailability(
 		orcWorkflow.AppUrl(),
 		&http.Client{
+			Timeout: 30 * time.Second,
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 			},
