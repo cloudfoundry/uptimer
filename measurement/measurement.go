@@ -44,7 +44,7 @@ func NewPeriodicWithoutMeasuringImmediately(
 		allowedFailures:    allowedFailures,
 		measureImmediately: false,
 
-		stopChan:  make(chan int),
+		stopChan:  make(chan int, 1),
 		resultSet: resultSet,
 	}
 }
@@ -67,7 +67,7 @@ func NewPeriodic(
 		allowedFailures:    allowedFailures,
 		measureImmediately: true,
 
-		stopChan:  make(chan int),
+		stopChan:  make(chan int, 1),
 		resultSet: resultSet,
 	}
 }
