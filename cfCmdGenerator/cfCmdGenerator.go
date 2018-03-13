@@ -123,6 +123,7 @@ func (c *cfCmdGenerator) Push(name, domain, path, command string) cmdStartWaiter
 				"-b", "binary_buildpack",
 				"-c", command,
 				"-i", "2",
+				"-m", "1024M",
 			),
 		),
 	)
