@@ -10,7 +10,6 @@ import (
 	"github.com/cloudfoundry/uptimer/cmdRunner/cmdRunnerfakes"
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	. "github.com/cloudfoundry/uptimer/measurement"
-	"github.com/cloudfoundry/uptimer/measurement/measurementfakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -20,7 +19,6 @@ var _ = Describe("StreamLogs", func() {
 	var (
 		commands             []cmdStartWaiter.CmdStartWaiter
 		ctx                  context.Context
-		fakeResultSet        *measurementfakes.FakeResultSet
 		fakeAppLogValidator  *appLogValidatorfakes.FakeAppLogValidator
 		fakeCancelFunc       context.CancelFunc
 		cancelFuncCallCount  int
@@ -49,7 +47,6 @@ var _ = Describe("StreamLogs", func() {
 		fakeCmdGeneratorFunc = func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter) {
 			return ctx, fakeCancelFunc, commands
 		}
-		fakeResultSet = &measurementfakes.FakeResultSet{}
 
 		slm = NewStreamingLogs(fakeCmdGeneratorFunc, fakeCommandRunner, outBuf, errBuf, fakeAppLogValidator)
 	})

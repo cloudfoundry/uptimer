@@ -9,7 +9,6 @@ import (
 	"github.com/cloudfoundry/uptimer/cmdRunner/cmdRunnerfakes"
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	. "github.com/cloudfoundry/uptimer/measurement"
-	"github.com/cloudfoundry/uptimer/measurement/measurementfakes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -18,7 +17,6 @@ import (
 var _ = Describe("RecentLogs", func() {
 	var (
 		commands             []cmdStartWaiter.CmdStartWaiter
-		fakeResultSet        *measurementfakes.FakeResultSet
 		fakeAppLogValidator  *appLogValidatorfakes.FakeAppLogValidator
 		fakeCmdGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
 		fakeCommandRunner    *cmdRunnerfakes.FakeCmdRunner
@@ -39,7 +37,6 @@ var _ = Describe("RecentLogs", func() {
 		fakeCmdGeneratorFunc = func() []cmdStartWaiter.CmdStartWaiter {
 			return commands
 		}
-		fakeResultSet = &measurementfakes.FakeResultSet{}
 
 		rlm = NewRecentLogs(fakeCmdGeneratorFunc, fakeCommandRunner, outBuf, errBuf, fakeAppLogValidator)
 	})

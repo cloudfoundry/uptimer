@@ -9,7 +9,6 @@ import (
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	. "github.com/cloudfoundry/uptimer/measurement"
 
-	"github.com/cloudfoundry/uptimer/measurement/measurementfakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -19,7 +18,6 @@ var _ = Describe("Pushability", func() {
 		commands             []cmdStartWaiter.CmdStartWaiter
 		fakeCommandRunner    *cmdRunnerfakes.FakeCmdRunner
 		fakeCmdGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter
-		fakeResultSet        *measurementfakes.FakeResultSet
 		outBuf               *bytes.Buffer
 		errBuf               *bytes.Buffer
 
@@ -31,7 +29,6 @@ var _ = Describe("Pushability", func() {
 		fakeCmdGeneratorFunc = func() []cmdStartWaiter.CmdStartWaiter {
 			return commands
 		}
-		fakeResultSet = &measurementfakes.FakeResultSet{}
 		outBuf = bytes.NewBuffer([]byte{})
 		errBuf = bytes.NewBuffer([]byte{})
 

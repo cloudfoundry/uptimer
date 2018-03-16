@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	. "github.com/cloudfoundry/uptimer/measurement"
-	"github.com/cloudfoundry/uptimer/measurement/measurementfakes"
 
 	"bytes"
 	"io/ioutil"
@@ -25,7 +24,6 @@ var _ = Describe("Availability", func() {
 		successResponse  *http.Response
 		failResponse     *http.Response
 		client           *http.Client
-		fakeResultSet    *measurementfakes.FakeResultSet
 
 		am BaseMeasurement
 	)
@@ -47,7 +45,6 @@ var _ = Describe("Availability", func() {
 			Timeout:   30 * time.Second,
 			Transport: fakeRoundTripper,
 		}
-		fakeResultSet = &measurementfakes.FakeResultSet{}
 
 		am = NewHTTPAvailability(url, client)
 	})
