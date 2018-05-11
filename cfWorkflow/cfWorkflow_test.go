@@ -117,6 +117,36 @@ var _ = Describe("CfWorkflow", func() {
 				},
 			))
 		})
+
+		Context("if a isolation segment is configured", func() {
+
+			BeforeEach(func(){
+				cfc.IsolationSegment = "someSegment"
+				cw = New(cfc, org, space, quota, appName, appPath, appCommand)
+			})
+
+
+			It("includes isolation segment related cmds", func() {
+
+				cmds := cw.Setup(ccg)
+
+				Expect(cmds).To(Equal(
+					[]cmdStartWaiter.CmdStartWaiter{
+						ccg.Api("jigglypuff.cf-app.com"),
+						ccg.Auth("pika", "chu"),
+						ccg.CreateOrg("someOrg"),
+						ccg.CreateSpace("someOrg", "someSpace"),
+						ccg.CreateQuota("someQuota"),
+						ccg.SetQuota("someOrg", "someQuota"),
+						ccg.EnableOrgIsolation("someOrg", "someSegment"),
+						ccg.Target("someOrg", "someSpace"),
+						ccg.SetSpaceIsolation("someSpace", "someSegment"),
+					},
+				))
+			})
+
+		})
+
 	})
 
 	Describe("TearDown", func() {

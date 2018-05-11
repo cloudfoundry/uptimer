@@ -232,4 +232,28 @@ var _ = Describe("CfCmdGenerator", func() {
 			Expect(cmd).To(Equal(expectedCmd))
 		})
 	})
+
+	Describe("EnableOrgIsolation", func() {
+		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "enable-org-isolation", "orgName", "segmentName")
+			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
+
+			cmd := generator.EnableOrgIsolation("orgName", "segmentName")
+
+			Expect(cmd).To(Equal(expectedCmd))
+		})
+	})
+
+	Describe("SetSpaceIsolation", func() {
+		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "set-space-isolation-segment", "spaceName", "segmentName")
+			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
+
+			cmd := generator.SetSpaceIsolation("spaceName", "segmentName")
+
+			Expect(cmd).To(Equal(expectedCmd))
+
+		})
+	})
+
 })

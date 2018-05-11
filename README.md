@@ -54,7 +54,8 @@ Here is an example config `json`:
         "admin_user": "admin",
         "admin_password": "PASS",
         "tcp_domain": "tcp.my-cf.com",
-        "available_port": 1025
+        "available_port": 1025,
+        "isolation_segment": "production"
     },
     "optional_tests": {
       "run_app_syslog_availability": true
@@ -101,6 +102,9 @@ during test setup.
 The `tcp_domain` and `available_port` values
 are not required
 _unless_ you elect to run the `app_syslog_availability` test.
+
+`isolation_segment` is not required. 
+Setting it allows you to target a different isolation segment other than `shared`.
 
 ### Optional tests (optional)
 The `optional_tests` section is optional,

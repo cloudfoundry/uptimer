@@ -67,7 +67,7 @@ func New(cfConfig *config.Cf, org, space, quota, appName, appPath, appCommand st
 }
 
 func (c *cfWorkflow) Setup(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
-	return []cmdStartWaiter.CmdStartWaiter{
+	cmds := []cmdStartWaiter.CmdStartWaiter{
 		ccg.Api(c.cf.API),
 		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
 		ccg.CreateOrg(c.org),
@@ -75,6 +75,17 @@ func (c *cfWorkflow) Setup(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.C
 		ccg.CreateQuota(c.quota),
 		ccg.SetQuota(c.org, c.quota),
 	}
+
+	if c.cf.IsolationSegment != "" {
+		cmds = append(
+			cmds,
+			ccg.EnableOrgIsolation(c.org, c.cf.IsolationSegment),
+			ccg.Target(c.org, c.space),
+			ccg.SetSpaceIsolation(c.space, c.cf.IsolationSegment),
+		)
+	}
+
+	return cmds
 }
 
 func (c *cfWorkflow) Push(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {

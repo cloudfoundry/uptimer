@@ -26,6 +26,8 @@ type Cf struct {
 
 	TCPDomain     string `json:"tcp_domain"`
 	AvailablePort int    `json:"available_port"`
+
+	IsolationSegment string `json:"isolation_segment"`
 }
 
 type AllowedFailures struct {

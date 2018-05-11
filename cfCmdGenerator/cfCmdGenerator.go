@@ -28,6 +28,8 @@ type CfCmdGenerator interface {
 	CreateUserProvidedService(serviceName, syslogURL string) cmdStartWaiter.CmdStartWaiter
 	BindService(appName, serviceName string) cmdStartWaiter.CmdStartWaiter
 	Restage(appName string) cmdStartWaiter.CmdStartWaiter
+	EnableOrgIsolation(orgName, segmentName string) cmdStartWaiter.CmdStartWaiter
+	SetSpaceIsolation(spaceName, segmentName string) cmdStartWaiter.CmdStartWaiter
 }
 
 type cfCmdGenerator struct {
@@ -212,6 +214,22 @@ func (c *cfCmdGenerator) Restage(appName string) cmdStartWaiter.CmdStartWaiter {
 	return c.addCfHome(
 		exec.Command(
 			"cf", "restage", appName,
+		),
+	)
+}
+
+func (c *cfCmdGenerator) EnableOrgIsolation(orgName string, segmentName string) cmdStartWaiter.CmdStartWaiter {
+	return c.addCfHome(
+		exec.Command(
+			"cf", "enable-org-isolation", orgName, segmentName,
+		),
+	)
+}
+
+func (c *cfCmdGenerator) SetSpaceIsolation(spaceName, segmentName string) cmdStartWaiter.CmdStartWaiter {
+	return c.addCfHome(
+		exec.Command(
+			"cf", "set-space-isolation-segment", spaceName, segmentName,
 		),
 	)
 }
