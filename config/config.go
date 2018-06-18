@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 )
 
+const defaultCFAppInstances = 2
+
 type Config struct {
 	While           []*Command      `json:"while"`
 	CF              *Cf             `json:"cf"`
@@ -26,6 +28,8 @@ type Cf struct {
 
 	TCPDomain     string `json:"tcp_domain"`
 	AvailablePort int    `json:"available_port"`
+
+	AppInstancesToPush int `json:"app_instances_to_push"`
 }
 
 type AllowedFailures struct {
@@ -48,6 +52,10 @@ func Load(filename string) (*Config, error) {
 
 	newConfig := &Config{}
 	err = json.Unmarshal(data, newConfig)
+
+	if newConfig.CF != nil && newConfig.CF.AppInstancesToPush <= 0 {
+		newConfig.CF.AppInstancesToPush = defaultCFAppInstances
+	}
 
 	return newConfig, err
 }

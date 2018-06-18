@@ -36,6 +36,8 @@ var _ = Describe("CfWorkflow", func() {
 
 			TCPDomain:     "tcp.jigglypuff.cf-app.com",
 			AvailablePort: 1025,
+
+			AppInstancesToPush: 3,
 		}
 		ccg = cfCmdGenerator.New("/cfhome")
 		org = "someOrg"
@@ -81,7 +83,7 @@ var _ = Describe("CfWorkflow", func() {
 					ccg.Api("jigglypuff.cf-app.com"),
 					ccg.Auth("pika", "chu"),
 					ccg.Target("someOrg", "someSpace"),
-					ccg.Push("doraApp", "app.jigglypuff.cf-app.com", "this/is/an/app/path", "./app-command"),
+					ccg.Push("doraApp", "app.jigglypuff.cf-app.com", "this/is/an/app/path", "./app-command", 3),
 				},
 			))
 		})
