@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"strconv"
 
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 )
@@ -17,7 +18,7 @@ type CfCmdGenerator interface {
 	CreateOrg(org string) cmdStartWaiter.CmdStartWaiter
 	CreateSpace(org, space string) cmdStartWaiter.CmdStartWaiter
 	Target(org, space string) cmdStartWaiter.CmdStartWaiter
-	Push(name, domain, path, command string) cmdStartWaiter.CmdStartWaiter
+	Push(name, domain, path, command string, instances int) cmdStartWaiter.CmdStartWaiter
 	Delete(name string) cmdStartWaiter.CmdStartWaiter
 	DeleteOrg(org string) cmdStartWaiter.CmdStartWaiter
 	DeleteQuota(quota string) cmdStartWaiter.CmdStartWaiter
@@ -113,7 +114,7 @@ func (c *cfCmdGenerator) Target(org string, space string) cmdStartWaiter.CmdStar
 	)
 }
 
-func (c *cfCmdGenerator) Push(name, domain, path, command string) cmdStartWaiter.CmdStartWaiter {
+func (c *cfCmdGenerator) Push(name, domain, path, command string, instances int) cmdStartWaiter.CmdStartWaiter {
 	return c.addCfStagingTimeout(
 		c.addCfHome(
 			exec.Command(
@@ -122,7 +123,7 @@ func (c *cfCmdGenerator) Push(name, domain, path, command string) cmdStartWaiter
 				"-p", path,
 				"-b", "binary_buildpack",
 				"-c", command,
-				"-i", "2",
+				"-i", strconv.Itoa(instances),
 				"-m", "1024M",
 			),
 		),

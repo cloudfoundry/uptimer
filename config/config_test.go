@@ -1,17 +1,19 @@
 package config_test
 
 import (
+	"io"
+	"io/ioutil"
+	"os"
+
+	"github.com/cloudfoundry/uptimer/config"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"io/ioutil"
-	"github.com/cloudfoundry/uptimer/config"
-	"os"
 )
 
 var _ = Describe("Config", func() {
 	var (
 		configFile *os.File
-		err error
+		err        error
 	)
 
 	BeforeEach(func() {
@@ -24,11 +26,27 @@ var _ = Describe("Config", func() {
 		Expect(err).ToNot(HaveOccurred())
 	})
 
+	Describe("Load", func() {
+		It("sets the desired number of CF app instances to the default value if not configured", func() {
+			_, err := io.WriteString(configFile, `{"cf": {}}`)
+			cfg, err := config.Load(configFile.Name())
+			Expect(err).ToNot(HaveOccurred())
+			Expect(cfg.CF.AppInstancesToPush).To(Equal(2))
+		})
+
+		It("sets the desired number of CF app instances to the default value if less than 0", func() {
+			_, err := io.WriteString(configFile, `{"cf": {"app_instances_to_push": -1}}`)
+			cfg, err := config.Load(configFile.Name())
+			Expect(err).ToNot(HaveOccurred())
+			Expect(cfg.CF.AppInstancesToPush).To(Equal(2))
+		})
+	})
+
 	Describe("#Validate", func() {
 		It("Returns no error if run_app_syslog_availability is set to true and tcp_domain and available_port are not provided", func() {
 			cfg := config.Config{
 				CF: &config.Cf{
-					TCPDomain: "tcp.my-cf.com",
+					TCPDomain:     "tcp.my-cf.com",
 					AvailablePort: 1025,
 				},
 				OptionalTests: config.OptionalTests{RunAppSyslogAvailability: true},
@@ -40,7 +58,7 @@ var _ = Describe("Config", func() {
 
 		It("Returns error if run_app_syslog_availability is set to true, but tcp_domain and available_port are not provided", func() {
 			cfg := config.Config{
-				CF: &config.Cf{},
+				CF:            &config.Cf{},
 				OptionalTests: config.OptionalTests{RunAppSyslogAvailability: true},
 			}
 
