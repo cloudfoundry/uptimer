@@ -96,6 +96,11 @@ func (o *orchestrator) Run(performMeasurements bool) (int, error) {
 		}
 	}
 
+	// Alert user that the While Command succeeded, but we failed in the setup of one or more measurements
+	if !performMeasurements && exitCode == 0 {
+		exitCode = 70
+	}
+
 	return exitCode, err
 }
 

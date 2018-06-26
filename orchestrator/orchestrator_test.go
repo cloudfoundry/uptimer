@@ -260,10 +260,10 @@ var _ = Describe("Orchestrator", func() {
 				Expect(logBuf.String()).NotTo(ContainSubstring("\x1b[32msummary2\x1b[0m"))
 			})
 
-			It("returns an exit code of 0 when the while commands succeed", func() {
+			It("returns an exit code of 70 when the while commands succeed", func() {
 				ec, _ := orc.Run(performMeasurements)
 
-				Expect(ec).To(Equal(0))
+				Expect(ec).To(Equal(70))
 			})
 
 			It("returns the exit code of the failed while command when a while command fails", func() {
