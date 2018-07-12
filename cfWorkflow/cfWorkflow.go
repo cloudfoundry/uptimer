@@ -78,11 +78,16 @@ func (c *cfWorkflow) Setup(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.C
 }
 
 func (c *cfWorkflow) Push(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
+	appInstancesToPush := 2
+	if c.cf.UseSingleAppInstance {
+		appInstancesToPush = 1
+	}
+
 	return []cmdStartWaiter.CmdStartWaiter{
 		ccg.Api(c.cf.API),
 		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
 		ccg.Target(c.org, c.space),
-		ccg.Push(c.appName, c.cf.AppDomain, c.appPath, c.appCommand),
+		ccg.Push(c.appName, c.cf.AppDomain, c.appPath, c.appCommand, appInstancesToPush),
 	}
 }
 

@@ -37,6 +37,9 @@ var _ = Describe("CfWorkflow", func() {
 			TCPDomain:     "tcp.jigglypuff.cf-app.com",
 			AvailablePort: 1025,
 		}
+	})
+
+	JustBeforeEach(func() {
 		ccg = cfCmdGenerator.New("/cfhome")
 		org = "someOrg"
 		space = "someSpace"
@@ -81,9 +84,28 @@ var _ = Describe("CfWorkflow", func() {
 					ccg.Api("jigglypuff.cf-app.com"),
 					ccg.Auth("pika", "chu"),
 					ccg.Target("someOrg", "someSpace"),
-					ccg.Push("doraApp", "app.jigglypuff.cf-app.com", "this/is/an/app/path", "./app-command"),
+					ccg.Push("doraApp", "app.jigglypuff.cf-app.com", "this/is/an/app/path", "./app-command", 2),
 				},
 			))
+		})
+
+		Context("when the UseSingleAppInstance flag is used", func() {
+			BeforeEach(func() {
+				cfc.UseSingleAppInstance = true
+			})
+
+			It("returns a series of commands to push a single instance app", func() {
+				cmds := cw.Push(ccg)
+
+				Expect(cmds).To(Equal(
+					[]cmdStartWaiter.CmdStartWaiter{
+						ccg.Api("jigglypuff.cf-app.com"),
+						ccg.Auth("pika", "chu"),
+						ccg.Target("someOrg", "someSpace"),
+						ccg.Push("doraApp", "app.jigglypuff.cf-app.com", "this/is/an/app/path", "./app-command", 1),
+					},
+				))
+			})
 		})
 	})
 
