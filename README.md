@@ -54,7 +54,7 @@ Here is an example config `json`:
         "admin_user": "admin",
         "admin_password": "PASS",
         "tcp_domain": "tcp.my-cf.com",
-        "use_single_app_instance": true,
+        "use_single_app_instance": false,
         "available_port": 1025
     },
     "optional_tests": {
@@ -103,8 +103,17 @@ The `tcp_domain` and `available_port` values
 are not required
 _unless_ you elect to run the `app_syslog_availability` test.
 
-Uptimer by default pushes 2 instances of an app but it can be configured to push only a single instance by
-setting the optional `use_single_app_instance` value to `true` under the `cf` section.
+Uptimer by default pushes two instances of an app
+for its uptime measurements,
+but it can be configured to push only a single instance
+by setting the optional
+`use_single_app_instance` value to
+`true` under the `cf` section.
+
+Only set this flag to `true`
+if you understand
+the implications it has
+for your uptime measurements.
 
 ### Optional tests (optional)
 The `optional_tests` section is optional,

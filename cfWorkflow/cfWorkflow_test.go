@@ -76,7 +76,7 @@ var _ = Describe("CfWorkflow", func() {
 	})
 
 	Describe("Push", func() {
-		It("returns a series of commands to push an app", func() {
+		It("returns a series of commands to push an app with exactly 2 instances", func() {
 			cmds := cw.Push(ccg)
 
 			Expect(cmds).To(Equal(
