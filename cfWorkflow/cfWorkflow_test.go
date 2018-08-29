@@ -31,193 +31,262 @@ var _ = Describe("CfWorkflow", func() {
 		cfc = &config.Cf{
 			API:           "jigglypuff.cf-app.com",
 			AppDomain:     "app.jigglypuff.cf-app.com",
-			AdminUser:     "pika",
-			AdminPassword: "chu",
+			User:     "pika",
+			Password: "chu",
 
 			TCPDomain:     "tcp.jigglypuff.cf-app.com",
 			AvailablePort: 1025,
 		}
 	})
-
-	JustBeforeEach(func() {
-		ccg = cfCmdGenerator.New("/cfhome")
-		org = "someOrg"
-		space = "someSpace"
-		quota = "someQuota"
-		appName = "doraApp"
-		appPath = "this/is/an/app/path"
-		appCommand = "./app-command"
-
-		cw = New(cfc, org, space, quota, appName, appPath, appCommand)
-	})
-
-	Describe("Org", func() {
-		It("returns the correct org", func() {
-			Expect(cw.Org()).To(Equal(org))
+	Context("when not using existing space", func() {
+		JustBeforeEach(func() {
+			ccg = cfCmdGenerator.New("/cfhome")
+			org = "someOrg"
+			space = "someSpace"
+			quota = "someQuota"
+			appName = "doraApp"
+			appPath = "this/is/an/app/path"
+			appCommand = "./app-command"
+	
+			cw = New(cfc, org, space, quota, appName, appPath, appCommand)
 		})
-	})
-
-	Describe("Space", func() {
-		It("returns the correct space", func() {
-			Expect(cw.Space()).To(Equal(space))
-		})
-	})
-
-	Describe("Quota", func() {
-		It("returns the correct quota", func() {
-			Expect(cw.Quota()).To(Equal(quota))
-		})
-	})
-
-	Describe("AppUrl", func() {
-		It("returns the correct app url", func() {
-			Expect(cw.AppUrl()).To(Equal("https://doraApp.app.jigglypuff.cf-app.com"))
-		})
-	})
-
-	Describe("Push", func() {
-		It("returns a series of commands to push an app with exactly 2 instances", func() {
-			cmds := cw.Push(ccg)
-
-			Expect(cmds).To(Equal(
-				[]cmdStartWaiter.CmdStartWaiter{
-					ccg.Api("jigglypuff.cf-app.com"),
-					ccg.Auth("pika", "chu"),
-					ccg.Target("someOrg", "someSpace"),
-					ccg.Push("doraApp", "app.jigglypuff.cf-app.com", "this/is/an/app/path", "./app-command", 2),
-				},
-			))
-		})
-
-		Context("when the UseSingleAppInstance flag is used", func() {
-			BeforeEach(func() {
-				cfc.UseSingleAppInstance = true
+	
+		Describe("Org", func() {
+			It("returns the correct org", func() {
+				Expect(cw.Org()).To(Equal(org))
 			})
-
-			It("returns a series of commands to push a single instance app", func() {
+		})
+	
+		Describe("Space", func() {
+			It("returns the correct space", func() {
+				Expect(cw.Space()).To(Equal(space))
+			})
+		})
+	
+		Describe("Quota", func() {
+			It("returns the correct quota", func() {
+				Expect(cw.Quota()).To(Equal(quota))
+			})
+		})
+	
+		Describe("AppUrl", func() {
+			It("returns the correct app url", func() {
+				Expect(cw.AppUrl()).To(Equal("https://doraApp.app.jigglypuff.cf-app.com"))
+			})
+		})
+	
+		Describe("Push", func() {
+			It("returns a series of commands to push an app with exactly 2 instances", func() {
 				cmds := cw.Push(ccg)
-
+	
 				Expect(cmds).To(Equal(
 					[]cmdStartWaiter.CmdStartWaiter{
 						ccg.Api("jigglypuff.cf-app.com"),
 						ccg.Auth("pika", "chu"),
 						ccg.Target("someOrg", "someSpace"),
-						ccg.Push("doraApp", "app.jigglypuff.cf-app.com", "this/is/an/app/path", "./app-command", 1),
+						ccg.Push("doraApp", "app.jigglypuff.cf-app.com", "this/is/an/app/path", "./app-command", 2),
+					},
+				))
+			})
+	
+			Context("when the UseSingleAppInstance flag is used", func() {
+				BeforeEach(func() {
+					cfc.UseSingleAppInstance = true
+				})
+	
+				It("returns a series of commands to push a single instance app", func() {
+					cmds := cw.Push(ccg)
+	
+					Expect(cmds).To(Equal(
+						[]cmdStartWaiter.CmdStartWaiter{
+							ccg.Api("jigglypuff.cf-app.com"),
+							ccg.Auth("pika", "chu"),
+							ccg.Target("someOrg", "someSpace"),
+							ccg.Push("doraApp", "app.jigglypuff.cf-app.com", "this/is/an/app/path", "./app-command", 1),
+						},
+					))
+				})
+			})
+		})
+	
+		Describe("Delete", func() {
+			It("returns a series of commands to delete an app", func() {
+				cmds := cw.Delete(ccg)
+	
+				Expect(cmds).To(Equal(
+					[]cmdStartWaiter.CmdStartWaiter{
+						ccg.Api("jigglypuff.cf-app.com"),
+						ccg.Auth("pika", "chu"),
+						ccg.Target("someOrg", "someSpace"),
+						ccg.Delete("doraApp"),
+					},
+				))
+			})
+		})
+	
+		Describe("Setup", func() {
+			It("returns a series of commands to create a new org and space", func() {
+				cmds := cw.Setup(ccg)
+	
+				Expect(cmds).To(Equal(
+					[]cmdStartWaiter.CmdStartWaiter{
+						ccg.Api("jigglypuff.cf-app.com"),
+						ccg.Auth("pika", "chu"),
+						ccg.CreateOrg("someOrg"),
+						ccg.CreateQuota("someQuota"),
+						ccg.SetQuota("someOrg", "someQuota"),
+						ccg.CreateSpace("someOrg", "someSpace"),
+					},
+				))
+			})
+		})
+	
+		Describe("TearDown", func() {
+			It("returns a set of commands to delete an org", func() {
+				cmds := cw.TearDown(ccg)
+	
+				Expect(cmds).To(Equal(
+					[]cmdStartWaiter.CmdStartWaiter{
+						ccg.Api("jigglypuff.cf-app.com"),
+						ccg.Auth("pika", "chu"),
+						ccg.DeleteOrg("someOrg"),
+						ccg.DeleteQuota("someQuota"),
+						ccg.LogOut(),
+					},
+				))
+			})
+		})
+	
+		Describe("RecentLogs", func() {
+			It("returns a set of commands to get recent logs for an app", func() {
+				cmds := cw.RecentLogs(ccg)
+	
+				Expect(cmds).To(Equal(
+					[]cmdStartWaiter.CmdStartWaiter{
+						ccg.Api("jigglypuff.cf-app.com"),
+						ccg.Auth("pika", "chu"),
+						ccg.Target("someOrg", "someSpace"),
+						ccg.RecentLogs("doraApp"),
+					},
+				))
+			})
+		})
+	
+		Describe("StreamLogs", func() {
+			It("returns a set of commands to stream logs for an app", func() {
+				ctx, cancelFunc := context.WithTimeout(context.Background(), time.Second)
+				defer cancelFunc()
+				cmds := cw.StreamLogs(ctx, ccg)
+	
+				Expect(cmds).To(Equal(
+					[]cmdStartWaiter.CmdStartWaiter{
+						ccg.Api("jigglypuff.cf-app.com"),
+						ccg.Auth("pika", "chu"),
+						ccg.Target("someOrg", "someSpace"),
+						ccg.StreamLogs(ctx, "doraApp"),
+					},
+				))
+			})
+		})
+	
+		Describe("MapRoute", func() {
+			It("returns a set of commands to map a route to a syslog sink app", func() {
+				cmds := cw.MapRoute(ccg)
+	
+				Expect(cmds).To(Equal(
+					[]cmdStartWaiter.CmdStartWaiter{
+						ccg.Api("jigglypuff.cf-app.com"),
+						ccg.Auth("pika", "chu"),
+						ccg.Target("someOrg", "someSpace"),
+						ccg.MapRoute("doraApp", "tcp.jigglypuff.cf-app.com", 1025),
+					},
+				))
+			})
+		})
+	
+		Describe("CreateAndBindSyslogDrainService", func() {
+			It("Creates and binds a user-provided syslog drain service to an app and restages the app", func() {
+				cmds := cw.CreateAndBindSyslogDrainService(ccg, "syslogUPS")
+	
+				Expect(cmds).To(Equal(
+					[]cmdStartWaiter.CmdStartWaiter{
+						ccg.Api("jigglypuff.cf-app.com"),
+						ccg.Auth("pika", "chu"),
+						ccg.Target("someOrg", "someSpace"),
+						ccg.CreateUserProvidedService("syslogUPS", "syslog://tcp.jigglypuff.cf-app.com:1025"),
+						ccg.BindService("doraApp", "syslogUPS"),
+						ccg.Restage("doraApp"),
 					},
 				))
 			})
 		})
 	})
+	Context("when using existing space", func() {
+		JustBeforeEach(func() {
+			cfc.Org = "existingOrg"
+			cfc.Space = "existingSpace"
+			cfc.UseExistingSpace = true
 
-	Describe("Delete", func() {
-		It("returns a series of commands to delete an app", func() {
-			cmds := cw.Delete(ccg)
-
-			Expect(cmds).To(Equal(
-				[]cmdStartWaiter.CmdStartWaiter{
-					ccg.Api("jigglypuff.cf-app.com"),
-					ccg.Auth("pika", "chu"),
-					ccg.Target("someOrg", "someSpace"),
-					ccg.Delete("doraApp"),
-				},
-			))
+			ccg = cfCmdGenerator.New("/cfhome")
+			appName = "doraApp"
+			appPath = "this/is/an/app/path"
+			appCommand = "./app-command"
+	
+			cw = NewWithExistingSpace(cfc, appName, appPath, appCommand)
 		})
-	})
-
-	Describe("Setup", func() {
-		It("returns a series of commands to create a new org and space", func() {
-			cmds := cw.Setup(ccg)
-
-			Expect(cmds).To(Equal(
-				[]cmdStartWaiter.CmdStartWaiter{
-					ccg.Api("jigglypuff.cf-app.com"),
-					ccg.Auth("pika", "chu"),
-					ccg.CreateOrg("someOrg"),
-					ccg.CreateSpace("someOrg", "someSpace"),
-					ccg.CreateQuota("someQuota"),
-					ccg.SetQuota("someOrg", "someQuota"),
-				},
-			))
+		
+		Describe("Org", func() {
+			It("returns the correct org", func() {
+				Expect(cw.Org()).To(Equal("existingOrg"))
+			})
 		})
-	})
-
-	Describe("TearDown", func() {
-		It("returns a set of commands to delete an org", func() {
-			cmds := cw.TearDown(ccg)
-
-			Expect(cmds).To(Equal(
-				[]cmdStartWaiter.CmdStartWaiter{
-					ccg.Api("jigglypuff.cf-app.com"),
-					ccg.Auth("pika", "chu"),
-					ccg.DeleteOrg("someOrg"),
-					ccg.DeleteQuota("someQuota"),
-					ccg.LogOut(),
-				},
-			))
+	
+		Describe("Space", func() {
+			It("returns the correct space", func() {
+				Expect(cw.Space()).To(Equal("existingSpace"))
+			})
 		})
-	})
 
-	Describe("RecentLogs", func() {
-		It("returns a set of commands to get recent logs for an app", func() {
-			cmds := cw.RecentLogs(ccg)
-
-			Expect(cmds).To(Equal(
-				[]cmdStartWaiter.CmdStartWaiter{
-					ccg.Api("jigglypuff.cf-app.com"),
-					ccg.Auth("pika", "chu"),
-					ccg.Target("someOrg", "someSpace"),
-					ccg.RecentLogs("doraApp"),
-				},
-			))
+		Describe("Push", func() {
+			It("returns a series of commands to push an app with exactly 2 instances", func() {
+				cmds := cw.Push(ccg)
+	
+				Expect(cmds).To(Equal(
+					[]cmdStartWaiter.CmdStartWaiter{
+						ccg.Api("jigglypuff.cf-app.com"),
+						ccg.Auth("pika", "chu"),
+						ccg.Target("existingOrg", "existingSpace"),
+						ccg.Push("doraApp", "app.jigglypuff.cf-app.com", "this/is/an/app/path", "./app-command", 2),
+					},
+				))
+			})
 		})
-	})
-
-	Describe("StreamLogs", func() {
-		It("returns a set of commands to stream logs for an app", func() {
-			ctx, cancelFunc := context.WithTimeout(context.Background(), time.Second)
-			defer cancelFunc()
-			cmds := cw.StreamLogs(ctx, ccg)
-
-			Expect(cmds).To(Equal(
-				[]cmdStartWaiter.CmdStartWaiter{
-					ccg.Api("jigglypuff.cf-app.com"),
-					ccg.Auth("pika", "chu"),
-					ccg.Target("someOrg", "someSpace"),
-					ccg.StreamLogs(ctx, "doraApp"),
-				},
-			))
+		
+		Describe("Setup", func() {
+			It("returns a series of commands that don't create an org or space", func() {
+				cmds := cw.Setup(ccg)
+	
+				Expect(cmds).To(Equal(
+					[]cmdStartWaiter.CmdStartWaiter{
+						ccg.Api("jigglypuff.cf-app.com"),
+						ccg.Auth("pika", "chu"),
+					},
+				))
+			})
 		})
-	})
-
-	Describe("MapRoute", func() {
-		It("returns a set of commands to map a route to a syslog sink app", func() {
-			cmds := cw.MapRoute(ccg)
-
-			Expect(cmds).To(Equal(
-				[]cmdStartWaiter.CmdStartWaiter{
-					ccg.Api("jigglypuff.cf-app.com"),
-					ccg.Auth("pika", "chu"),
-					ccg.Target("someOrg", "someSpace"),
-					ccg.MapRoute("doraApp", "tcp.jigglypuff.cf-app.com", 1025),
-				},
-			))
-		})
-	})
-
-	Describe("CreateAndBindSyslogDrainService", func() {
-		It("Creates and binds a user-provided syslog drain service to an app and restages the app", func() {
-			cmds := cw.CreateAndBindSyslogDrainService(ccg, "syslogUPS")
-
-			Expect(cmds).To(Equal(
-				[]cmdStartWaiter.CmdStartWaiter{
-					ccg.Api("jigglypuff.cf-app.com"),
-					ccg.Auth("pika", "chu"),
-					ccg.Target("someOrg", "someSpace"),
-					ccg.CreateUserProvidedService("syslogUPS", "syslog://tcp.jigglypuff.cf-app.com:1025"),
-					ccg.BindService("doraApp", "syslogUPS"),
-					ccg.Restage("doraApp"),
-				},
-			))
+		
+		Describe("TearDown", func() {
+			It("returns a set of commands that tear down the config without deleting the org or quota", func() {
+				cmds := cw.TearDown(ccg)
+	
+				Expect(cmds).To(Equal(
+					[]cmdStartWaiter.CmdStartWaiter{
+						ccg.Api("jigglypuff.cf-app.com"),
+						ccg.Auth("pika", "chu"),
+						ccg.LogOut(),
+					},
+				))
+			})
 		})
 	})
 })

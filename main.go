@@ -242,6 +242,14 @@ func compileIncludedApp(appName string) (string, error) {
 }
 
 func createWorkflow(cfc *config.Cf, appPath, appCommand string) cfWorkflow.CfWorkflow {
+	if cfc.UseExistingSpace {
+		return cfWorkflow.NewWithExistingSpace(
+			cfc,
+			fmt.Sprintf("uptimer-app-%s", uuid.NewV4().String()),
+			appPath,
+			appCommand,
+		)
+	}
 	return cfWorkflow.New(
 		cfc,
 		fmt.Sprintf("uptimer-org-%s", uuid.NewV4().String()),

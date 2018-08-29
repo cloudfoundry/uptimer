@@ -75,5 +75,31 @@ var _ = Describe("Config", func() {
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(Equal("`cf.tcp_domain` and `cf.available_port` must be set in order to run App Syslog Availability tests."))
 		})
+		It("Returns error if use_existing_space is set but no org or space is set", func() {
+			cfg := config.Config{
+				CF: &config.Cf{
+					UseExistingSpace: true,
+				},
+			}
+
+			err := cfg.Validate()
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("`cf.org` and `cf.space` must be set if `cf.use_existing_space` is set."))
+		})
+	})
+	Describe("#HandleDeprecated", func() {
+		It("Returns an error sets User and Password when AdminUser or AdminPassword provided", func() {
+			cfg := config.Config{
+				CF: &config.Cf{
+					AdminUser:     "admin",
+					AdminPassword: "password",
+				},
+			}
+
+			err := cfg.HandleDeprecated()
+			Expect(err).To(HaveOccurred())
+			Expect(cfg.CF.User).To(Equal("admin"))
+			Expect(cfg.CF.Password).To(Equal("password"))
+		})
 	})
 })
