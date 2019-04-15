@@ -231,11 +231,10 @@ func compileIncludedApp(appName string) (string, error) {
 
 	buildCmd := exec.Command("go", "build")
 	buildCmd.Dir = appPath
-	buildCmd.Env = []string{
+	buildCmd.Env = append(os.Environ(),
 		"GOOS=linux",
 		"GOARCH=amd64",
-		fmt.Sprintf("GOPATH=%s", os.Getenv("GOPATH")),
-	}
+	)
 	err := buildCmd.Run()
 
 	return appPath, err
