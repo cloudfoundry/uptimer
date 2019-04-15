@@ -304,6 +304,7 @@ func createMeasurements(
 			Timeout: 30 * time.Second,
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+				DisableKeepAlives: true,
 			},
 		},
 	)
