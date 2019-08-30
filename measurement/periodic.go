@@ -106,9 +106,9 @@ func (p *periodic) Failed() bool {
 }
 
 func (p *periodic) Summary() string {
-	msg := "SUCCESS (%s): %d failed attempts to %s did not exceed the threshold of %d allowed failures (Total attempts: %d)"
+	msg := "SUCCESS (%s): %d failed attempts to %s did not exceed the threshold of %d allowed failures (Total attempts: %d, pass rate %.2f%%)"
 	if p.Failed() {
-		msg = "FAILED (%s): %d failed attempts to %s exceeded the threshold of %d allowed failures (Total attempts: %d)"
+		msg = "FAILED (%s): %d failed attempts to %s exceeded the threshold of %d allowed failures (Total attempts: %d, pass rate %.2f%%)"
 	}
 
 	return fmt.Sprintf(
@@ -118,5 +118,6 @@ func (p *periodic) Summary() string {
 		p.baseMeasurement.SummaryPhrase(),
 		p.allowedFailures,
 		p.resultSet.Total(),
+		float32(100*p.resultSet.Failed()/p.resultSet.Total()),
 	)
 }

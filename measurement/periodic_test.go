@@ -354,12 +354,13 @@ var _ = Describe("Periodic", func() {
 			fakeResultSet.TotalReturns(failed + succeeded)
 
 			Expect(p.Summary()).To(Equal(
-				fmt.Sprintf("SUCCESS (%s): %d failed attempts to %s did not exceed the threshold of %d allowed failures (Total attempts: %d)",
+				fmt.Sprintf("SUCCESS (%s): %d failed attempts to %s did not exceed the threshold of %d allowed failures (Total attempts: %d, pass rate %.2f%%)",
 					fakeBaseMeasurement.Name(),
 					failed,
 					fakeBaseMeasurement.SummaryPhrase(),
 					allowedFailures,
 					failed+succeeded,
+					float32(100*failed/(failed+succeeded)),
 				)))
 		})
 
@@ -373,12 +374,13 @@ var _ = Describe("Periodic", func() {
 			fakeResultSet.TotalReturns(failed + succeeded)
 
 			Expect(p.Summary()).To(Equal(
-				fmt.Sprintf("SUCCESS (%s): %d failed attempts to %s did not exceed the threshold of %d allowed failures (Total attempts: %d)",
+				fmt.Sprintf("SUCCESS (%s): %d failed attempts to %s did not exceed the threshold of %d allowed failures (Total attempts: %d, pass rate %.2f%%)",
 					fakeBaseMeasurement.Name(),
 					failed,
 					fakeBaseMeasurement.SummaryPhrase(),
 					allowedFailures,
 					failed+succeeded,
+					float32(100*failed/(failed+succeeded)),
 				)))
 		})
 
@@ -392,12 +394,13 @@ var _ = Describe("Periodic", func() {
 			fakeResultSet.TotalReturns(failed + succeeded)
 
 			Expect(p.Summary()).To(Equal(
-				fmt.Sprintf("FAILED (%s): %d failed attempts to %s exceeded the threshold of %d allowed failures (Total attempts: %d)",
+				fmt.Sprintf("FAILED (%s): %d failed attempts to %s exceeded the threshold of %d allowed failures (Total attempts: %d, pass rate %.2f%%)",
 					fakeBaseMeasurement.Name(),
 					failed,
 					fakeBaseMeasurement.SummaryPhrase(),
 					allowedFailures,
 					failed+succeeded,
+					float32(100*failed/(failed+succeeded)),
 				)))
 		})
 	})
