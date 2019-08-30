@@ -80,8 +80,10 @@ func (p *periodic) logFailure(msg, stdOut, stdErr string) {
 	}
 
 	p.logger.Printf(
-		"\x1b[31mFAILURE (%s): %s%s\x1b[0m\n%s%s\n",
+		"\x1b[31mFAILURE (%s, %d/%d): %s%s\x1b[0m\n%s%s\n",
 		p.baseMeasurement.Name(),
+		p.resultSet.Failed(),
+		p.allowedFailures,
 		msg,
 		lfMsg,
 		stdOutMsg,
