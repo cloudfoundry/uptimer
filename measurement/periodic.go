@@ -118,6 +118,6 @@ func (p *periodic) Summary() string {
 		p.baseMeasurement.SummaryPhrase(),
 		p.allowedFailures,
 		p.resultSet.Total(),
-		float32(100*p.resultSet.Failed()/p.resultSet.Total()),
+		float32(100*p.resultSet.Successful())/float32(p.resultSet.Total()),
 	)
 }

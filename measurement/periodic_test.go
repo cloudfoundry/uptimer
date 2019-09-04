@@ -346,61 +346,61 @@ var _ = Describe("Periodic", func() {
 	Describe("Summary", func() {
 		It("returns a success summary if fewer than the allowed failures occurred", func() {
 			failed := 2
-			succeeded := 2
+			succeeded := 3
 			allowedFailures := 3
 
 			p = NewPeriodic(logger, mockClock, freq, fakeBaseMeasurement, fakeResultSet, allowedFailures, func(string, string) bool { return shouldRetry })
 			fakeResultSet.FailedReturns(failed)
+			fakeResultSet.SuccessfulReturns(succeeded)
 			fakeResultSet.TotalReturns(failed + succeeded)
 
 			Expect(p.Summary()).To(Equal(
-				fmt.Sprintf("SUCCESS (%s): %d failed attempts to %s did not exceed the threshold of %d allowed failures (Total attempts: %d, pass rate %.2f%%)",
+				fmt.Sprintf("SUCCESS (%s): %d failed attempts to %s did not exceed the threshold of %d allowed failures (Total attempts: %d, pass rate 60.00%%)",
 					fakeBaseMeasurement.Name(),
 					failed,
 					fakeBaseMeasurement.SummaryPhrase(),
 					allowedFailures,
 					failed+succeeded,
-					float32(100*failed/(failed+succeeded)),
 				)))
 		})
 
 		It("returns a success summary if exactly the number of allowed failures occurred", func() {
 			failed := 2
-			succeeded := 2
+			succeeded := 4
 			allowedFailures := 2
 
 			p = NewPeriodic(logger, mockClock, freq, fakeBaseMeasurement, fakeResultSet, allowedFailures, func(string, string) bool { return shouldRetry })
 			fakeResultSet.FailedReturns(failed)
+			fakeResultSet.SuccessfulReturns(succeeded)
 			fakeResultSet.TotalReturns(failed + succeeded)
 
 			Expect(p.Summary()).To(Equal(
-				fmt.Sprintf("SUCCESS (%s): %d failed attempts to %s did not exceed the threshold of %d allowed failures (Total attempts: %d, pass rate %.2f%%)",
+				fmt.Sprintf("SUCCESS (%s): %d failed attempts to %s did not exceed the threshold of %d allowed failures (Total attempts: %d, pass rate 66.67%%)",
 					fakeBaseMeasurement.Name(),
 					failed,
 					fakeBaseMeasurement.SummaryPhrase(),
 					allowedFailures,
 					failed+succeeded,
-					float32(100*failed/(failed+succeeded)),
 				)))
 		})
 
 		It("returns a failed summary if more than the allowed failures occurred", func() {
 			failed := 3
-			succeeded := 2
+			succeeded := 1
 			allowedFailures := 2
 
 			p = NewPeriodic(logger, mockClock, freq, fakeBaseMeasurement, fakeResultSet, allowedFailures, func(string, string) bool { return shouldRetry })
 			fakeResultSet.FailedReturns(failed)
+			fakeResultSet.SuccessfulReturns(succeeded)
 			fakeResultSet.TotalReturns(failed + succeeded)
 
 			Expect(p.Summary()).To(Equal(
-				fmt.Sprintf("FAILED (%s): %d failed attempts to %s exceeded the threshold of %d allowed failures (Total attempts: %d, pass rate %.2f%%)",
+				fmt.Sprintf("FAILED (%s): %d failed attempts to %s exceeded the threshold of %d allowed failures (Total attempts: %d, pass rate 25.00%%)",
 					fakeBaseMeasurement.Name(),
 					failed,
 					fakeBaseMeasurement.SummaryPhrase(),
 					allowedFailures,
 					failed+succeeded,
-					float32(100*failed/(failed+succeeded)),
 				)))
 		})
 	})
