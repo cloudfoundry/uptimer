@@ -46,8 +46,8 @@ func (p *periodic) Start() {
 
 func (p *periodic) performMeasurement() {
 	if msg, stdOut, stdErr, ok := p.performWithSingleRetry(); !ok {
-		p.logFailure(msg, stdOut, stdErr)
 		p.resultSet.RecordFailure()
+		p.logFailure(msg, stdOut, stdErr)
 		return
 	}
 
