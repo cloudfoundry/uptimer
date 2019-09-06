@@ -84,7 +84,7 @@ var _ = Describe("CfWorkflow", func() {
 					ccg.Api("jigglypuff.cf-app.com"),
 					ccg.Auth("pika", "chu"),
 					ccg.Target("someOrg", "someSpace"),
-					ccg.Push("doraApp", "app.jigglypuff.cf-app.com", "this/is/an/app/path", "./app-command", 2),
+					ccg.Push("doraApp", "this/is/an/app/path", "./app-command", 2),
 				},
 			))
 		})
@@ -102,7 +102,7 @@ var _ = Describe("CfWorkflow", func() {
 						ccg.Api("jigglypuff.cf-app.com"),
 						ccg.Auth("pika", "chu"),
 						ccg.Target("someOrg", "someSpace"),
-						ccg.Push("doraApp", "app.jigglypuff.cf-app.com", "this/is/an/app/path", "./app-command", 1),
+						ccg.Push("doraApp", "this/is/an/app/path", "./app-command", 1),
 					},
 				))
 			})

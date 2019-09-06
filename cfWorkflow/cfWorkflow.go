@@ -87,7 +87,7 @@ func (c *cfWorkflow) Push(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.Cm
 		ccg.Api(c.cf.API),
 		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
 		ccg.Target(c.org, c.space),
-		ccg.Push(c.appName, c.cf.AppDomain, c.appPath, c.appCommand, appInstancesToPush),
+		ccg.Push(c.appName, c.appPath, c.appCommand, appInstancesToPush),
 	}
 }
 
