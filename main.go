@@ -17,7 +17,7 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/cloudfoundry/uptimer/appLogValidator"
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
@@ -148,6 +148,23 @@ func main() {
 		authFailedRetryFunc,
 	)
 
+	if !cfg.OptionalTests.RunLogsAvailability {
+		measurements = append(
+			measurements,
+			createLogsAvailabilityMeasurement(
+				clock,
+				logger,
+				orcWorkflow,
+				pushWorkflowGeneratorFunc,
+				cfCmdGenerator.New(recentLogsTmpDir),
+				cfCmdGenerator.New(streamingLogsTmpDir),
+				pushCmdGenerator,
+				cfg.AllowedFailures,
+				authFailedRetryFunc,
+			)...,
+		)
+	}
+
 	if cfg.OptionalTests.RunAppSyslogAvailability {
 		measurements = append(
 			measurements,
@@ -261,28 +278,6 @@ func createMeasurements(
 	allowedFailures config.AllowedFailures,
 	authFailedRetryFunc func(stdOut, stdErr string) bool,
 ) []measurement.Measurement {
-	recentLogsBufferRunner, recentLogsRunnerOutBuf, recentLogsRunnerErrBuf := createBufferedRunner()
-	recentLogsMeasurement := measurement.NewRecentLogs(
-		func() []cmdStartWaiter.CmdStartWaiter {
-			return orcWorkflow.RecentLogs(recentLogsCmdGenerator)
-		},
-		recentLogsBufferRunner,
-		recentLogsRunnerOutBuf,
-		recentLogsRunnerErrBuf,
-		appLogValidator.New(),
-	)
-
-	streamingLogsBufferRunner, streamingLogsRunnerOutBuf, streamingLogsRunnerErrBuf := createBufferedRunner()
-	streamingLogsMeasurement := measurement.NewStreamingLogs(
-		func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter) {
-			ctx, cancelFunc := context.WithTimeout(context.Background(), 15*time.Second)
-			return ctx, cancelFunc, orcWorkflow.StreamLogs(ctx, streamingLogsCmdGenerator)
-		},
-		streamingLogsBufferRunner,
-		streamingLogsRunnerOutBuf,
-		streamingLogsRunnerErrBuf,
-		appLogValidator.New(),
-	)
 
 	pushRunner, pushRunnerOutBuf, pushRunnerErrBuf := createBufferedRunner()
 	appPushabilityMeasurement := measurement.NewAppPushability(
@@ -303,7 +298,7 @@ func createMeasurements(
 		&http.Client{
 			Timeout: 30 * time.Second,
 			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+				TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
 				DisableKeepAlives: true,
 			},
 		},
@@ -328,6 +323,43 @@ func createMeasurements(
 			allowedFailures.AppPushability,
 			authFailedRetryFunc,
 		),
+	}
+}
+
+func createLogsAvailabilityMeasurement(
+	clock clock.Clock,
+	logger *log.Logger,
+	orcWorkflow cfWorkflow.CfWorkflow,
+	pushWorkFlowGeneratorFunc func() cfWorkflow.CfWorkflow,
+	recentLogsCmdGenerator, streamingLogsCmdGenerator, pushCmdGenerator cfCmdGenerator.CfCmdGenerator,
+	allowedFailures config.AllowedFailures,
+	authFailedRetryFunc func(stdOut, stdErr string) bool,
+) []measurement.Measurement {
+
+	recentLogsBufferRunner, recentLogsRunnerOutBuf, recentLogsRunnerErrBuf := createBufferedRunner()
+	recentLogsMeasurement := measurement.NewRecentLogs(
+		func() []cmdStartWaiter.CmdStartWaiter {
+			return orcWorkflow.RecentLogs(recentLogsCmdGenerator)
+		},
+		recentLogsBufferRunner,
+		recentLogsRunnerOutBuf,
+		recentLogsRunnerErrBuf,
+		appLogValidator.New(),
+	)
+
+	streamingLogsBufferRunner, streamingLogsRunnerOutBuf, streamingLogsRunnerErrBuf := createBufferedRunner()
+	streamingLogsMeasurement := measurement.NewStreamingLogs(
+		func() (context.Context, context.CancelFunc, []cmdStartWaiter.CmdStartWaiter) {
+			ctx, cancelFunc := context.WithTimeout(context.Background(), 15*time.Second)
+			return ctx, cancelFunc, orcWorkflow.StreamLogs(ctx, streamingLogsCmdGenerator)
+		},
+		streamingLogsBufferRunner,
+		streamingLogsRunnerOutBuf,
+		streamingLogsRunnerErrBuf,
+		appLogValidator.New(),
+	)
+
+	return []measurement.Measurement{
 		measurement.NewPeriodic(
 			logger,
 			clock,

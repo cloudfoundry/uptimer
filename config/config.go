@@ -40,6 +40,7 @@ type AllowedFailures struct {
 
 type OptionalTests struct {
 	RunAppSyslogAvailability bool `json:"run_app_syslog_availability"`
+	RunLogsAvailability      bool `json:"run_logs_availability"`
 }
 
 func Load(filename string) (*Config, error) {
