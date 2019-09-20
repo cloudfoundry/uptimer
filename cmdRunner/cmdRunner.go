@@ -40,13 +40,19 @@ func (r *cmdRunner) RunInSequence(cmdStartWaiters ...cmdStartWaiter.CmdStartWait
 }
 
 func (r *cmdRunner) RunInSequenceWithContext(ctx context.Context, csws ...cmdStartWaiter.CmdStartWaiter) error {
+	var errs []error
+
 	for _, cmd := range csws {
-		if err := r.RunWithContext(ctx, cmd); err != nil {
-			return err
+		if runErr := r.RunWithContext(ctx, cmd); runErr != nil {
+			errs = append(errs, runErr)
 		}
 	}
 
-	return nil
+	if errs != nil {
+		return errs[0]
+	} else {
+		return nil
+	}
 }
 
 func (r *cmdRunner) RunWithContext(ctx context.Context, csw cmdStartWaiter.CmdStartWaiter) error {

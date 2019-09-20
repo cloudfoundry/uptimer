@@ -186,13 +186,12 @@ var _ = Describe("CmdRunner", func() {
 			Expect(outBuf.String()).To(BeEmpty())
 		})
 
-		It("runs until it encounters an error, returning that error", func() {
-			fakeCmdStartWaiter2.StdoutPipeReturns(ioutil.NopCloser(bytes.NewBufferString("")), fmt.Errorf("something even worse happened"))
+		It("continues running after encountering an error", func() {
+			fakeCmdStartWaiter.StdoutPipeReturns(ioutil.NopCloser(bytes.NewBufferString("")), fmt.Errorf("something bad happened"))
 
-			err := runner.RunInSequence(fakeCmdStartWaiter, fakeCmdStartWaiter2)
+			runner.RunInSequence(fakeCmdStartWaiter, fakeCmdStartWaiter2)
 
-			Expect(err).To(MatchError("something even worse happened"))
-			Expect(outBuf.String()).To(Equal("1"))
+			Expect(outBuf.String()).To(Equal("2"))
 		})
 	})
 })
