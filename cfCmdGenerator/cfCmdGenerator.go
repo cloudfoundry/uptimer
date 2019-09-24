@@ -123,7 +123,8 @@ func (c *cfCmdGenerator) Push(name, path, command string, instances int) cmdStar
 				"-b", "binary_buildpack",
 				"-c", command,
 				"-i", strconv.Itoa(instances),
-				"-m", "1024M",
+				"-m", "16M",
+				"-k", "16M",
 			),
 		),
 	)
