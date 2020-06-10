@@ -8,43 +8,49 @@ import (
 )
 
 type FakeMeasurement struct {
-	NameStub        func() string
-	nameMutex       sync.RWMutex
-	nameArgsForCall []struct{}
-	nameReturns     struct {
-		result1 string
-	}
-	nameReturnsOnCall map[int]struct {
-		result1 string
-	}
-	StartStub          func()
-	startMutex         sync.RWMutex
-	startArgsForCall   []struct{}
-	StopStub           func()
-	stopMutex          sync.RWMutex
-	stopArgsForCall    []struct{}
-	ResultsStub        func() measurement.ResultSet
-	resultsMutex       sync.RWMutex
-	resultsArgsForCall []struct{}
-	resultsReturns     struct {
-		result1 measurement.ResultSet
-	}
-	resultsReturnsOnCall map[int]struct {
-		result1 measurement.ResultSet
-	}
 	FailedStub        func() bool
 	failedMutex       sync.RWMutex
-	failedArgsForCall []struct{}
-	failedReturns     struct {
+	failedArgsForCall []struct {
+	}
+	failedReturns struct {
 		result1 bool
 	}
 	failedReturnsOnCall map[int]struct {
 		result1 bool
 	}
+	NameStub        func() string
+	nameMutex       sync.RWMutex
+	nameArgsForCall []struct {
+	}
+	nameReturns struct {
+		result1 string
+	}
+	nameReturnsOnCall map[int]struct {
+		result1 string
+	}
+	ResultsStub        func() measurement.ResultSet
+	resultsMutex       sync.RWMutex
+	resultsArgsForCall []struct {
+	}
+	resultsReturns struct {
+		result1 measurement.ResultSet
+	}
+	resultsReturnsOnCall map[int]struct {
+		result1 measurement.ResultSet
+	}
+	StartStub        func()
+	startMutex       sync.RWMutex
+	startArgsForCall []struct {
+	}
+	StopStub        func()
+	stopMutex       sync.RWMutex
+	stopArgsForCall []struct {
+	}
 	SummaryStub        func() string
 	summaryMutex       sync.RWMutex
-	summaryArgsForCall []struct{}
-	summaryReturns     struct {
+	summaryArgsForCall []struct {
+	}
+	summaryReturns struct {
 		result1 string
 	}
 	summaryReturnsOnCall map[int]struct {
@@ -54,10 +60,63 @@ type FakeMeasurement struct {
 	invocationsMutex sync.RWMutex
 }
 
+func (fake *FakeMeasurement) Failed() bool {
+	fake.failedMutex.Lock()
+	ret, specificReturn := fake.failedReturnsOnCall[len(fake.failedArgsForCall)]
+	fake.failedArgsForCall = append(fake.failedArgsForCall, struct {
+	}{})
+	fake.recordInvocation("Failed", []interface{}{})
+	fake.failedMutex.Unlock()
+	if fake.FailedStub != nil {
+		return fake.FailedStub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.failedReturns
+	return fakeReturns.result1
+}
+
+func (fake *FakeMeasurement) FailedCallCount() int {
+	fake.failedMutex.RLock()
+	defer fake.failedMutex.RUnlock()
+	return len(fake.failedArgsForCall)
+}
+
+func (fake *FakeMeasurement) FailedCalls(stub func() bool) {
+	fake.failedMutex.Lock()
+	defer fake.failedMutex.Unlock()
+	fake.FailedStub = stub
+}
+
+func (fake *FakeMeasurement) FailedReturns(result1 bool) {
+	fake.failedMutex.Lock()
+	defer fake.failedMutex.Unlock()
+	fake.FailedStub = nil
+	fake.failedReturns = struct {
+		result1 bool
+	}{result1}
+}
+
+func (fake *FakeMeasurement) FailedReturnsOnCall(i int, result1 bool) {
+	fake.failedMutex.Lock()
+	defer fake.failedMutex.Unlock()
+	fake.FailedStub = nil
+	if fake.failedReturnsOnCall == nil {
+		fake.failedReturnsOnCall = make(map[int]struct {
+			result1 bool
+		})
+	}
+	fake.failedReturnsOnCall[i] = struct {
+		result1 bool
+	}{result1}
+}
+
 func (fake *FakeMeasurement) Name() string {
 	fake.nameMutex.Lock()
 	ret, specificReturn := fake.nameReturnsOnCall[len(fake.nameArgsForCall)]
-	fake.nameArgsForCall = append(fake.nameArgsForCall, struct{}{})
+	fake.nameArgsForCall = append(fake.nameArgsForCall, struct {
+	}{})
 	fake.recordInvocation("Name", []interface{}{})
 	fake.nameMutex.Unlock()
 	if fake.NameStub != nil {
@@ -66,7 +125,8 @@ func (fake *FakeMeasurement) Name() string {
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.nameReturns.result1
+	fakeReturns := fake.nameReturns
+	return fakeReturns.result1
 }
 
 func (fake *FakeMeasurement) NameCallCount() int {
@@ -75,7 +135,15 @@ func (fake *FakeMeasurement) NameCallCount() int {
 	return len(fake.nameArgsForCall)
 }
 
+func (fake *FakeMeasurement) NameCalls(stub func() string) {
+	fake.nameMutex.Lock()
+	defer fake.nameMutex.Unlock()
+	fake.NameStub = stub
+}
+
 func (fake *FakeMeasurement) NameReturns(result1 string) {
+	fake.nameMutex.Lock()
+	defer fake.nameMutex.Unlock()
 	fake.NameStub = nil
 	fake.nameReturns = struct {
 		result1 string
@@ -83,6 +151,8 @@ func (fake *FakeMeasurement) NameReturns(result1 string) {
 }
 
 func (fake *FakeMeasurement) NameReturnsOnCall(i int, result1 string) {
+	fake.nameMutex.Lock()
+	defer fake.nameMutex.Unlock()
 	fake.NameStub = nil
 	if fake.nameReturnsOnCall == nil {
 		fake.nameReturnsOnCall = make(map[int]struct {
@@ -94,9 +164,62 @@ func (fake *FakeMeasurement) NameReturnsOnCall(i int, result1 string) {
 	}{result1}
 }
 
+func (fake *FakeMeasurement) Results() measurement.ResultSet {
+	fake.resultsMutex.Lock()
+	ret, specificReturn := fake.resultsReturnsOnCall[len(fake.resultsArgsForCall)]
+	fake.resultsArgsForCall = append(fake.resultsArgsForCall, struct {
+	}{})
+	fake.recordInvocation("Results", []interface{}{})
+	fake.resultsMutex.Unlock()
+	if fake.ResultsStub != nil {
+		return fake.ResultsStub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.resultsReturns
+	return fakeReturns.result1
+}
+
+func (fake *FakeMeasurement) ResultsCallCount() int {
+	fake.resultsMutex.RLock()
+	defer fake.resultsMutex.RUnlock()
+	return len(fake.resultsArgsForCall)
+}
+
+func (fake *FakeMeasurement) ResultsCalls(stub func() measurement.ResultSet) {
+	fake.resultsMutex.Lock()
+	defer fake.resultsMutex.Unlock()
+	fake.ResultsStub = stub
+}
+
+func (fake *FakeMeasurement) ResultsReturns(result1 measurement.ResultSet) {
+	fake.resultsMutex.Lock()
+	defer fake.resultsMutex.Unlock()
+	fake.ResultsStub = nil
+	fake.resultsReturns = struct {
+		result1 measurement.ResultSet
+	}{result1}
+}
+
+func (fake *FakeMeasurement) ResultsReturnsOnCall(i int, result1 measurement.ResultSet) {
+	fake.resultsMutex.Lock()
+	defer fake.resultsMutex.Unlock()
+	fake.ResultsStub = nil
+	if fake.resultsReturnsOnCall == nil {
+		fake.resultsReturnsOnCall = make(map[int]struct {
+			result1 measurement.ResultSet
+		})
+	}
+	fake.resultsReturnsOnCall[i] = struct {
+		result1 measurement.ResultSet
+	}{result1}
+}
+
 func (fake *FakeMeasurement) Start() {
 	fake.startMutex.Lock()
-	fake.startArgsForCall = append(fake.startArgsForCall, struct{}{})
+	fake.startArgsForCall = append(fake.startArgsForCall, struct {
+	}{})
 	fake.recordInvocation("Start", []interface{}{})
 	fake.startMutex.Unlock()
 	if fake.StartStub != nil {
@@ -110,9 +233,16 @@ func (fake *FakeMeasurement) StartCallCount() int {
 	return len(fake.startArgsForCall)
 }
 
+func (fake *FakeMeasurement) StartCalls(stub func()) {
+	fake.startMutex.Lock()
+	defer fake.startMutex.Unlock()
+	fake.StartStub = stub
+}
+
 func (fake *FakeMeasurement) Stop() {
 	fake.stopMutex.Lock()
-	fake.stopArgsForCall = append(fake.stopArgsForCall, struct{}{})
+	fake.stopArgsForCall = append(fake.stopArgsForCall, struct {
+	}{})
 	fake.recordInvocation("Stop", []interface{}{})
 	fake.stopMutex.Unlock()
 	if fake.StopStub != nil {
@@ -126,90 +256,17 @@ func (fake *FakeMeasurement) StopCallCount() int {
 	return len(fake.stopArgsForCall)
 }
 
-func (fake *FakeMeasurement) Results() measurement.ResultSet {
-	fake.resultsMutex.Lock()
-	ret, specificReturn := fake.resultsReturnsOnCall[len(fake.resultsArgsForCall)]
-	fake.resultsArgsForCall = append(fake.resultsArgsForCall, struct{}{})
-	fake.recordInvocation("Results", []interface{}{})
-	fake.resultsMutex.Unlock()
-	if fake.ResultsStub != nil {
-		return fake.ResultsStub()
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	return fake.resultsReturns.result1
-}
-
-func (fake *FakeMeasurement) ResultsCallCount() int {
-	fake.resultsMutex.RLock()
-	defer fake.resultsMutex.RUnlock()
-	return len(fake.resultsArgsForCall)
-}
-
-func (fake *FakeMeasurement) ResultsReturns(result1 measurement.ResultSet) {
-	fake.ResultsStub = nil
-	fake.resultsReturns = struct {
-		result1 measurement.ResultSet
-	}{result1}
-}
-
-func (fake *FakeMeasurement) ResultsReturnsOnCall(i int, result1 measurement.ResultSet) {
-	fake.ResultsStub = nil
-	if fake.resultsReturnsOnCall == nil {
-		fake.resultsReturnsOnCall = make(map[int]struct {
-			result1 measurement.ResultSet
-		})
-	}
-	fake.resultsReturnsOnCall[i] = struct {
-		result1 measurement.ResultSet
-	}{result1}
-}
-
-func (fake *FakeMeasurement) Failed() bool {
-	fake.failedMutex.Lock()
-	ret, specificReturn := fake.failedReturnsOnCall[len(fake.failedArgsForCall)]
-	fake.failedArgsForCall = append(fake.failedArgsForCall, struct{}{})
-	fake.recordInvocation("Failed", []interface{}{})
-	fake.failedMutex.Unlock()
-	if fake.FailedStub != nil {
-		return fake.FailedStub()
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	return fake.failedReturns.result1
-}
-
-func (fake *FakeMeasurement) FailedCallCount() int {
-	fake.failedMutex.RLock()
-	defer fake.failedMutex.RUnlock()
-	return len(fake.failedArgsForCall)
-}
-
-func (fake *FakeMeasurement) FailedReturns(result1 bool) {
-	fake.FailedStub = nil
-	fake.failedReturns = struct {
-		result1 bool
-	}{result1}
-}
-
-func (fake *FakeMeasurement) FailedReturnsOnCall(i int, result1 bool) {
-	fake.FailedStub = nil
-	if fake.failedReturnsOnCall == nil {
-		fake.failedReturnsOnCall = make(map[int]struct {
-			result1 bool
-		})
-	}
-	fake.failedReturnsOnCall[i] = struct {
-		result1 bool
-	}{result1}
+func (fake *FakeMeasurement) StopCalls(stub func()) {
+	fake.stopMutex.Lock()
+	defer fake.stopMutex.Unlock()
+	fake.StopStub = stub
 }
 
 func (fake *FakeMeasurement) Summary() string {
 	fake.summaryMutex.Lock()
 	ret, specificReturn := fake.summaryReturnsOnCall[len(fake.summaryArgsForCall)]
-	fake.summaryArgsForCall = append(fake.summaryArgsForCall, struct{}{})
+	fake.summaryArgsForCall = append(fake.summaryArgsForCall, struct {
+	}{})
 	fake.recordInvocation("Summary", []interface{}{})
 	fake.summaryMutex.Unlock()
 	if fake.SummaryStub != nil {
@@ -218,7 +275,8 @@ func (fake *FakeMeasurement) Summary() string {
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.summaryReturns.result1
+	fakeReturns := fake.summaryReturns
+	return fakeReturns.result1
 }
 
 func (fake *FakeMeasurement) SummaryCallCount() int {
@@ -227,7 +285,15 @@ func (fake *FakeMeasurement) SummaryCallCount() int {
 	return len(fake.summaryArgsForCall)
 }
 
+func (fake *FakeMeasurement) SummaryCalls(stub func() string) {
+	fake.summaryMutex.Lock()
+	defer fake.summaryMutex.Unlock()
+	fake.SummaryStub = stub
+}
+
 func (fake *FakeMeasurement) SummaryReturns(result1 string) {
+	fake.summaryMutex.Lock()
+	defer fake.summaryMutex.Unlock()
 	fake.SummaryStub = nil
 	fake.summaryReturns = struct {
 		result1 string
@@ -235,6 +301,8 @@ func (fake *FakeMeasurement) SummaryReturns(result1 string) {
 }
 
 func (fake *FakeMeasurement) SummaryReturnsOnCall(i int, result1 string) {
+	fake.summaryMutex.Lock()
+	defer fake.summaryMutex.Unlock()
 	fake.SummaryStub = nil
 	if fake.summaryReturnsOnCall == nil {
 		fake.summaryReturnsOnCall = make(map[int]struct {
@@ -249,16 +317,16 @@ func (fake *FakeMeasurement) SummaryReturnsOnCall(i int, result1 string) {
 func (fake *FakeMeasurement) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
+	fake.failedMutex.RLock()
+	defer fake.failedMutex.RUnlock()
 	fake.nameMutex.RLock()
 	defer fake.nameMutex.RUnlock()
+	fake.resultsMutex.RLock()
+	defer fake.resultsMutex.RUnlock()
 	fake.startMutex.RLock()
 	defer fake.startMutex.RUnlock()
 	fake.stopMutex.RLock()
 	defer fake.stopMutex.RUnlock()
-	fake.resultsMutex.RLock()
-	defer fake.resultsMutex.RUnlock()
-	fake.failedMutex.RLock()
-	defer fake.failedMutex.RUnlock()
 	fake.summaryMutex.RLock()
 	defer fake.summaryMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}

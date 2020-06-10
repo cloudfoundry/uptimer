@@ -8,10 +8,10 @@ import (
 )
 
 type FakeAppLogValidator struct {
-	IsNewerStub        func(log string) (bool, error)
+	IsNewerStub        func(string) (bool, error)
 	isNewerMutex       sync.RWMutex
 	isNewerArgsForCall []struct {
-		log string
+		arg1 string
 	}
 	isNewerReturns struct {
 		result1 bool
@@ -25,21 +25,22 @@ type FakeAppLogValidator struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeAppLogValidator) IsNewer(log string) (bool, error) {
+func (fake *FakeAppLogValidator) IsNewer(arg1 string) (bool, error) {
 	fake.isNewerMutex.Lock()
 	ret, specificReturn := fake.isNewerReturnsOnCall[len(fake.isNewerArgsForCall)]
 	fake.isNewerArgsForCall = append(fake.isNewerArgsForCall, struct {
-		log string
-	}{log})
-	fake.recordInvocation("IsNewer", []interface{}{log})
+		arg1 string
+	}{arg1})
+	fake.recordInvocation("IsNewer", []interface{}{arg1})
 	fake.isNewerMutex.Unlock()
 	if fake.IsNewerStub != nil {
-		return fake.IsNewerStub(log)
+		return fake.IsNewerStub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	return fake.isNewerReturns.result1, fake.isNewerReturns.result2
+	fakeReturns := fake.isNewerReturns
+	return fakeReturns.result1, fakeReturns.result2
 }
 
 func (fake *FakeAppLogValidator) IsNewerCallCount() int {
@@ -48,13 +49,22 @@ func (fake *FakeAppLogValidator) IsNewerCallCount() int {
 	return len(fake.isNewerArgsForCall)
 }
 
+func (fake *FakeAppLogValidator) IsNewerCalls(stub func(string) (bool, error)) {
+	fake.isNewerMutex.Lock()
+	defer fake.isNewerMutex.Unlock()
+	fake.IsNewerStub = stub
+}
+
 func (fake *FakeAppLogValidator) IsNewerArgsForCall(i int) string {
 	fake.isNewerMutex.RLock()
 	defer fake.isNewerMutex.RUnlock()
-	return fake.isNewerArgsForCall[i].log
+	argsForCall := fake.isNewerArgsForCall[i]
+	return argsForCall.arg1
 }
 
 func (fake *FakeAppLogValidator) IsNewerReturns(result1 bool, result2 error) {
+	fake.isNewerMutex.Lock()
+	defer fake.isNewerMutex.Unlock()
 	fake.IsNewerStub = nil
 	fake.isNewerReturns = struct {
 		result1 bool
@@ -63,6 +73,8 @@ func (fake *FakeAppLogValidator) IsNewerReturns(result1 bool, result2 error) {
 }
 
 func (fake *FakeAppLogValidator) IsNewerReturnsOnCall(i int, result1 bool, result2 error) {
+	fake.isNewerMutex.Lock()
+	defer fake.isNewerMutex.Unlock()
 	fake.IsNewerStub = nil
 	if fake.isNewerReturnsOnCall == nil {
 		fake.isNewerReturnsOnCall = make(map[int]struct {

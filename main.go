@@ -17,7 +17,7 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/cloudfoundry/uptimer/appLogValidator"
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
@@ -29,8 +29,6 @@ import (
 	"github.com/cloudfoundry/uptimer/orchestrator"
 	"github.com/cloudfoundry/uptimer/version"
 )
-
-const appCommand string = "./app"
 
 func main() {
 	logger := log.New(os.Stdout, "\n[UPTIMER] ", log.Ldate|log.Ltime|log.LUTC)
@@ -89,7 +87,7 @@ func main() {
 	bufferedRunner, runnerOutBuf, runnerErrBuf := createBufferedRunner()
 
 	pushCmdGenerator := cfCmdGenerator.New(pushTmpDir)
-	pushWorkflow := createWorkflow(cfg.CF, appPath, appCommand)
+	pushWorkflow := createWorkflow(cfg.CF, appPath)
 	logger.Printf("Setting up push workflow with org %s ...", pushWorkflow.Org())
 	if err := bufferedRunner.RunInSequence(pushWorkflow.Setup(pushCmdGenerator)...); err != nil {
 		logBufferedRunnerFailure(logger, "push workflow setup", err, runnerOutBuf, runnerErrBuf)
@@ -105,7 +103,6 @@ func main() {
 			pushWorkflow.Quota(),
 			fmt.Sprintf("uptimer-app-%s", uuid.NewV4().String()),
 			appPath,
-			appCommand,
 		)
 	}
 
@@ -113,7 +110,7 @@ func main() {
 	var sinkCmdGenerator cfCmdGenerator.CfCmdGenerator
 	if cfg.OptionalTests.RunAppSyslogAvailability {
 		sinkCmdGenerator = cfCmdGenerator.New(sinkTmpDir)
-		sinkWorkflow = createWorkflow(cfg.CF, sinkAppPath, "./syslogSink")
+		sinkWorkflow = createWorkflow(cfg.CF, sinkAppPath)
 		logger.Printf("Setting up sink workflow with org %s ...", sinkWorkflow.Org())
 		err = bufferedRunner.RunInSequence(
 			append(append(
@@ -129,7 +126,7 @@ func main() {
 	}
 
 	orcCmdGenerator := cfCmdGenerator.New(orcTmpDir)
-	orcWorkflow := createWorkflow(cfg.CF, appPath, appCommand)
+	orcWorkflow := createWorkflow(cfg.CF, appPath)
 
 	authFailedRetryFunc := func(stdOut, stdErr string) bool {
 		authFailedMessage := "Authentication has expired.  Please log back in to re-authenticate."
@@ -240,7 +237,7 @@ func compileIncludedApp(appName string) (string, error) {
 	return appPath, err
 }
 
-func createWorkflow(cfc *config.Cf, appPath, appCommand string) cfWorkflow.CfWorkflow {
+func createWorkflow(cfc *config.Cf, appPath string) cfWorkflow.CfWorkflow {
 	return cfWorkflow.New(
 		cfc,
 		fmt.Sprintf("uptimer-org-%s", uuid.NewV4().String()),
@@ -248,7 +245,6 @@ func createWorkflow(cfc *config.Cf, appPath, appCommand string) cfWorkflow.CfWor
 		fmt.Sprintf("uptimer-quota-%s", uuid.NewV4().String()),
 		fmt.Sprintf("uptimer-app-%s", uuid.NewV4().String()),
 		appPath,
-		appCommand,
 	)
 }
 
@@ -303,7 +299,7 @@ func createMeasurements(
 		&http.Client{
 			Timeout: 30 * time.Second,
 			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+				TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
 				DisableKeepAlives: true,
 			},
 		},

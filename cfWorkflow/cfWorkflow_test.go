@@ -15,14 +15,13 @@ import (
 
 var _ = Describe("CfWorkflow", func() {
 	var (
-		cfc        *config.Cf
-		ccg        cfCmdGenerator.CfCmdGenerator
-		org        string
-		space      string
-		quota      string
-		appName    string
-		appPath    string
-		appCommand string
+		cfc     *config.Cf
+		ccg     cfCmdGenerator.CfCmdGenerator
+		org     string
+		space   string
+		quota   string
+		appName string
+		appPath string
 
 		cw CfWorkflow
 	)
@@ -46,9 +45,8 @@ var _ = Describe("CfWorkflow", func() {
 		quota = "someQuota"
 		appName = "doraApp"
 		appPath = "this/is/an/app/path"
-		appCommand = "./app-command"
 
-		cw = New(cfc, org, space, quota, appName, appPath, appCommand)
+		cw = New(cfc, org, space, quota, appName, appPath)
 	})
 
 	Describe("Org", func() {
@@ -84,7 +82,7 @@ var _ = Describe("CfWorkflow", func() {
 					ccg.Api("jigglypuff.cf-app.com"),
 					ccg.Auth("pika", "chu"),
 					ccg.Target("someOrg", "someSpace"),
-					ccg.Push("doraApp", "this/is/an/app/path", "./app-command", 2),
+					ccg.Push("doraApp", "this/is/an/app/path", 2),
 				},
 			))
 		})
@@ -102,7 +100,7 @@ var _ = Describe("CfWorkflow", func() {
 						ccg.Api("jigglypuff.cf-app.com"),
 						ccg.Auth("pika", "chu"),
 						ccg.Target("someOrg", "someSpace"),
-						ccg.Push("doraApp", "this/is/an/app/path", "./app-command", 1),
+						ccg.Push("doraApp", "this/is/an/app/path", 1),
 					},
 				))
 			})

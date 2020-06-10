@@ -11,19 +11,6 @@ import (
 )
 
 type FakeOrchestrator struct {
-	SetupStub        func(cmdRunner.CmdRunner, cfCmdGenerator.CfCmdGenerator, config.OptionalTests) error
-	setupMutex       sync.RWMutex
-	setupArgsForCall []struct {
-		arg1 cmdRunner.CmdRunner
-		arg2 cfCmdGenerator.CfCmdGenerator
-		arg3 config.OptionalTests
-	}
-	setupReturns struct {
-		result1 error
-	}
-	setupReturnsOnCall map[int]struct {
-		result1 error
-	}
 	RunStub        func(bool) (int, error)
 	runMutex       sync.RWMutex
 	runArgsForCall []struct {
@@ -36,6 +23,19 @@ type FakeOrchestrator struct {
 	runReturnsOnCall map[int]struct {
 		result1 int
 		result2 error
+	}
+	SetupStub        func(cmdRunner.CmdRunner, cfCmdGenerator.CfCmdGenerator, config.OptionalTests) error
+	setupMutex       sync.RWMutex
+	setupArgsForCall []struct {
+		arg1 cmdRunner.CmdRunner
+		arg2 cfCmdGenerator.CfCmdGenerator
+		arg3 config.OptionalTests
+	}
+	setupReturns struct {
+		result1 error
+	}
+	setupReturnsOnCall map[int]struct {
+		result1 error
 	}
 	TearDownStub        func(cmdRunner.CmdRunner, cfCmdGenerator.CfCmdGenerator) error
 	tearDownMutex       sync.RWMutex
@@ -51,6 +51,69 @@ type FakeOrchestrator struct {
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
+}
+
+func (fake *FakeOrchestrator) Run(arg1 bool) (int, error) {
+	fake.runMutex.Lock()
+	ret, specificReturn := fake.runReturnsOnCall[len(fake.runArgsForCall)]
+	fake.runArgsForCall = append(fake.runArgsForCall, struct {
+		arg1 bool
+	}{arg1})
+	fake.recordInvocation("Run", []interface{}{arg1})
+	fake.runMutex.Unlock()
+	if fake.RunStub != nil {
+		return fake.RunStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.runReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeOrchestrator) RunCallCount() int {
+	fake.runMutex.RLock()
+	defer fake.runMutex.RUnlock()
+	return len(fake.runArgsForCall)
+}
+
+func (fake *FakeOrchestrator) RunCalls(stub func(bool) (int, error)) {
+	fake.runMutex.Lock()
+	defer fake.runMutex.Unlock()
+	fake.RunStub = stub
+}
+
+func (fake *FakeOrchestrator) RunArgsForCall(i int) bool {
+	fake.runMutex.RLock()
+	defer fake.runMutex.RUnlock()
+	argsForCall := fake.runArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeOrchestrator) RunReturns(result1 int, result2 error) {
+	fake.runMutex.Lock()
+	defer fake.runMutex.Unlock()
+	fake.RunStub = nil
+	fake.runReturns = struct {
+		result1 int
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeOrchestrator) RunReturnsOnCall(i int, result1 int, result2 error) {
+	fake.runMutex.Lock()
+	defer fake.runMutex.Unlock()
+	fake.RunStub = nil
+	if fake.runReturnsOnCall == nil {
+		fake.runReturnsOnCall = make(map[int]struct {
+			result1 int
+			result2 error
+		})
+	}
+	fake.runReturnsOnCall[i] = struct {
+		result1 int
+		result2 error
+	}{result1, result2}
 }
 
 func (fake *FakeOrchestrator) Setup(arg1 cmdRunner.CmdRunner, arg2 cfCmdGenerator.CfCmdGenerator, arg3 config.OptionalTests) error {
@@ -69,7 +132,8 @@ func (fake *FakeOrchestrator) Setup(arg1 cmdRunner.CmdRunner, arg2 cfCmdGenerato
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.setupReturns.result1
+	fakeReturns := fake.setupReturns
+	return fakeReturns.result1
 }
 
 func (fake *FakeOrchestrator) SetupCallCount() int {
@@ -78,13 +142,22 @@ func (fake *FakeOrchestrator) SetupCallCount() int {
 	return len(fake.setupArgsForCall)
 }
 
+func (fake *FakeOrchestrator) SetupCalls(stub func(cmdRunner.CmdRunner, cfCmdGenerator.CfCmdGenerator, config.OptionalTests) error) {
+	fake.setupMutex.Lock()
+	defer fake.setupMutex.Unlock()
+	fake.SetupStub = stub
+}
+
 func (fake *FakeOrchestrator) SetupArgsForCall(i int) (cmdRunner.CmdRunner, cfCmdGenerator.CfCmdGenerator, config.OptionalTests) {
 	fake.setupMutex.RLock()
 	defer fake.setupMutex.RUnlock()
-	return fake.setupArgsForCall[i].arg1, fake.setupArgsForCall[i].arg2, fake.setupArgsForCall[i].arg3
+	argsForCall := fake.setupArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
 }
 
 func (fake *FakeOrchestrator) SetupReturns(result1 error) {
+	fake.setupMutex.Lock()
+	defer fake.setupMutex.Unlock()
 	fake.SetupStub = nil
 	fake.setupReturns = struct {
 		result1 error
@@ -92,6 +165,8 @@ func (fake *FakeOrchestrator) SetupReturns(result1 error) {
 }
 
 func (fake *FakeOrchestrator) SetupReturnsOnCall(i int, result1 error) {
+	fake.setupMutex.Lock()
+	defer fake.setupMutex.Unlock()
 	fake.SetupStub = nil
 	if fake.setupReturnsOnCall == nil {
 		fake.setupReturnsOnCall = make(map[int]struct {
@@ -101,57 +176,6 @@ func (fake *FakeOrchestrator) SetupReturnsOnCall(i int, result1 error) {
 	fake.setupReturnsOnCall[i] = struct {
 		result1 error
 	}{result1}
-}
-
-func (fake *FakeOrchestrator) Run(arg1 bool) (int, error) {
-	fake.runMutex.Lock()
-	ret, specificReturn := fake.runReturnsOnCall[len(fake.runArgsForCall)]
-	fake.runArgsForCall = append(fake.runArgsForCall, struct {
-		arg1 bool
-	}{arg1})
-	fake.recordInvocation("Run", []interface{}{arg1})
-	fake.runMutex.Unlock()
-	if fake.RunStub != nil {
-		return fake.RunStub(arg1)
-	}
-	if specificReturn {
-		return ret.result1, ret.result2
-	}
-	return fake.runReturns.result1, fake.runReturns.result2
-}
-
-func (fake *FakeOrchestrator) RunCallCount() int {
-	fake.runMutex.RLock()
-	defer fake.runMutex.RUnlock()
-	return len(fake.runArgsForCall)
-}
-
-func (fake *FakeOrchestrator) RunArgsForCall(i int) bool {
-	fake.runMutex.RLock()
-	defer fake.runMutex.RUnlock()
-	return fake.runArgsForCall[i].arg1
-}
-
-func (fake *FakeOrchestrator) RunReturns(result1 int, result2 error) {
-	fake.RunStub = nil
-	fake.runReturns = struct {
-		result1 int
-		result2 error
-	}{result1, result2}
-}
-
-func (fake *FakeOrchestrator) RunReturnsOnCall(i int, result1 int, result2 error) {
-	fake.RunStub = nil
-	if fake.runReturnsOnCall == nil {
-		fake.runReturnsOnCall = make(map[int]struct {
-			result1 int
-			result2 error
-		})
-	}
-	fake.runReturnsOnCall[i] = struct {
-		result1 int
-		result2 error
-	}{result1, result2}
 }
 
 func (fake *FakeOrchestrator) TearDown(arg1 cmdRunner.CmdRunner, arg2 cfCmdGenerator.CfCmdGenerator) error {
@@ -169,7 +193,8 @@ func (fake *FakeOrchestrator) TearDown(arg1 cmdRunner.CmdRunner, arg2 cfCmdGener
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.tearDownReturns.result1
+	fakeReturns := fake.tearDownReturns
+	return fakeReturns.result1
 }
 
 func (fake *FakeOrchestrator) TearDownCallCount() int {
@@ -178,13 +203,22 @@ func (fake *FakeOrchestrator) TearDownCallCount() int {
 	return len(fake.tearDownArgsForCall)
 }
 
+func (fake *FakeOrchestrator) TearDownCalls(stub func(cmdRunner.CmdRunner, cfCmdGenerator.CfCmdGenerator) error) {
+	fake.tearDownMutex.Lock()
+	defer fake.tearDownMutex.Unlock()
+	fake.TearDownStub = stub
+}
+
 func (fake *FakeOrchestrator) TearDownArgsForCall(i int) (cmdRunner.CmdRunner, cfCmdGenerator.CfCmdGenerator) {
 	fake.tearDownMutex.RLock()
 	defer fake.tearDownMutex.RUnlock()
-	return fake.tearDownArgsForCall[i].arg1, fake.tearDownArgsForCall[i].arg2
+	argsForCall := fake.tearDownArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
 }
 
 func (fake *FakeOrchestrator) TearDownReturns(result1 error) {
+	fake.tearDownMutex.Lock()
+	defer fake.tearDownMutex.Unlock()
 	fake.TearDownStub = nil
 	fake.tearDownReturns = struct {
 		result1 error
@@ -192,6 +226,8 @@ func (fake *FakeOrchestrator) TearDownReturns(result1 error) {
 }
 
 func (fake *FakeOrchestrator) TearDownReturnsOnCall(i int, result1 error) {
+	fake.tearDownMutex.Lock()
+	defer fake.tearDownMutex.Unlock()
 	fake.TearDownStub = nil
 	if fake.tearDownReturnsOnCall == nil {
 		fake.tearDownReturnsOnCall = make(map[int]struct {
@@ -206,10 +242,10 @@ func (fake *FakeOrchestrator) TearDownReturnsOnCall(i int, result1 error) {
 func (fake *FakeOrchestrator) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
-	fake.setupMutex.RLock()
-	defer fake.setupMutex.RUnlock()
 	fake.runMutex.RLock()
 	defer fake.runMutex.RUnlock()
+	fake.setupMutex.RLock()
+	defer fake.setupMutex.RUnlock()
 	fake.tearDownMutex.RLock()
 	defer fake.tearDownMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}

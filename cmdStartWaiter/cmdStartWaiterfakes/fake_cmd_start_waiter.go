@@ -11,26 +11,31 @@ import (
 type FakeCmdStartWaiter struct {
 	StartStub        func() error
 	startMutex       sync.RWMutex
-	startArgsForCall []struct{}
-	startReturns     struct {
+	startArgsForCall []struct {
+	}
+	startReturns struct {
 		result1 error
 	}
 	startReturnsOnCall map[int]struct {
 		result1 error
 	}
-	WaitStub        func() error
-	waitMutex       sync.RWMutex
-	waitArgsForCall []struct{}
-	waitReturns     struct {
-		result1 error
+	StderrPipeStub        func() (io.ReadCloser, error)
+	stderrPipeMutex       sync.RWMutex
+	stderrPipeArgsForCall []struct {
 	}
-	waitReturnsOnCall map[int]struct {
-		result1 error
+	stderrPipeReturns struct {
+		result1 io.ReadCloser
+		result2 error
+	}
+	stderrPipeReturnsOnCall map[int]struct {
+		result1 io.ReadCloser
+		result2 error
 	}
 	StdoutPipeStub        func() (io.ReadCloser, error)
 	stdoutPipeMutex       sync.RWMutex
-	stdoutPipeArgsForCall []struct{}
-	stdoutPipeReturns     struct {
+	stdoutPipeArgsForCall []struct {
+	}
+	stdoutPipeReturns struct {
 		result1 io.ReadCloser
 		result2 error
 	}
@@ -38,16 +43,15 @@ type FakeCmdStartWaiter struct {
 		result1 io.ReadCloser
 		result2 error
 	}
-	StderrPipeStub        func() (io.ReadCloser, error)
-	stderrPipeMutex       sync.RWMutex
-	stderrPipeArgsForCall []struct{}
-	stderrPipeReturns     struct {
-		result1 io.ReadCloser
-		result2 error
+	WaitStub        func() error
+	waitMutex       sync.RWMutex
+	waitArgsForCall []struct {
 	}
-	stderrPipeReturnsOnCall map[int]struct {
-		result1 io.ReadCloser
-		result2 error
+	waitReturns struct {
+		result1 error
+	}
+	waitReturnsOnCall map[int]struct {
+		result1 error
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
@@ -56,7 +60,8 @@ type FakeCmdStartWaiter struct {
 func (fake *FakeCmdStartWaiter) Start() error {
 	fake.startMutex.Lock()
 	ret, specificReturn := fake.startReturnsOnCall[len(fake.startArgsForCall)]
-	fake.startArgsForCall = append(fake.startArgsForCall, struct{}{})
+	fake.startArgsForCall = append(fake.startArgsForCall, struct {
+	}{})
 	fake.recordInvocation("Start", []interface{}{})
 	fake.startMutex.Unlock()
 	if fake.StartStub != nil {
@@ -65,7 +70,8 @@ func (fake *FakeCmdStartWaiter) Start() error {
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.startReturns.result1
+	fakeReturns := fake.startReturns
+	return fakeReturns.result1
 }
 
 func (fake *FakeCmdStartWaiter) StartCallCount() int {
@@ -74,7 +80,15 @@ func (fake *FakeCmdStartWaiter) StartCallCount() int {
 	return len(fake.startArgsForCall)
 }
 
+func (fake *FakeCmdStartWaiter) StartCalls(stub func() error) {
+	fake.startMutex.Lock()
+	defer fake.startMutex.Unlock()
+	fake.StartStub = stub
+}
+
 func (fake *FakeCmdStartWaiter) StartReturns(result1 error) {
+	fake.startMutex.Lock()
+	defer fake.startMutex.Unlock()
 	fake.StartStub = nil
 	fake.startReturns = struct {
 		result1 error
@@ -82,6 +96,8 @@ func (fake *FakeCmdStartWaiter) StartReturns(result1 error) {
 }
 
 func (fake *FakeCmdStartWaiter) StartReturnsOnCall(i int, result1 error) {
+	fake.startMutex.Lock()
+	defer fake.startMutex.Unlock()
 	fake.StartStub = nil
 	if fake.startReturnsOnCall == nil {
 		fake.startReturnsOnCall = make(map[int]struct {
@@ -93,93 +109,11 @@ func (fake *FakeCmdStartWaiter) StartReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeCmdStartWaiter) Wait() error {
-	fake.waitMutex.Lock()
-	ret, specificReturn := fake.waitReturnsOnCall[len(fake.waitArgsForCall)]
-	fake.waitArgsForCall = append(fake.waitArgsForCall, struct{}{})
-	fake.recordInvocation("Wait", []interface{}{})
-	fake.waitMutex.Unlock()
-	if fake.WaitStub != nil {
-		return fake.WaitStub()
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	return fake.waitReturns.result1
-}
-
-func (fake *FakeCmdStartWaiter) WaitCallCount() int {
-	fake.waitMutex.RLock()
-	defer fake.waitMutex.RUnlock()
-	return len(fake.waitArgsForCall)
-}
-
-func (fake *FakeCmdStartWaiter) WaitReturns(result1 error) {
-	fake.WaitStub = nil
-	fake.waitReturns = struct {
-		result1 error
-	}{result1}
-}
-
-func (fake *FakeCmdStartWaiter) WaitReturnsOnCall(i int, result1 error) {
-	fake.WaitStub = nil
-	if fake.waitReturnsOnCall == nil {
-		fake.waitReturnsOnCall = make(map[int]struct {
-			result1 error
-		})
-	}
-	fake.waitReturnsOnCall[i] = struct {
-		result1 error
-	}{result1}
-}
-
-func (fake *FakeCmdStartWaiter) StdoutPipe() (io.ReadCloser, error) {
-	fake.stdoutPipeMutex.Lock()
-	ret, specificReturn := fake.stdoutPipeReturnsOnCall[len(fake.stdoutPipeArgsForCall)]
-	fake.stdoutPipeArgsForCall = append(fake.stdoutPipeArgsForCall, struct{}{})
-	fake.recordInvocation("StdoutPipe", []interface{}{})
-	fake.stdoutPipeMutex.Unlock()
-	if fake.StdoutPipeStub != nil {
-		return fake.StdoutPipeStub()
-	}
-	if specificReturn {
-		return ret.result1, ret.result2
-	}
-	return fake.stdoutPipeReturns.result1, fake.stdoutPipeReturns.result2
-}
-
-func (fake *FakeCmdStartWaiter) StdoutPipeCallCount() int {
-	fake.stdoutPipeMutex.RLock()
-	defer fake.stdoutPipeMutex.RUnlock()
-	return len(fake.stdoutPipeArgsForCall)
-}
-
-func (fake *FakeCmdStartWaiter) StdoutPipeReturns(result1 io.ReadCloser, result2 error) {
-	fake.StdoutPipeStub = nil
-	fake.stdoutPipeReturns = struct {
-		result1 io.ReadCloser
-		result2 error
-	}{result1, result2}
-}
-
-func (fake *FakeCmdStartWaiter) StdoutPipeReturnsOnCall(i int, result1 io.ReadCloser, result2 error) {
-	fake.StdoutPipeStub = nil
-	if fake.stdoutPipeReturnsOnCall == nil {
-		fake.stdoutPipeReturnsOnCall = make(map[int]struct {
-			result1 io.ReadCloser
-			result2 error
-		})
-	}
-	fake.stdoutPipeReturnsOnCall[i] = struct {
-		result1 io.ReadCloser
-		result2 error
-	}{result1, result2}
-}
-
 func (fake *FakeCmdStartWaiter) StderrPipe() (io.ReadCloser, error) {
 	fake.stderrPipeMutex.Lock()
 	ret, specificReturn := fake.stderrPipeReturnsOnCall[len(fake.stderrPipeArgsForCall)]
-	fake.stderrPipeArgsForCall = append(fake.stderrPipeArgsForCall, struct{}{})
+	fake.stderrPipeArgsForCall = append(fake.stderrPipeArgsForCall, struct {
+	}{})
 	fake.recordInvocation("StderrPipe", []interface{}{})
 	fake.stderrPipeMutex.Unlock()
 	if fake.StderrPipeStub != nil {
@@ -188,7 +122,8 @@ func (fake *FakeCmdStartWaiter) StderrPipe() (io.ReadCloser, error) {
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	return fake.stderrPipeReturns.result1, fake.stderrPipeReturns.result2
+	fakeReturns := fake.stderrPipeReturns
+	return fakeReturns.result1, fakeReturns.result2
 }
 
 func (fake *FakeCmdStartWaiter) StderrPipeCallCount() int {
@@ -197,7 +132,15 @@ func (fake *FakeCmdStartWaiter) StderrPipeCallCount() int {
 	return len(fake.stderrPipeArgsForCall)
 }
 
+func (fake *FakeCmdStartWaiter) StderrPipeCalls(stub func() (io.ReadCloser, error)) {
+	fake.stderrPipeMutex.Lock()
+	defer fake.stderrPipeMutex.Unlock()
+	fake.StderrPipeStub = stub
+}
+
 func (fake *FakeCmdStartWaiter) StderrPipeReturns(result1 io.ReadCloser, result2 error) {
+	fake.stderrPipeMutex.Lock()
+	defer fake.stderrPipeMutex.Unlock()
 	fake.StderrPipeStub = nil
 	fake.stderrPipeReturns = struct {
 		result1 io.ReadCloser
@@ -206,6 +149,8 @@ func (fake *FakeCmdStartWaiter) StderrPipeReturns(result1 io.ReadCloser, result2
 }
 
 func (fake *FakeCmdStartWaiter) StderrPipeReturnsOnCall(i int, result1 io.ReadCloser, result2 error) {
+	fake.stderrPipeMutex.Lock()
+	defer fake.stderrPipeMutex.Unlock()
 	fake.StderrPipeStub = nil
 	if fake.stderrPipeReturnsOnCall == nil {
 		fake.stderrPipeReturnsOnCall = make(map[int]struct {
@@ -219,17 +164,124 @@ func (fake *FakeCmdStartWaiter) StderrPipeReturnsOnCall(i int, result1 io.ReadCl
 	}{result1, result2}
 }
 
+func (fake *FakeCmdStartWaiter) StdoutPipe() (io.ReadCloser, error) {
+	fake.stdoutPipeMutex.Lock()
+	ret, specificReturn := fake.stdoutPipeReturnsOnCall[len(fake.stdoutPipeArgsForCall)]
+	fake.stdoutPipeArgsForCall = append(fake.stdoutPipeArgsForCall, struct {
+	}{})
+	fake.recordInvocation("StdoutPipe", []interface{}{})
+	fake.stdoutPipeMutex.Unlock()
+	if fake.StdoutPipeStub != nil {
+		return fake.StdoutPipeStub()
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.stdoutPipeReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeCmdStartWaiter) StdoutPipeCallCount() int {
+	fake.stdoutPipeMutex.RLock()
+	defer fake.stdoutPipeMutex.RUnlock()
+	return len(fake.stdoutPipeArgsForCall)
+}
+
+func (fake *FakeCmdStartWaiter) StdoutPipeCalls(stub func() (io.ReadCloser, error)) {
+	fake.stdoutPipeMutex.Lock()
+	defer fake.stdoutPipeMutex.Unlock()
+	fake.StdoutPipeStub = stub
+}
+
+func (fake *FakeCmdStartWaiter) StdoutPipeReturns(result1 io.ReadCloser, result2 error) {
+	fake.stdoutPipeMutex.Lock()
+	defer fake.stdoutPipeMutex.Unlock()
+	fake.StdoutPipeStub = nil
+	fake.stdoutPipeReturns = struct {
+		result1 io.ReadCloser
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeCmdStartWaiter) StdoutPipeReturnsOnCall(i int, result1 io.ReadCloser, result2 error) {
+	fake.stdoutPipeMutex.Lock()
+	defer fake.stdoutPipeMutex.Unlock()
+	fake.StdoutPipeStub = nil
+	if fake.stdoutPipeReturnsOnCall == nil {
+		fake.stdoutPipeReturnsOnCall = make(map[int]struct {
+			result1 io.ReadCloser
+			result2 error
+		})
+	}
+	fake.stdoutPipeReturnsOnCall[i] = struct {
+		result1 io.ReadCloser
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeCmdStartWaiter) Wait() error {
+	fake.waitMutex.Lock()
+	ret, specificReturn := fake.waitReturnsOnCall[len(fake.waitArgsForCall)]
+	fake.waitArgsForCall = append(fake.waitArgsForCall, struct {
+	}{})
+	fake.recordInvocation("Wait", []interface{}{})
+	fake.waitMutex.Unlock()
+	if fake.WaitStub != nil {
+		return fake.WaitStub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.waitReturns
+	return fakeReturns.result1
+}
+
+func (fake *FakeCmdStartWaiter) WaitCallCount() int {
+	fake.waitMutex.RLock()
+	defer fake.waitMutex.RUnlock()
+	return len(fake.waitArgsForCall)
+}
+
+func (fake *FakeCmdStartWaiter) WaitCalls(stub func() error) {
+	fake.waitMutex.Lock()
+	defer fake.waitMutex.Unlock()
+	fake.WaitStub = stub
+}
+
+func (fake *FakeCmdStartWaiter) WaitReturns(result1 error) {
+	fake.waitMutex.Lock()
+	defer fake.waitMutex.Unlock()
+	fake.WaitStub = nil
+	fake.waitReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeCmdStartWaiter) WaitReturnsOnCall(i int, result1 error) {
+	fake.waitMutex.Lock()
+	defer fake.waitMutex.Unlock()
+	fake.WaitStub = nil
+	if fake.waitReturnsOnCall == nil {
+		fake.waitReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.waitReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeCmdStartWaiter) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
 	fake.startMutex.RLock()
 	defer fake.startMutex.RUnlock()
-	fake.waitMutex.RLock()
-	defer fake.waitMutex.RUnlock()
-	fake.stdoutPipeMutex.RLock()
-	defer fake.stdoutPipeMutex.RUnlock()
 	fake.stderrPipeMutex.RLock()
 	defer fake.stderrPipeMutex.RUnlock()
+	fake.stdoutPipeMutex.RLock()
+	defer fake.stdoutPipeMutex.RUnlock()
+	fake.waitMutex.RLock()
+	defer fake.waitMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

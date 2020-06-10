@@ -10,10 +10,10 @@ import (
 )
 
 type FakeCfCmdGenerator struct {
-	ApiStub        func(url string) cmdStartWaiter.CmdStartWaiter
+	ApiStub        func(string) cmdStartWaiter.CmdStartWaiter
 	apiMutex       sync.RWMutex
 	apiArgsForCall []struct {
-		url string
+		arg1 string
 	}
 	apiReturns struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -21,11 +21,11 @@ type FakeCfCmdGenerator struct {
 	apiReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	AuthStub        func(username, password string) cmdStartWaiter.CmdStartWaiter
+	AuthStub        func(string, string) cmdStartWaiter.CmdStartWaiter
 	authMutex       sync.RWMutex
 	authArgsForCall []struct {
-		username string
-		password string
+		arg1 string
+		arg2 string
 	}
 	authReturns struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -33,33 +33,22 @@ type FakeCfCmdGenerator struct {
 	authReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	CreateQuotaStub        func(quota string) cmdStartWaiter.CmdStartWaiter
-	createQuotaMutex       sync.RWMutex
-	createQuotaArgsForCall []struct {
-		quota string
+	BindServiceStub        func(string, string) cmdStartWaiter.CmdStartWaiter
+	bindServiceMutex       sync.RWMutex
+	bindServiceArgsForCall []struct {
+		arg1 string
+		arg2 string
 	}
-	createQuotaReturns struct {
+	bindServiceReturns struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	createQuotaReturnsOnCall map[int]struct {
+	bindServiceReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	SetQuotaStub        func(org, quota string) cmdStartWaiter.CmdStartWaiter
-	setQuotaMutex       sync.RWMutex
-	setQuotaArgsForCall []struct {
-		org   string
-		quota string
-	}
-	setQuotaReturns struct {
-		result1 cmdStartWaiter.CmdStartWaiter
-	}
-	setQuotaReturnsOnCall map[int]struct {
-		result1 cmdStartWaiter.CmdStartWaiter
-	}
-	CreateOrgStub        func(org string) cmdStartWaiter.CmdStartWaiter
+	CreateOrgStub        func(string) cmdStartWaiter.CmdStartWaiter
 	createOrgMutex       sync.RWMutex
 	createOrgArgsForCall []struct {
-		org string
+		arg1 string
 	}
 	createOrgReturns struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -67,11 +56,22 @@ type FakeCfCmdGenerator struct {
 	createOrgReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	CreateSpaceStub        func(org, space string) cmdStartWaiter.CmdStartWaiter
+	CreateQuotaStub        func(string) cmdStartWaiter.CmdStartWaiter
+	createQuotaMutex       sync.RWMutex
+	createQuotaArgsForCall []struct {
+		arg1 string
+	}
+	createQuotaReturns struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
+	createQuotaReturnsOnCall map[int]struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
+	CreateSpaceStub        func(string, string) cmdStartWaiter.CmdStartWaiter
 	createSpaceMutex       sync.RWMutex
 	createSpaceArgsForCall []struct {
-		org   string
-		space string
+		arg1 string
+		arg2 string
 	}
 	createSpaceReturns struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -79,37 +79,22 @@ type FakeCfCmdGenerator struct {
 	createSpaceReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	TargetStub        func(org, space string) cmdStartWaiter.CmdStartWaiter
-	targetMutex       sync.RWMutex
-	targetArgsForCall []struct {
-		org   string
-		space string
+	CreateUserProvidedServiceStub        func(string, string) cmdStartWaiter.CmdStartWaiter
+	createUserProvidedServiceMutex       sync.RWMutex
+	createUserProvidedServiceArgsForCall []struct {
+		arg1 string
+		arg2 string
 	}
-	targetReturns struct {
+	createUserProvidedServiceReturns struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	targetReturnsOnCall map[int]struct {
+	createUserProvidedServiceReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	PushStub        func(name, domain, path, command string, instances int) cmdStartWaiter.CmdStartWaiter
-	pushMutex       sync.RWMutex
-	pushArgsForCall []struct {
-		name      string
-		domain    string
-		path      string
-		command   string
-		instances int
-	}
-	pushReturns struct {
-		result1 cmdStartWaiter.CmdStartWaiter
-	}
-	pushReturnsOnCall map[int]struct {
-		result1 cmdStartWaiter.CmdStartWaiter
-	}
-	DeleteStub        func(name string) cmdStartWaiter.CmdStartWaiter
+	DeleteStub        func(string) cmdStartWaiter.CmdStartWaiter
 	deleteMutex       sync.RWMutex
 	deleteArgsForCall []struct {
-		name string
+		arg1 string
 	}
 	deleteReturns struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -117,10 +102,10 @@ type FakeCfCmdGenerator struct {
 	deleteReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	DeleteOrgStub        func(org string) cmdStartWaiter.CmdStartWaiter
+	DeleteOrgStub        func(string) cmdStartWaiter.CmdStartWaiter
 	deleteOrgMutex       sync.RWMutex
 	deleteOrgArgsForCall []struct {
-		org string
+		arg1 string
 	}
 	deleteOrgReturns struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -128,10 +113,10 @@ type FakeCfCmdGenerator struct {
 	deleteOrgReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	DeleteQuotaStub        func(quota string) cmdStartWaiter.CmdStartWaiter
+	DeleteQuotaStub        func(string) cmdStartWaiter.CmdStartWaiter
 	deleteQuotaMutex       sync.RWMutex
 	deleteQuotaArgsForCall []struct {
-		quota string
+		arg1 string
 	}
 	deleteQuotaReturns struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -141,42 +126,20 @@ type FakeCfCmdGenerator struct {
 	}
 	LogOutStub        func() cmdStartWaiter.CmdStartWaiter
 	logOutMutex       sync.RWMutex
-	logOutArgsForCall []struct{}
-	logOutReturns     struct {
+	logOutArgsForCall []struct {
+	}
+	logOutReturns struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
 	logOutReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	RecentLogsStub        func(appName string) cmdStartWaiter.CmdStartWaiter
-	recentLogsMutex       sync.RWMutex
-	recentLogsArgsForCall []struct {
-		appName string
-	}
-	recentLogsReturns struct {
-		result1 cmdStartWaiter.CmdStartWaiter
-	}
-	recentLogsReturnsOnCall map[int]struct {
-		result1 cmdStartWaiter.CmdStartWaiter
-	}
-	StreamLogsStub        func(ctx context.Context, appName string) cmdStartWaiter.CmdStartWaiter
-	streamLogsMutex       sync.RWMutex
-	streamLogsArgsForCall []struct {
-		ctx     context.Context
-		appName string
-	}
-	streamLogsReturns struct {
-		result1 cmdStartWaiter.CmdStartWaiter
-	}
-	streamLogsReturnsOnCall map[int]struct {
-		result1 cmdStartWaiter.CmdStartWaiter
-	}
-	MapRouteStub        func(appName, domain string, port int) cmdStartWaiter.CmdStartWaiter
+	MapRouteStub        func(string, string, int) cmdStartWaiter.CmdStartWaiter
 	mapRouteMutex       sync.RWMutex
 	mapRouteArgsForCall []struct {
-		appName string
-		domain  string
-		port    int
+		arg1 string
+		arg2 string
+		arg3 int
 	}
 	mapRouteReturns struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -184,34 +147,34 @@ type FakeCfCmdGenerator struct {
 	mapRouteReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	CreateUserProvidedServiceStub        func(serviceName, syslogURL string) cmdStartWaiter.CmdStartWaiter
-	createUserProvidedServiceMutex       sync.RWMutex
-	createUserProvidedServiceArgsForCall []struct {
-		serviceName string
-		syslogURL   string
+	PushStub        func(string, string, int) cmdStartWaiter.CmdStartWaiter
+	pushMutex       sync.RWMutex
+	pushArgsForCall []struct {
+		arg1 string
+		arg2 string
+		arg3 int
 	}
-	createUserProvidedServiceReturns struct {
+	pushReturns struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	createUserProvidedServiceReturnsOnCall map[int]struct {
+	pushReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	BindServiceStub        func(appName, serviceName string) cmdStartWaiter.CmdStartWaiter
-	bindServiceMutex       sync.RWMutex
-	bindServiceArgsForCall []struct {
-		appName     string
-		serviceName string
+	RecentLogsStub        func(string) cmdStartWaiter.CmdStartWaiter
+	recentLogsMutex       sync.RWMutex
+	recentLogsArgsForCall []struct {
+		arg1 string
 	}
-	bindServiceReturns struct {
+	recentLogsReturns struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	bindServiceReturnsOnCall map[int]struct {
+	recentLogsReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	RestageStub        func(appName string) cmdStartWaiter.CmdStartWaiter
+	RestageStub        func(string) cmdStartWaiter.CmdStartWaiter
 	restageMutex       sync.RWMutex
 	restageArgsForCall []struct {
-		appName string
+		arg1 string
 	}
 	restageReturns struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -219,25 +182,62 @@ type FakeCfCmdGenerator struct {
 	restageReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
+	SetQuotaStub        func(string, string) cmdStartWaiter.CmdStartWaiter
+	setQuotaMutex       sync.RWMutex
+	setQuotaArgsForCall []struct {
+		arg1 string
+		arg2 string
+	}
+	setQuotaReturns struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
+	setQuotaReturnsOnCall map[int]struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
+	StreamLogsStub        func(context.Context, string) cmdStartWaiter.CmdStartWaiter
+	streamLogsMutex       sync.RWMutex
+	streamLogsArgsForCall []struct {
+		arg1 context.Context
+		arg2 string
+	}
+	streamLogsReturns struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
+	streamLogsReturnsOnCall map[int]struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
+	TargetStub        func(string, string) cmdStartWaiter.CmdStartWaiter
+	targetMutex       sync.RWMutex
+	targetArgsForCall []struct {
+		arg1 string
+		arg2 string
+	}
+	targetReturns struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
+	targetReturnsOnCall map[int]struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeCfCmdGenerator) Api(url string) cmdStartWaiter.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) Api(arg1 string) cmdStartWaiter.CmdStartWaiter {
 	fake.apiMutex.Lock()
 	ret, specificReturn := fake.apiReturnsOnCall[len(fake.apiArgsForCall)]
 	fake.apiArgsForCall = append(fake.apiArgsForCall, struct {
-		url string
-	}{url})
-	fake.recordInvocation("Api", []interface{}{url})
+		arg1 string
+	}{arg1})
+	fake.recordInvocation("Api", []interface{}{arg1})
 	fake.apiMutex.Unlock()
 	if fake.ApiStub != nil {
-		return fake.ApiStub(url)
+		return fake.ApiStub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.apiReturns.result1
+	fakeReturns := fake.apiReturns
+	return fakeReturns.result1
 }
 
 func (fake *FakeCfCmdGenerator) ApiCallCount() int {
@@ -246,13 +246,22 @@ func (fake *FakeCfCmdGenerator) ApiCallCount() int {
 	return len(fake.apiArgsForCall)
 }
 
+func (fake *FakeCfCmdGenerator) ApiCalls(stub func(string) cmdStartWaiter.CmdStartWaiter) {
+	fake.apiMutex.Lock()
+	defer fake.apiMutex.Unlock()
+	fake.ApiStub = stub
+}
+
 func (fake *FakeCfCmdGenerator) ApiArgsForCall(i int) string {
 	fake.apiMutex.RLock()
 	defer fake.apiMutex.RUnlock()
-	return fake.apiArgsForCall[i].url
+	argsForCall := fake.apiArgsForCall[i]
+	return argsForCall.arg1
 }
 
 func (fake *FakeCfCmdGenerator) ApiReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.apiMutex.Lock()
+	defer fake.apiMutex.Unlock()
 	fake.ApiStub = nil
 	fake.apiReturns = struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -260,6 +269,8 @@ func (fake *FakeCfCmdGenerator) ApiReturns(result1 cmdStartWaiter.CmdStartWaiter
 }
 
 func (fake *FakeCfCmdGenerator) ApiReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.apiMutex.Lock()
+	defer fake.apiMutex.Unlock()
 	fake.ApiStub = nil
 	if fake.apiReturnsOnCall == nil {
 		fake.apiReturnsOnCall = make(map[int]struct {
@@ -271,22 +282,23 @@ func (fake *FakeCfCmdGenerator) ApiReturnsOnCall(i int, result1 cmdStartWaiter.C
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) Auth(username string, password string) cmdStartWaiter.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) Auth(arg1 string, arg2 string) cmdStartWaiter.CmdStartWaiter {
 	fake.authMutex.Lock()
 	ret, specificReturn := fake.authReturnsOnCall[len(fake.authArgsForCall)]
 	fake.authArgsForCall = append(fake.authArgsForCall, struct {
-		username string
-		password string
-	}{username, password})
-	fake.recordInvocation("Auth", []interface{}{username, password})
+		arg1 string
+		arg2 string
+	}{arg1, arg2})
+	fake.recordInvocation("Auth", []interface{}{arg1, arg2})
 	fake.authMutex.Unlock()
 	if fake.AuthStub != nil {
-		return fake.AuthStub(username, password)
+		return fake.AuthStub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.authReturns.result1
+	fakeReturns := fake.authReturns
+	return fakeReturns.result1
 }
 
 func (fake *FakeCfCmdGenerator) AuthCallCount() int {
@@ -295,13 +307,22 @@ func (fake *FakeCfCmdGenerator) AuthCallCount() int {
 	return len(fake.authArgsForCall)
 }
 
+func (fake *FakeCfCmdGenerator) AuthCalls(stub func(string, string) cmdStartWaiter.CmdStartWaiter) {
+	fake.authMutex.Lock()
+	defer fake.authMutex.Unlock()
+	fake.AuthStub = stub
+}
+
 func (fake *FakeCfCmdGenerator) AuthArgsForCall(i int) (string, string) {
 	fake.authMutex.RLock()
 	defer fake.authMutex.RUnlock()
-	return fake.authArgsForCall[i].username, fake.authArgsForCall[i].password
+	argsForCall := fake.authArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
 }
 
 func (fake *FakeCfCmdGenerator) AuthReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.authMutex.Lock()
+	defer fake.authMutex.Unlock()
 	fake.AuthStub = nil
 	fake.authReturns = struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -309,6 +330,8 @@ func (fake *FakeCfCmdGenerator) AuthReturns(result1 cmdStartWaiter.CmdStartWaite
 }
 
 func (fake *FakeCfCmdGenerator) AuthReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.authMutex.Lock()
+	defer fake.authMutex.Unlock()
 	fake.AuthStub = nil
 	if fake.authReturnsOnCall == nil {
 		fake.authReturnsOnCall = make(map[int]struct {
@@ -320,118 +343,83 @@ func (fake *FakeCfCmdGenerator) AuthReturnsOnCall(i int, result1 cmdStartWaiter.
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) CreateQuota(quota string) cmdStartWaiter.CmdStartWaiter {
-	fake.createQuotaMutex.Lock()
-	ret, specificReturn := fake.createQuotaReturnsOnCall[len(fake.createQuotaArgsForCall)]
-	fake.createQuotaArgsForCall = append(fake.createQuotaArgsForCall, struct {
-		quota string
-	}{quota})
-	fake.recordInvocation("CreateQuota", []interface{}{quota})
-	fake.createQuotaMutex.Unlock()
-	if fake.CreateQuotaStub != nil {
-		return fake.CreateQuotaStub(quota)
+func (fake *FakeCfCmdGenerator) BindService(arg1 string, arg2 string) cmdStartWaiter.CmdStartWaiter {
+	fake.bindServiceMutex.Lock()
+	ret, specificReturn := fake.bindServiceReturnsOnCall[len(fake.bindServiceArgsForCall)]
+	fake.bindServiceArgsForCall = append(fake.bindServiceArgsForCall, struct {
+		arg1 string
+		arg2 string
+	}{arg1, arg2})
+	fake.recordInvocation("BindService", []interface{}{arg1, arg2})
+	fake.bindServiceMutex.Unlock()
+	if fake.BindServiceStub != nil {
+		return fake.BindServiceStub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.createQuotaReturns.result1
+	fakeReturns := fake.bindServiceReturns
+	return fakeReturns.result1
 }
 
-func (fake *FakeCfCmdGenerator) CreateQuotaCallCount() int {
-	fake.createQuotaMutex.RLock()
-	defer fake.createQuotaMutex.RUnlock()
-	return len(fake.createQuotaArgsForCall)
+func (fake *FakeCfCmdGenerator) BindServiceCallCount() int {
+	fake.bindServiceMutex.RLock()
+	defer fake.bindServiceMutex.RUnlock()
+	return len(fake.bindServiceArgsForCall)
 }
 
-func (fake *FakeCfCmdGenerator) CreateQuotaArgsForCall(i int) string {
-	fake.createQuotaMutex.RLock()
-	defer fake.createQuotaMutex.RUnlock()
-	return fake.createQuotaArgsForCall[i].quota
+func (fake *FakeCfCmdGenerator) BindServiceCalls(stub func(string, string) cmdStartWaiter.CmdStartWaiter) {
+	fake.bindServiceMutex.Lock()
+	defer fake.bindServiceMutex.Unlock()
+	fake.BindServiceStub = stub
 }
 
-func (fake *FakeCfCmdGenerator) CreateQuotaReturns(result1 cmdStartWaiter.CmdStartWaiter) {
-	fake.CreateQuotaStub = nil
-	fake.createQuotaReturns = struct {
+func (fake *FakeCfCmdGenerator) BindServiceArgsForCall(i int) (string, string) {
+	fake.bindServiceMutex.RLock()
+	defer fake.bindServiceMutex.RUnlock()
+	argsForCall := fake.bindServiceArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeCfCmdGenerator) BindServiceReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.bindServiceMutex.Lock()
+	defer fake.bindServiceMutex.Unlock()
+	fake.BindServiceStub = nil
+	fake.bindServiceReturns = struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) CreateQuotaReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
-	fake.CreateQuotaStub = nil
-	if fake.createQuotaReturnsOnCall == nil {
-		fake.createQuotaReturnsOnCall = make(map[int]struct {
+func (fake *FakeCfCmdGenerator) BindServiceReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.bindServiceMutex.Lock()
+	defer fake.bindServiceMutex.Unlock()
+	fake.BindServiceStub = nil
+	if fake.bindServiceReturnsOnCall == nil {
+		fake.bindServiceReturnsOnCall = make(map[int]struct {
 			result1 cmdStartWaiter.CmdStartWaiter
 		})
 	}
-	fake.createQuotaReturnsOnCall[i] = struct {
+	fake.bindServiceReturnsOnCall[i] = struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) SetQuota(org string, quota string) cmdStartWaiter.CmdStartWaiter {
-	fake.setQuotaMutex.Lock()
-	ret, specificReturn := fake.setQuotaReturnsOnCall[len(fake.setQuotaArgsForCall)]
-	fake.setQuotaArgsForCall = append(fake.setQuotaArgsForCall, struct {
-		org   string
-		quota string
-	}{org, quota})
-	fake.recordInvocation("SetQuota", []interface{}{org, quota})
-	fake.setQuotaMutex.Unlock()
-	if fake.SetQuotaStub != nil {
-		return fake.SetQuotaStub(org, quota)
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	return fake.setQuotaReturns.result1
-}
-
-func (fake *FakeCfCmdGenerator) SetQuotaCallCount() int {
-	fake.setQuotaMutex.RLock()
-	defer fake.setQuotaMutex.RUnlock()
-	return len(fake.setQuotaArgsForCall)
-}
-
-func (fake *FakeCfCmdGenerator) SetQuotaArgsForCall(i int) (string, string) {
-	fake.setQuotaMutex.RLock()
-	defer fake.setQuotaMutex.RUnlock()
-	return fake.setQuotaArgsForCall[i].org, fake.setQuotaArgsForCall[i].quota
-}
-
-func (fake *FakeCfCmdGenerator) SetQuotaReturns(result1 cmdStartWaiter.CmdStartWaiter) {
-	fake.SetQuotaStub = nil
-	fake.setQuotaReturns = struct {
-		result1 cmdStartWaiter.CmdStartWaiter
-	}{result1}
-}
-
-func (fake *FakeCfCmdGenerator) SetQuotaReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
-	fake.SetQuotaStub = nil
-	if fake.setQuotaReturnsOnCall == nil {
-		fake.setQuotaReturnsOnCall = make(map[int]struct {
-			result1 cmdStartWaiter.CmdStartWaiter
-		})
-	}
-	fake.setQuotaReturnsOnCall[i] = struct {
-		result1 cmdStartWaiter.CmdStartWaiter
-	}{result1}
-}
-
-func (fake *FakeCfCmdGenerator) CreateOrg(org string) cmdStartWaiter.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) CreateOrg(arg1 string) cmdStartWaiter.CmdStartWaiter {
 	fake.createOrgMutex.Lock()
 	ret, specificReturn := fake.createOrgReturnsOnCall[len(fake.createOrgArgsForCall)]
 	fake.createOrgArgsForCall = append(fake.createOrgArgsForCall, struct {
-		org string
-	}{org})
-	fake.recordInvocation("CreateOrg", []interface{}{org})
+		arg1 string
+	}{arg1})
+	fake.recordInvocation("CreateOrg", []interface{}{arg1})
 	fake.createOrgMutex.Unlock()
 	if fake.CreateOrgStub != nil {
-		return fake.CreateOrgStub(org)
+		return fake.CreateOrgStub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.createOrgReturns.result1
+	fakeReturns := fake.createOrgReturns
+	return fakeReturns.result1
 }
 
 func (fake *FakeCfCmdGenerator) CreateOrgCallCount() int {
@@ -440,13 +428,22 @@ func (fake *FakeCfCmdGenerator) CreateOrgCallCount() int {
 	return len(fake.createOrgArgsForCall)
 }
 
+func (fake *FakeCfCmdGenerator) CreateOrgCalls(stub func(string) cmdStartWaiter.CmdStartWaiter) {
+	fake.createOrgMutex.Lock()
+	defer fake.createOrgMutex.Unlock()
+	fake.CreateOrgStub = stub
+}
+
 func (fake *FakeCfCmdGenerator) CreateOrgArgsForCall(i int) string {
 	fake.createOrgMutex.RLock()
 	defer fake.createOrgMutex.RUnlock()
-	return fake.createOrgArgsForCall[i].org
+	argsForCall := fake.createOrgArgsForCall[i]
+	return argsForCall.arg1
 }
 
 func (fake *FakeCfCmdGenerator) CreateOrgReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.createOrgMutex.Lock()
+	defer fake.createOrgMutex.Unlock()
 	fake.CreateOrgStub = nil
 	fake.createOrgReturns = struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -454,6 +451,8 @@ func (fake *FakeCfCmdGenerator) CreateOrgReturns(result1 cmdStartWaiter.CmdStart
 }
 
 func (fake *FakeCfCmdGenerator) CreateOrgReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.createOrgMutex.Lock()
+	defer fake.createOrgMutex.Unlock()
 	fake.CreateOrgStub = nil
 	if fake.createOrgReturnsOnCall == nil {
 		fake.createOrgReturnsOnCall = make(map[int]struct {
@@ -465,22 +464,83 @@ func (fake *FakeCfCmdGenerator) CreateOrgReturnsOnCall(i int, result1 cmdStartWa
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) CreateSpace(org string, space string) cmdStartWaiter.CmdStartWaiter {
-	fake.createSpaceMutex.Lock()
-	ret, specificReturn := fake.createSpaceReturnsOnCall[len(fake.createSpaceArgsForCall)]
-	fake.createSpaceArgsForCall = append(fake.createSpaceArgsForCall, struct {
-		org   string
-		space string
-	}{org, space})
-	fake.recordInvocation("CreateSpace", []interface{}{org, space})
-	fake.createSpaceMutex.Unlock()
-	if fake.CreateSpaceStub != nil {
-		return fake.CreateSpaceStub(org, space)
+func (fake *FakeCfCmdGenerator) CreateQuota(arg1 string) cmdStartWaiter.CmdStartWaiter {
+	fake.createQuotaMutex.Lock()
+	ret, specificReturn := fake.createQuotaReturnsOnCall[len(fake.createQuotaArgsForCall)]
+	fake.createQuotaArgsForCall = append(fake.createQuotaArgsForCall, struct {
+		arg1 string
+	}{arg1})
+	fake.recordInvocation("CreateQuota", []interface{}{arg1})
+	fake.createQuotaMutex.Unlock()
+	if fake.CreateQuotaStub != nil {
+		return fake.CreateQuotaStub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.createSpaceReturns.result1
+	fakeReturns := fake.createQuotaReturns
+	return fakeReturns.result1
+}
+
+func (fake *FakeCfCmdGenerator) CreateQuotaCallCount() int {
+	fake.createQuotaMutex.RLock()
+	defer fake.createQuotaMutex.RUnlock()
+	return len(fake.createQuotaArgsForCall)
+}
+
+func (fake *FakeCfCmdGenerator) CreateQuotaCalls(stub func(string) cmdStartWaiter.CmdStartWaiter) {
+	fake.createQuotaMutex.Lock()
+	defer fake.createQuotaMutex.Unlock()
+	fake.CreateQuotaStub = stub
+}
+
+func (fake *FakeCfCmdGenerator) CreateQuotaArgsForCall(i int) string {
+	fake.createQuotaMutex.RLock()
+	defer fake.createQuotaMutex.RUnlock()
+	argsForCall := fake.createQuotaArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeCfCmdGenerator) CreateQuotaReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.createQuotaMutex.Lock()
+	defer fake.createQuotaMutex.Unlock()
+	fake.CreateQuotaStub = nil
+	fake.createQuotaReturns = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfCmdGenerator) CreateQuotaReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.createQuotaMutex.Lock()
+	defer fake.createQuotaMutex.Unlock()
+	fake.CreateQuotaStub = nil
+	if fake.createQuotaReturnsOnCall == nil {
+		fake.createQuotaReturnsOnCall = make(map[int]struct {
+			result1 cmdStartWaiter.CmdStartWaiter
+		})
+	}
+	fake.createQuotaReturnsOnCall[i] = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfCmdGenerator) CreateSpace(arg1 string, arg2 string) cmdStartWaiter.CmdStartWaiter {
+	fake.createSpaceMutex.Lock()
+	ret, specificReturn := fake.createSpaceReturnsOnCall[len(fake.createSpaceArgsForCall)]
+	fake.createSpaceArgsForCall = append(fake.createSpaceArgsForCall, struct {
+		arg1 string
+		arg2 string
+	}{arg1, arg2})
+	fake.recordInvocation("CreateSpace", []interface{}{arg1, arg2})
+	fake.createSpaceMutex.Unlock()
+	if fake.CreateSpaceStub != nil {
+		return fake.CreateSpaceStub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.createSpaceReturns
+	return fakeReturns.result1
 }
 
 func (fake *FakeCfCmdGenerator) CreateSpaceCallCount() int {
@@ -489,13 +549,22 @@ func (fake *FakeCfCmdGenerator) CreateSpaceCallCount() int {
 	return len(fake.createSpaceArgsForCall)
 }
 
+func (fake *FakeCfCmdGenerator) CreateSpaceCalls(stub func(string, string) cmdStartWaiter.CmdStartWaiter) {
+	fake.createSpaceMutex.Lock()
+	defer fake.createSpaceMutex.Unlock()
+	fake.CreateSpaceStub = stub
+}
+
 func (fake *FakeCfCmdGenerator) CreateSpaceArgsForCall(i int) (string, string) {
 	fake.createSpaceMutex.RLock()
 	defer fake.createSpaceMutex.RUnlock()
-	return fake.createSpaceArgsForCall[i].org, fake.createSpaceArgsForCall[i].space
+	argsForCall := fake.createSpaceArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
 }
 
 func (fake *FakeCfCmdGenerator) CreateSpaceReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.createSpaceMutex.Lock()
+	defer fake.createSpaceMutex.Unlock()
 	fake.CreateSpaceStub = nil
 	fake.createSpaceReturns = struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -503,6 +572,8 @@ func (fake *FakeCfCmdGenerator) CreateSpaceReturns(result1 cmdStartWaiter.CmdSta
 }
 
 func (fake *FakeCfCmdGenerator) CreateSpaceReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.createSpaceMutex.Lock()
+	defer fake.createSpaceMutex.Unlock()
 	fake.CreateSpaceStub = nil
 	if fake.createSpaceReturnsOnCall == nil {
 		fake.createSpaceReturnsOnCall = make(map[int]struct {
@@ -514,122 +585,83 @@ func (fake *FakeCfCmdGenerator) CreateSpaceReturnsOnCall(i int, result1 cmdStart
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) Target(org string, space string) cmdStartWaiter.CmdStartWaiter {
-	fake.targetMutex.Lock()
-	ret, specificReturn := fake.targetReturnsOnCall[len(fake.targetArgsForCall)]
-	fake.targetArgsForCall = append(fake.targetArgsForCall, struct {
-		org   string
-		space string
-	}{org, space})
-	fake.recordInvocation("Target", []interface{}{org, space})
-	fake.targetMutex.Unlock()
-	if fake.TargetStub != nil {
-		return fake.TargetStub(org, space)
+func (fake *FakeCfCmdGenerator) CreateUserProvidedService(arg1 string, arg2 string) cmdStartWaiter.CmdStartWaiter {
+	fake.createUserProvidedServiceMutex.Lock()
+	ret, specificReturn := fake.createUserProvidedServiceReturnsOnCall[len(fake.createUserProvidedServiceArgsForCall)]
+	fake.createUserProvidedServiceArgsForCall = append(fake.createUserProvidedServiceArgsForCall, struct {
+		arg1 string
+		arg2 string
+	}{arg1, arg2})
+	fake.recordInvocation("CreateUserProvidedService", []interface{}{arg1, arg2})
+	fake.createUserProvidedServiceMutex.Unlock()
+	if fake.CreateUserProvidedServiceStub != nil {
+		return fake.CreateUserProvidedServiceStub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.targetReturns.result1
+	fakeReturns := fake.createUserProvidedServiceReturns
+	return fakeReturns.result1
 }
 
-func (fake *FakeCfCmdGenerator) TargetCallCount() int {
-	fake.targetMutex.RLock()
-	defer fake.targetMutex.RUnlock()
-	return len(fake.targetArgsForCall)
+func (fake *FakeCfCmdGenerator) CreateUserProvidedServiceCallCount() int {
+	fake.createUserProvidedServiceMutex.RLock()
+	defer fake.createUserProvidedServiceMutex.RUnlock()
+	return len(fake.createUserProvidedServiceArgsForCall)
 }
 
-func (fake *FakeCfCmdGenerator) TargetArgsForCall(i int) (string, string) {
-	fake.targetMutex.RLock()
-	defer fake.targetMutex.RUnlock()
-	return fake.targetArgsForCall[i].org, fake.targetArgsForCall[i].space
+func (fake *FakeCfCmdGenerator) CreateUserProvidedServiceCalls(stub func(string, string) cmdStartWaiter.CmdStartWaiter) {
+	fake.createUserProvidedServiceMutex.Lock()
+	defer fake.createUserProvidedServiceMutex.Unlock()
+	fake.CreateUserProvidedServiceStub = stub
 }
 
-func (fake *FakeCfCmdGenerator) TargetReturns(result1 cmdStartWaiter.CmdStartWaiter) {
-	fake.TargetStub = nil
-	fake.targetReturns = struct {
+func (fake *FakeCfCmdGenerator) CreateUserProvidedServiceArgsForCall(i int) (string, string) {
+	fake.createUserProvidedServiceMutex.RLock()
+	defer fake.createUserProvidedServiceMutex.RUnlock()
+	argsForCall := fake.createUserProvidedServiceArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeCfCmdGenerator) CreateUserProvidedServiceReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.createUserProvidedServiceMutex.Lock()
+	defer fake.createUserProvidedServiceMutex.Unlock()
+	fake.CreateUserProvidedServiceStub = nil
+	fake.createUserProvidedServiceReturns = struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) TargetReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
-	fake.TargetStub = nil
-	if fake.targetReturnsOnCall == nil {
-		fake.targetReturnsOnCall = make(map[int]struct {
+func (fake *FakeCfCmdGenerator) CreateUserProvidedServiceReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.createUserProvidedServiceMutex.Lock()
+	defer fake.createUserProvidedServiceMutex.Unlock()
+	fake.CreateUserProvidedServiceStub = nil
+	if fake.createUserProvidedServiceReturnsOnCall == nil {
+		fake.createUserProvidedServiceReturnsOnCall = make(map[int]struct {
 			result1 cmdStartWaiter.CmdStartWaiter
 		})
 	}
-	fake.targetReturnsOnCall[i] = struct {
+	fake.createUserProvidedServiceReturnsOnCall[i] = struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) Push(name string, domain string, path string, command string, instances int) cmdStartWaiter.CmdStartWaiter {
-	fake.pushMutex.Lock()
-	ret, specificReturn := fake.pushReturnsOnCall[len(fake.pushArgsForCall)]
-	fake.pushArgsForCall = append(fake.pushArgsForCall, struct {
-		name      string
-		domain    string
-		path      string
-		command   string
-		instances int
-	}{name, domain, path, command, instances})
-	fake.recordInvocation("Push", []interface{}{name, domain, path, command, instances})
-	fake.pushMutex.Unlock()
-	if fake.PushStub != nil {
-		return fake.PushStub(name, domain, path, command, instances)
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	return fake.pushReturns.result1
-}
-
-func (fake *FakeCfCmdGenerator) PushCallCount() int {
-	fake.pushMutex.RLock()
-	defer fake.pushMutex.RUnlock()
-	return len(fake.pushArgsForCall)
-}
-
-func (fake *FakeCfCmdGenerator) PushArgsForCall(i int) (string, string, string, string, int) {
-	fake.pushMutex.RLock()
-	defer fake.pushMutex.RUnlock()
-	return fake.pushArgsForCall[i].name, fake.pushArgsForCall[i].domain, fake.pushArgsForCall[i].path, fake.pushArgsForCall[i].command, fake.pushArgsForCall[i].instances
-}
-
-func (fake *FakeCfCmdGenerator) PushReturns(result1 cmdStartWaiter.CmdStartWaiter) {
-	fake.PushStub = nil
-	fake.pushReturns = struct {
-		result1 cmdStartWaiter.CmdStartWaiter
-	}{result1}
-}
-
-func (fake *FakeCfCmdGenerator) PushReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
-	fake.PushStub = nil
-	if fake.pushReturnsOnCall == nil {
-		fake.pushReturnsOnCall = make(map[int]struct {
-			result1 cmdStartWaiter.CmdStartWaiter
-		})
-	}
-	fake.pushReturnsOnCall[i] = struct {
-		result1 cmdStartWaiter.CmdStartWaiter
-	}{result1}
-}
-
-func (fake *FakeCfCmdGenerator) Delete(name string) cmdStartWaiter.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) Delete(arg1 string) cmdStartWaiter.CmdStartWaiter {
 	fake.deleteMutex.Lock()
 	ret, specificReturn := fake.deleteReturnsOnCall[len(fake.deleteArgsForCall)]
 	fake.deleteArgsForCall = append(fake.deleteArgsForCall, struct {
-		name string
-	}{name})
-	fake.recordInvocation("Delete", []interface{}{name})
+		arg1 string
+	}{arg1})
+	fake.recordInvocation("Delete", []interface{}{arg1})
 	fake.deleteMutex.Unlock()
 	if fake.DeleteStub != nil {
-		return fake.DeleteStub(name)
+		return fake.DeleteStub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.deleteReturns.result1
+	fakeReturns := fake.deleteReturns
+	return fakeReturns.result1
 }
 
 func (fake *FakeCfCmdGenerator) DeleteCallCount() int {
@@ -638,13 +670,22 @@ func (fake *FakeCfCmdGenerator) DeleteCallCount() int {
 	return len(fake.deleteArgsForCall)
 }
 
+func (fake *FakeCfCmdGenerator) DeleteCalls(stub func(string) cmdStartWaiter.CmdStartWaiter) {
+	fake.deleteMutex.Lock()
+	defer fake.deleteMutex.Unlock()
+	fake.DeleteStub = stub
+}
+
 func (fake *FakeCfCmdGenerator) DeleteArgsForCall(i int) string {
 	fake.deleteMutex.RLock()
 	defer fake.deleteMutex.RUnlock()
-	return fake.deleteArgsForCall[i].name
+	argsForCall := fake.deleteArgsForCall[i]
+	return argsForCall.arg1
 }
 
 func (fake *FakeCfCmdGenerator) DeleteReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.deleteMutex.Lock()
+	defer fake.deleteMutex.Unlock()
 	fake.DeleteStub = nil
 	fake.deleteReturns = struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -652,6 +693,8 @@ func (fake *FakeCfCmdGenerator) DeleteReturns(result1 cmdStartWaiter.CmdStartWai
 }
 
 func (fake *FakeCfCmdGenerator) DeleteReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.deleteMutex.Lock()
+	defer fake.deleteMutex.Unlock()
 	fake.DeleteStub = nil
 	if fake.deleteReturnsOnCall == nil {
 		fake.deleteReturnsOnCall = make(map[int]struct {
@@ -663,21 +706,22 @@ func (fake *FakeCfCmdGenerator) DeleteReturnsOnCall(i int, result1 cmdStartWaite
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) DeleteOrg(org string) cmdStartWaiter.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) DeleteOrg(arg1 string) cmdStartWaiter.CmdStartWaiter {
 	fake.deleteOrgMutex.Lock()
 	ret, specificReturn := fake.deleteOrgReturnsOnCall[len(fake.deleteOrgArgsForCall)]
 	fake.deleteOrgArgsForCall = append(fake.deleteOrgArgsForCall, struct {
-		org string
-	}{org})
-	fake.recordInvocation("DeleteOrg", []interface{}{org})
+		arg1 string
+	}{arg1})
+	fake.recordInvocation("DeleteOrg", []interface{}{arg1})
 	fake.deleteOrgMutex.Unlock()
 	if fake.DeleteOrgStub != nil {
-		return fake.DeleteOrgStub(org)
+		return fake.DeleteOrgStub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.deleteOrgReturns.result1
+	fakeReturns := fake.deleteOrgReturns
+	return fakeReturns.result1
 }
 
 func (fake *FakeCfCmdGenerator) DeleteOrgCallCount() int {
@@ -686,13 +730,22 @@ func (fake *FakeCfCmdGenerator) DeleteOrgCallCount() int {
 	return len(fake.deleteOrgArgsForCall)
 }
 
+func (fake *FakeCfCmdGenerator) DeleteOrgCalls(stub func(string) cmdStartWaiter.CmdStartWaiter) {
+	fake.deleteOrgMutex.Lock()
+	defer fake.deleteOrgMutex.Unlock()
+	fake.DeleteOrgStub = stub
+}
+
 func (fake *FakeCfCmdGenerator) DeleteOrgArgsForCall(i int) string {
 	fake.deleteOrgMutex.RLock()
 	defer fake.deleteOrgMutex.RUnlock()
-	return fake.deleteOrgArgsForCall[i].org
+	argsForCall := fake.deleteOrgArgsForCall[i]
+	return argsForCall.arg1
 }
 
 func (fake *FakeCfCmdGenerator) DeleteOrgReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.deleteOrgMutex.Lock()
+	defer fake.deleteOrgMutex.Unlock()
 	fake.DeleteOrgStub = nil
 	fake.deleteOrgReturns = struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -700,6 +753,8 @@ func (fake *FakeCfCmdGenerator) DeleteOrgReturns(result1 cmdStartWaiter.CmdStart
 }
 
 func (fake *FakeCfCmdGenerator) DeleteOrgReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.deleteOrgMutex.Lock()
+	defer fake.deleteOrgMutex.Unlock()
 	fake.DeleteOrgStub = nil
 	if fake.deleteOrgReturnsOnCall == nil {
 		fake.deleteOrgReturnsOnCall = make(map[int]struct {
@@ -711,21 +766,22 @@ func (fake *FakeCfCmdGenerator) DeleteOrgReturnsOnCall(i int, result1 cmdStartWa
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) DeleteQuota(quota string) cmdStartWaiter.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) DeleteQuota(arg1 string) cmdStartWaiter.CmdStartWaiter {
 	fake.deleteQuotaMutex.Lock()
 	ret, specificReturn := fake.deleteQuotaReturnsOnCall[len(fake.deleteQuotaArgsForCall)]
 	fake.deleteQuotaArgsForCall = append(fake.deleteQuotaArgsForCall, struct {
-		quota string
-	}{quota})
-	fake.recordInvocation("DeleteQuota", []interface{}{quota})
+		arg1 string
+	}{arg1})
+	fake.recordInvocation("DeleteQuota", []interface{}{arg1})
 	fake.deleteQuotaMutex.Unlock()
 	if fake.DeleteQuotaStub != nil {
-		return fake.DeleteQuotaStub(quota)
+		return fake.DeleteQuotaStub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.deleteQuotaReturns.result1
+	fakeReturns := fake.deleteQuotaReturns
+	return fakeReturns.result1
 }
 
 func (fake *FakeCfCmdGenerator) DeleteQuotaCallCount() int {
@@ -734,13 +790,22 @@ func (fake *FakeCfCmdGenerator) DeleteQuotaCallCount() int {
 	return len(fake.deleteQuotaArgsForCall)
 }
 
+func (fake *FakeCfCmdGenerator) DeleteQuotaCalls(stub func(string) cmdStartWaiter.CmdStartWaiter) {
+	fake.deleteQuotaMutex.Lock()
+	defer fake.deleteQuotaMutex.Unlock()
+	fake.DeleteQuotaStub = stub
+}
+
 func (fake *FakeCfCmdGenerator) DeleteQuotaArgsForCall(i int) string {
 	fake.deleteQuotaMutex.RLock()
 	defer fake.deleteQuotaMutex.RUnlock()
-	return fake.deleteQuotaArgsForCall[i].quota
+	argsForCall := fake.deleteQuotaArgsForCall[i]
+	return argsForCall.arg1
 }
 
 func (fake *FakeCfCmdGenerator) DeleteQuotaReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.deleteQuotaMutex.Lock()
+	defer fake.deleteQuotaMutex.Unlock()
 	fake.DeleteQuotaStub = nil
 	fake.deleteQuotaReturns = struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -748,6 +813,8 @@ func (fake *FakeCfCmdGenerator) DeleteQuotaReturns(result1 cmdStartWaiter.CmdSta
 }
 
 func (fake *FakeCfCmdGenerator) DeleteQuotaReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.deleteQuotaMutex.Lock()
+	defer fake.deleteQuotaMutex.Unlock()
 	fake.DeleteQuotaStub = nil
 	if fake.deleteQuotaReturnsOnCall == nil {
 		fake.deleteQuotaReturnsOnCall = make(map[int]struct {
@@ -762,7 +829,8 @@ func (fake *FakeCfCmdGenerator) DeleteQuotaReturnsOnCall(i int, result1 cmdStart
 func (fake *FakeCfCmdGenerator) LogOut() cmdStartWaiter.CmdStartWaiter {
 	fake.logOutMutex.Lock()
 	ret, specificReturn := fake.logOutReturnsOnCall[len(fake.logOutArgsForCall)]
-	fake.logOutArgsForCall = append(fake.logOutArgsForCall, struct{}{})
+	fake.logOutArgsForCall = append(fake.logOutArgsForCall, struct {
+	}{})
 	fake.recordInvocation("LogOut", []interface{}{})
 	fake.logOutMutex.Unlock()
 	if fake.LogOutStub != nil {
@@ -771,7 +839,8 @@ func (fake *FakeCfCmdGenerator) LogOut() cmdStartWaiter.CmdStartWaiter {
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.logOutReturns.result1
+	fakeReturns := fake.logOutReturns
+	return fakeReturns.result1
 }
 
 func (fake *FakeCfCmdGenerator) LogOutCallCount() int {
@@ -780,7 +849,15 @@ func (fake *FakeCfCmdGenerator) LogOutCallCount() int {
 	return len(fake.logOutArgsForCall)
 }
 
+func (fake *FakeCfCmdGenerator) LogOutCalls(stub func() cmdStartWaiter.CmdStartWaiter) {
+	fake.logOutMutex.Lock()
+	defer fake.logOutMutex.Unlock()
+	fake.LogOutStub = stub
+}
+
 func (fake *FakeCfCmdGenerator) LogOutReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.logOutMutex.Lock()
+	defer fake.logOutMutex.Unlock()
 	fake.LogOutStub = nil
 	fake.logOutReturns = struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -788,6 +865,8 @@ func (fake *FakeCfCmdGenerator) LogOutReturns(result1 cmdStartWaiter.CmdStartWai
 }
 
 func (fake *FakeCfCmdGenerator) LogOutReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.logOutMutex.Lock()
+	defer fake.logOutMutex.Unlock()
 	fake.LogOutStub = nil
 	if fake.logOutReturnsOnCall == nil {
 		fake.logOutReturnsOnCall = make(map[int]struct {
@@ -799,120 +878,24 @@ func (fake *FakeCfCmdGenerator) LogOutReturnsOnCall(i int, result1 cmdStartWaite
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) RecentLogs(appName string) cmdStartWaiter.CmdStartWaiter {
-	fake.recentLogsMutex.Lock()
-	ret, specificReturn := fake.recentLogsReturnsOnCall[len(fake.recentLogsArgsForCall)]
-	fake.recentLogsArgsForCall = append(fake.recentLogsArgsForCall, struct {
-		appName string
-	}{appName})
-	fake.recordInvocation("RecentLogs", []interface{}{appName})
-	fake.recentLogsMutex.Unlock()
-	if fake.RecentLogsStub != nil {
-		return fake.RecentLogsStub(appName)
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	return fake.recentLogsReturns.result1
-}
-
-func (fake *FakeCfCmdGenerator) RecentLogsCallCount() int {
-	fake.recentLogsMutex.RLock()
-	defer fake.recentLogsMutex.RUnlock()
-	return len(fake.recentLogsArgsForCall)
-}
-
-func (fake *FakeCfCmdGenerator) RecentLogsArgsForCall(i int) string {
-	fake.recentLogsMutex.RLock()
-	defer fake.recentLogsMutex.RUnlock()
-	return fake.recentLogsArgsForCall[i].appName
-}
-
-func (fake *FakeCfCmdGenerator) RecentLogsReturns(result1 cmdStartWaiter.CmdStartWaiter) {
-	fake.RecentLogsStub = nil
-	fake.recentLogsReturns = struct {
-		result1 cmdStartWaiter.CmdStartWaiter
-	}{result1}
-}
-
-func (fake *FakeCfCmdGenerator) RecentLogsReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
-	fake.RecentLogsStub = nil
-	if fake.recentLogsReturnsOnCall == nil {
-		fake.recentLogsReturnsOnCall = make(map[int]struct {
-			result1 cmdStartWaiter.CmdStartWaiter
-		})
-	}
-	fake.recentLogsReturnsOnCall[i] = struct {
-		result1 cmdStartWaiter.CmdStartWaiter
-	}{result1}
-}
-
-func (fake *FakeCfCmdGenerator) StreamLogs(ctx context.Context, appName string) cmdStartWaiter.CmdStartWaiter {
-	fake.streamLogsMutex.Lock()
-	ret, specificReturn := fake.streamLogsReturnsOnCall[len(fake.streamLogsArgsForCall)]
-	fake.streamLogsArgsForCall = append(fake.streamLogsArgsForCall, struct {
-		ctx     context.Context
-		appName string
-	}{ctx, appName})
-	fake.recordInvocation("StreamLogs", []interface{}{ctx, appName})
-	fake.streamLogsMutex.Unlock()
-	if fake.StreamLogsStub != nil {
-		return fake.StreamLogsStub(ctx, appName)
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	return fake.streamLogsReturns.result1
-}
-
-func (fake *FakeCfCmdGenerator) StreamLogsCallCount() int {
-	fake.streamLogsMutex.RLock()
-	defer fake.streamLogsMutex.RUnlock()
-	return len(fake.streamLogsArgsForCall)
-}
-
-func (fake *FakeCfCmdGenerator) StreamLogsArgsForCall(i int) (context.Context, string) {
-	fake.streamLogsMutex.RLock()
-	defer fake.streamLogsMutex.RUnlock()
-	return fake.streamLogsArgsForCall[i].ctx, fake.streamLogsArgsForCall[i].appName
-}
-
-func (fake *FakeCfCmdGenerator) StreamLogsReturns(result1 cmdStartWaiter.CmdStartWaiter) {
-	fake.StreamLogsStub = nil
-	fake.streamLogsReturns = struct {
-		result1 cmdStartWaiter.CmdStartWaiter
-	}{result1}
-}
-
-func (fake *FakeCfCmdGenerator) StreamLogsReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
-	fake.StreamLogsStub = nil
-	if fake.streamLogsReturnsOnCall == nil {
-		fake.streamLogsReturnsOnCall = make(map[int]struct {
-			result1 cmdStartWaiter.CmdStartWaiter
-		})
-	}
-	fake.streamLogsReturnsOnCall[i] = struct {
-		result1 cmdStartWaiter.CmdStartWaiter
-	}{result1}
-}
-
-func (fake *FakeCfCmdGenerator) MapRoute(appName string, domain string, port int) cmdStartWaiter.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) MapRoute(arg1 string, arg2 string, arg3 int) cmdStartWaiter.CmdStartWaiter {
 	fake.mapRouteMutex.Lock()
 	ret, specificReturn := fake.mapRouteReturnsOnCall[len(fake.mapRouteArgsForCall)]
 	fake.mapRouteArgsForCall = append(fake.mapRouteArgsForCall, struct {
-		appName string
-		domain  string
-		port    int
-	}{appName, domain, port})
-	fake.recordInvocation("MapRoute", []interface{}{appName, domain, port})
+		arg1 string
+		arg2 string
+		arg3 int
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("MapRoute", []interface{}{arg1, arg2, arg3})
 	fake.mapRouteMutex.Unlock()
 	if fake.MapRouteStub != nil {
-		return fake.MapRouteStub(appName, domain, port)
+		return fake.MapRouteStub(arg1, arg2, arg3)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.mapRouteReturns.result1
+	fakeReturns := fake.mapRouteReturns
+	return fakeReturns.result1
 }
 
 func (fake *FakeCfCmdGenerator) MapRouteCallCount() int {
@@ -921,13 +904,22 @@ func (fake *FakeCfCmdGenerator) MapRouteCallCount() int {
 	return len(fake.mapRouteArgsForCall)
 }
 
+func (fake *FakeCfCmdGenerator) MapRouteCalls(stub func(string, string, int) cmdStartWaiter.CmdStartWaiter) {
+	fake.mapRouteMutex.Lock()
+	defer fake.mapRouteMutex.Unlock()
+	fake.MapRouteStub = stub
+}
+
 func (fake *FakeCfCmdGenerator) MapRouteArgsForCall(i int) (string, string, int) {
 	fake.mapRouteMutex.RLock()
 	defer fake.mapRouteMutex.RUnlock()
-	return fake.mapRouteArgsForCall[i].appName, fake.mapRouteArgsForCall[i].domain, fake.mapRouteArgsForCall[i].port
+	argsForCall := fake.mapRouteArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
 }
 
 func (fake *FakeCfCmdGenerator) MapRouteReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.mapRouteMutex.Lock()
+	defer fake.mapRouteMutex.Unlock()
 	fake.MapRouteStub = nil
 	fake.mapRouteReturns = struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -935,6 +927,8 @@ func (fake *FakeCfCmdGenerator) MapRouteReturns(result1 cmdStartWaiter.CmdStartW
 }
 
 func (fake *FakeCfCmdGenerator) MapRouteReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.mapRouteMutex.Lock()
+	defer fake.mapRouteMutex.Unlock()
 	fake.MapRouteStub = nil
 	if fake.mapRouteReturnsOnCall == nil {
 		fake.mapRouteReturnsOnCall = make(map[int]struct {
@@ -946,119 +940,144 @@ func (fake *FakeCfCmdGenerator) MapRouteReturnsOnCall(i int, result1 cmdStartWai
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) CreateUserProvidedService(serviceName string, syslogURL string) cmdStartWaiter.CmdStartWaiter {
-	fake.createUserProvidedServiceMutex.Lock()
-	ret, specificReturn := fake.createUserProvidedServiceReturnsOnCall[len(fake.createUserProvidedServiceArgsForCall)]
-	fake.createUserProvidedServiceArgsForCall = append(fake.createUserProvidedServiceArgsForCall, struct {
-		serviceName string
-		syslogURL   string
-	}{serviceName, syslogURL})
-	fake.recordInvocation("CreateUserProvidedService", []interface{}{serviceName, syslogURL})
-	fake.createUserProvidedServiceMutex.Unlock()
-	if fake.CreateUserProvidedServiceStub != nil {
-		return fake.CreateUserProvidedServiceStub(serviceName, syslogURL)
+func (fake *FakeCfCmdGenerator) Push(arg1 string, arg2 string, arg3 int) cmdStartWaiter.CmdStartWaiter {
+	fake.pushMutex.Lock()
+	ret, specificReturn := fake.pushReturnsOnCall[len(fake.pushArgsForCall)]
+	fake.pushArgsForCall = append(fake.pushArgsForCall, struct {
+		arg1 string
+		arg2 string
+		arg3 int
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("Push", []interface{}{arg1, arg2, arg3})
+	fake.pushMutex.Unlock()
+	if fake.PushStub != nil {
+		return fake.PushStub(arg1, arg2, arg3)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.createUserProvidedServiceReturns.result1
+	fakeReturns := fake.pushReturns
+	return fakeReturns.result1
 }
 
-func (fake *FakeCfCmdGenerator) CreateUserProvidedServiceCallCount() int {
-	fake.createUserProvidedServiceMutex.RLock()
-	defer fake.createUserProvidedServiceMutex.RUnlock()
-	return len(fake.createUserProvidedServiceArgsForCall)
+func (fake *FakeCfCmdGenerator) PushCallCount() int {
+	fake.pushMutex.RLock()
+	defer fake.pushMutex.RUnlock()
+	return len(fake.pushArgsForCall)
 }
 
-func (fake *FakeCfCmdGenerator) CreateUserProvidedServiceArgsForCall(i int) (string, string) {
-	fake.createUserProvidedServiceMutex.RLock()
-	defer fake.createUserProvidedServiceMutex.RUnlock()
-	return fake.createUserProvidedServiceArgsForCall[i].serviceName, fake.createUserProvidedServiceArgsForCall[i].syslogURL
+func (fake *FakeCfCmdGenerator) PushCalls(stub func(string, string, int) cmdStartWaiter.CmdStartWaiter) {
+	fake.pushMutex.Lock()
+	defer fake.pushMutex.Unlock()
+	fake.PushStub = stub
 }
 
-func (fake *FakeCfCmdGenerator) CreateUserProvidedServiceReturns(result1 cmdStartWaiter.CmdStartWaiter) {
-	fake.CreateUserProvidedServiceStub = nil
-	fake.createUserProvidedServiceReturns = struct {
+func (fake *FakeCfCmdGenerator) PushArgsForCall(i int) (string, string, int) {
+	fake.pushMutex.RLock()
+	defer fake.pushMutex.RUnlock()
+	argsForCall := fake.pushArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeCfCmdGenerator) PushReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.pushMutex.Lock()
+	defer fake.pushMutex.Unlock()
+	fake.PushStub = nil
+	fake.pushReturns = struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) CreateUserProvidedServiceReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
-	fake.CreateUserProvidedServiceStub = nil
-	if fake.createUserProvidedServiceReturnsOnCall == nil {
-		fake.createUserProvidedServiceReturnsOnCall = make(map[int]struct {
+func (fake *FakeCfCmdGenerator) PushReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.pushMutex.Lock()
+	defer fake.pushMutex.Unlock()
+	fake.PushStub = nil
+	if fake.pushReturnsOnCall == nil {
+		fake.pushReturnsOnCall = make(map[int]struct {
 			result1 cmdStartWaiter.CmdStartWaiter
 		})
 	}
-	fake.createUserProvidedServiceReturnsOnCall[i] = struct {
+	fake.pushReturnsOnCall[i] = struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) BindService(appName string, serviceName string) cmdStartWaiter.CmdStartWaiter {
-	fake.bindServiceMutex.Lock()
-	ret, specificReturn := fake.bindServiceReturnsOnCall[len(fake.bindServiceArgsForCall)]
-	fake.bindServiceArgsForCall = append(fake.bindServiceArgsForCall, struct {
-		appName     string
-		serviceName string
-	}{appName, serviceName})
-	fake.recordInvocation("BindService", []interface{}{appName, serviceName})
-	fake.bindServiceMutex.Unlock()
-	if fake.BindServiceStub != nil {
-		return fake.BindServiceStub(appName, serviceName)
+func (fake *FakeCfCmdGenerator) RecentLogs(arg1 string) cmdStartWaiter.CmdStartWaiter {
+	fake.recentLogsMutex.Lock()
+	ret, specificReturn := fake.recentLogsReturnsOnCall[len(fake.recentLogsArgsForCall)]
+	fake.recentLogsArgsForCall = append(fake.recentLogsArgsForCall, struct {
+		arg1 string
+	}{arg1})
+	fake.recordInvocation("RecentLogs", []interface{}{arg1})
+	fake.recentLogsMutex.Unlock()
+	if fake.RecentLogsStub != nil {
+		return fake.RecentLogsStub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.bindServiceReturns.result1
+	fakeReturns := fake.recentLogsReturns
+	return fakeReturns.result1
 }
 
-func (fake *FakeCfCmdGenerator) BindServiceCallCount() int {
-	fake.bindServiceMutex.RLock()
-	defer fake.bindServiceMutex.RUnlock()
-	return len(fake.bindServiceArgsForCall)
+func (fake *FakeCfCmdGenerator) RecentLogsCallCount() int {
+	fake.recentLogsMutex.RLock()
+	defer fake.recentLogsMutex.RUnlock()
+	return len(fake.recentLogsArgsForCall)
 }
 
-func (fake *FakeCfCmdGenerator) BindServiceArgsForCall(i int) (string, string) {
-	fake.bindServiceMutex.RLock()
-	defer fake.bindServiceMutex.RUnlock()
-	return fake.bindServiceArgsForCall[i].appName, fake.bindServiceArgsForCall[i].serviceName
+func (fake *FakeCfCmdGenerator) RecentLogsCalls(stub func(string) cmdStartWaiter.CmdStartWaiter) {
+	fake.recentLogsMutex.Lock()
+	defer fake.recentLogsMutex.Unlock()
+	fake.RecentLogsStub = stub
 }
 
-func (fake *FakeCfCmdGenerator) BindServiceReturns(result1 cmdStartWaiter.CmdStartWaiter) {
-	fake.BindServiceStub = nil
-	fake.bindServiceReturns = struct {
+func (fake *FakeCfCmdGenerator) RecentLogsArgsForCall(i int) string {
+	fake.recentLogsMutex.RLock()
+	defer fake.recentLogsMutex.RUnlock()
+	argsForCall := fake.recentLogsArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeCfCmdGenerator) RecentLogsReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.recentLogsMutex.Lock()
+	defer fake.recentLogsMutex.Unlock()
+	fake.RecentLogsStub = nil
+	fake.recentLogsReturns = struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) BindServiceReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
-	fake.BindServiceStub = nil
-	if fake.bindServiceReturnsOnCall == nil {
-		fake.bindServiceReturnsOnCall = make(map[int]struct {
+func (fake *FakeCfCmdGenerator) RecentLogsReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.recentLogsMutex.Lock()
+	defer fake.recentLogsMutex.Unlock()
+	fake.RecentLogsStub = nil
+	if fake.recentLogsReturnsOnCall == nil {
+		fake.recentLogsReturnsOnCall = make(map[int]struct {
 			result1 cmdStartWaiter.CmdStartWaiter
 		})
 	}
-	fake.bindServiceReturnsOnCall[i] = struct {
+	fake.recentLogsReturnsOnCall[i] = struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) Restage(appName string) cmdStartWaiter.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) Restage(arg1 string) cmdStartWaiter.CmdStartWaiter {
 	fake.restageMutex.Lock()
 	ret, specificReturn := fake.restageReturnsOnCall[len(fake.restageArgsForCall)]
 	fake.restageArgsForCall = append(fake.restageArgsForCall, struct {
-		appName string
-	}{appName})
-	fake.recordInvocation("Restage", []interface{}{appName})
+		arg1 string
+	}{arg1})
+	fake.recordInvocation("Restage", []interface{}{arg1})
 	fake.restageMutex.Unlock()
 	if fake.RestageStub != nil {
-		return fake.RestageStub(appName)
+		return fake.RestageStub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.restageReturns.result1
+	fakeReturns := fake.restageReturns
+	return fakeReturns.result1
 }
 
 func (fake *FakeCfCmdGenerator) RestageCallCount() int {
@@ -1067,13 +1086,22 @@ func (fake *FakeCfCmdGenerator) RestageCallCount() int {
 	return len(fake.restageArgsForCall)
 }
 
+func (fake *FakeCfCmdGenerator) RestageCalls(stub func(string) cmdStartWaiter.CmdStartWaiter) {
+	fake.restageMutex.Lock()
+	defer fake.restageMutex.Unlock()
+	fake.RestageStub = stub
+}
+
 func (fake *FakeCfCmdGenerator) RestageArgsForCall(i int) string {
 	fake.restageMutex.RLock()
 	defer fake.restageMutex.RUnlock()
-	return fake.restageArgsForCall[i].appName
+	argsForCall := fake.restageArgsForCall[i]
+	return argsForCall.arg1
 }
 
 func (fake *FakeCfCmdGenerator) RestageReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.restageMutex.Lock()
+	defer fake.restageMutex.Unlock()
 	fake.RestageStub = nil
 	fake.restageReturns = struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -1081,6 +1109,8 @@ func (fake *FakeCfCmdGenerator) RestageReturns(result1 cmdStartWaiter.CmdStartWa
 }
 
 func (fake *FakeCfCmdGenerator) RestageReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.restageMutex.Lock()
+	defer fake.restageMutex.Unlock()
 	fake.RestageStub = nil
 	if fake.restageReturnsOnCall == nil {
 		fake.restageReturnsOnCall = make(map[int]struct {
@@ -1092,6 +1122,189 @@ func (fake *FakeCfCmdGenerator) RestageReturnsOnCall(i int, result1 cmdStartWait
 	}{result1}
 }
 
+func (fake *FakeCfCmdGenerator) SetQuota(arg1 string, arg2 string) cmdStartWaiter.CmdStartWaiter {
+	fake.setQuotaMutex.Lock()
+	ret, specificReturn := fake.setQuotaReturnsOnCall[len(fake.setQuotaArgsForCall)]
+	fake.setQuotaArgsForCall = append(fake.setQuotaArgsForCall, struct {
+		arg1 string
+		arg2 string
+	}{arg1, arg2})
+	fake.recordInvocation("SetQuota", []interface{}{arg1, arg2})
+	fake.setQuotaMutex.Unlock()
+	if fake.SetQuotaStub != nil {
+		return fake.SetQuotaStub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.setQuotaReturns
+	return fakeReturns.result1
+}
+
+func (fake *FakeCfCmdGenerator) SetQuotaCallCount() int {
+	fake.setQuotaMutex.RLock()
+	defer fake.setQuotaMutex.RUnlock()
+	return len(fake.setQuotaArgsForCall)
+}
+
+func (fake *FakeCfCmdGenerator) SetQuotaCalls(stub func(string, string) cmdStartWaiter.CmdStartWaiter) {
+	fake.setQuotaMutex.Lock()
+	defer fake.setQuotaMutex.Unlock()
+	fake.SetQuotaStub = stub
+}
+
+func (fake *FakeCfCmdGenerator) SetQuotaArgsForCall(i int) (string, string) {
+	fake.setQuotaMutex.RLock()
+	defer fake.setQuotaMutex.RUnlock()
+	argsForCall := fake.setQuotaArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeCfCmdGenerator) SetQuotaReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.setQuotaMutex.Lock()
+	defer fake.setQuotaMutex.Unlock()
+	fake.SetQuotaStub = nil
+	fake.setQuotaReturns = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfCmdGenerator) SetQuotaReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.setQuotaMutex.Lock()
+	defer fake.setQuotaMutex.Unlock()
+	fake.SetQuotaStub = nil
+	if fake.setQuotaReturnsOnCall == nil {
+		fake.setQuotaReturnsOnCall = make(map[int]struct {
+			result1 cmdStartWaiter.CmdStartWaiter
+		})
+	}
+	fake.setQuotaReturnsOnCall[i] = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfCmdGenerator) StreamLogs(arg1 context.Context, arg2 string) cmdStartWaiter.CmdStartWaiter {
+	fake.streamLogsMutex.Lock()
+	ret, specificReturn := fake.streamLogsReturnsOnCall[len(fake.streamLogsArgsForCall)]
+	fake.streamLogsArgsForCall = append(fake.streamLogsArgsForCall, struct {
+		arg1 context.Context
+		arg2 string
+	}{arg1, arg2})
+	fake.recordInvocation("StreamLogs", []interface{}{arg1, arg2})
+	fake.streamLogsMutex.Unlock()
+	if fake.StreamLogsStub != nil {
+		return fake.StreamLogsStub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.streamLogsReturns
+	return fakeReturns.result1
+}
+
+func (fake *FakeCfCmdGenerator) StreamLogsCallCount() int {
+	fake.streamLogsMutex.RLock()
+	defer fake.streamLogsMutex.RUnlock()
+	return len(fake.streamLogsArgsForCall)
+}
+
+func (fake *FakeCfCmdGenerator) StreamLogsCalls(stub func(context.Context, string) cmdStartWaiter.CmdStartWaiter) {
+	fake.streamLogsMutex.Lock()
+	defer fake.streamLogsMutex.Unlock()
+	fake.StreamLogsStub = stub
+}
+
+func (fake *FakeCfCmdGenerator) StreamLogsArgsForCall(i int) (context.Context, string) {
+	fake.streamLogsMutex.RLock()
+	defer fake.streamLogsMutex.RUnlock()
+	argsForCall := fake.streamLogsArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeCfCmdGenerator) StreamLogsReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.streamLogsMutex.Lock()
+	defer fake.streamLogsMutex.Unlock()
+	fake.StreamLogsStub = nil
+	fake.streamLogsReturns = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfCmdGenerator) StreamLogsReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.streamLogsMutex.Lock()
+	defer fake.streamLogsMutex.Unlock()
+	fake.StreamLogsStub = nil
+	if fake.streamLogsReturnsOnCall == nil {
+		fake.streamLogsReturnsOnCall = make(map[int]struct {
+			result1 cmdStartWaiter.CmdStartWaiter
+		})
+	}
+	fake.streamLogsReturnsOnCall[i] = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfCmdGenerator) Target(arg1 string, arg2 string) cmdStartWaiter.CmdStartWaiter {
+	fake.targetMutex.Lock()
+	ret, specificReturn := fake.targetReturnsOnCall[len(fake.targetArgsForCall)]
+	fake.targetArgsForCall = append(fake.targetArgsForCall, struct {
+		arg1 string
+		arg2 string
+	}{arg1, arg2})
+	fake.recordInvocation("Target", []interface{}{arg1, arg2})
+	fake.targetMutex.Unlock()
+	if fake.TargetStub != nil {
+		return fake.TargetStub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.targetReturns
+	return fakeReturns.result1
+}
+
+func (fake *FakeCfCmdGenerator) TargetCallCount() int {
+	fake.targetMutex.RLock()
+	defer fake.targetMutex.RUnlock()
+	return len(fake.targetArgsForCall)
+}
+
+func (fake *FakeCfCmdGenerator) TargetCalls(stub func(string, string) cmdStartWaiter.CmdStartWaiter) {
+	fake.targetMutex.Lock()
+	defer fake.targetMutex.Unlock()
+	fake.TargetStub = stub
+}
+
+func (fake *FakeCfCmdGenerator) TargetArgsForCall(i int) (string, string) {
+	fake.targetMutex.RLock()
+	defer fake.targetMutex.RUnlock()
+	argsForCall := fake.targetArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeCfCmdGenerator) TargetReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.targetMutex.Lock()
+	defer fake.targetMutex.Unlock()
+	fake.TargetStub = nil
+	fake.targetReturns = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfCmdGenerator) TargetReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.targetMutex.Lock()
+	defer fake.targetMutex.Unlock()
+	fake.TargetStub = nil
+	if fake.targetReturnsOnCall == nil {
+		fake.targetReturnsOnCall = make(map[int]struct {
+			result1 cmdStartWaiter.CmdStartWaiter
+		})
+	}
+	fake.targetReturnsOnCall[i] = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
 func (fake *FakeCfCmdGenerator) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -1099,18 +1312,16 @@ func (fake *FakeCfCmdGenerator) Invocations() map[string][][]interface{} {
 	defer fake.apiMutex.RUnlock()
 	fake.authMutex.RLock()
 	defer fake.authMutex.RUnlock()
-	fake.createQuotaMutex.RLock()
-	defer fake.createQuotaMutex.RUnlock()
-	fake.setQuotaMutex.RLock()
-	defer fake.setQuotaMutex.RUnlock()
+	fake.bindServiceMutex.RLock()
+	defer fake.bindServiceMutex.RUnlock()
 	fake.createOrgMutex.RLock()
 	defer fake.createOrgMutex.RUnlock()
+	fake.createQuotaMutex.RLock()
+	defer fake.createQuotaMutex.RUnlock()
 	fake.createSpaceMutex.RLock()
 	defer fake.createSpaceMutex.RUnlock()
-	fake.targetMutex.RLock()
-	defer fake.targetMutex.RUnlock()
-	fake.pushMutex.RLock()
-	defer fake.pushMutex.RUnlock()
+	fake.createUserProvidedServiceMutex.RLock()
+	defer fake.createUserProvidedServiceMutex.RUnlock()
 	fake.deleteMutex.RLock()
 	defer fake.deleteMutex.RUnlock()
 	fake.deleteOrgMutex.RLock()
@@ -1119,18 +1330,20 @@ func (fake *FakeCfCmdGenerator) Invocations() map[string][][]interface{} {
 	defer fake.deleteQuotaMutex.RUnlock()
 	fake.logOutMutex.RLock()
 	defer fake.logOutMutex.RUnlock()
-	fake.recentLogsMutex.RLock()
-	defer fake.recentLogsMutex.RUnlock()
-	fake.streamLogsMutex.RLock()
-	defer fake.streamLogsMutex.RUnlock()
 	fake.mapRouteMutex.RLock()
 	defer fake.mapRouteMutex.RUnlock()
-	fake.createUserProvidedServiceMutex.RLock()
-	defer fake.createUserProvidedServiceMutex.RUnlock()
-	fake.bindServiceMutex.RLock()
-	defer fake.bindServiceMutex.RUnlock()
+	fake.pushMutex.RLock()
+	defer fake.pushMutex.RUnlock()
+	fake.recentLogsMutex.RLock()
+	defer fake.recentLogsMutex.RUnlock()
 	fake.restageMutex.RLock()
 	defer fake.restageMutex.RUnlock()
+	fake.setQuotaMutex.RLock()
+	defer fake.setQuotaMutex.RUnlock()
+	fake.streamLogsMutex.RLock()
+	defer fake.streamLogsMutex.RUnlock()
+	fake.targetMutex.RLock()
+	defer fake.targetMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

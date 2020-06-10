@@ -30,12 +30,11 @@ type CfWorkflow interface {
 type cfWorkflow struct {
 	cf *config.Cf
 
-	appPath    string
-	org        string
-	space      string
-	quota      string
-	appName    string
-	appCommand string
+	appPath string
+	org     string
+	space   string
+	quota   string
+	appName string
 }
 
 func (c *cfWorkflow) Org() string {
@@ -54,15 +53,14 @@ func (c *cfWorkflow) AppUrl() string {
 	return fmt.Sprintf("https://%s.%s", c.appName, c.cf.AppDomain)
 }
 
-func New(cfConfig *config.Cf, org, space, quota, appName, appPath, appCommand string) CfWorkflow {
+func New(cfConfig *config.Cf, org, space, quota, appName, appPath string) CfWorkflow {
 	return &cfWorkflow{
-		cf:         cfConfig,
-		appPath:    appPath,
-		org:        org,
-		space:      space,
-		quota:      quota,
-		appName:    appName,
-		appCommand: appCommand,
+		cf:      cfConfig,
+		appPath: appPath,
+		org:     org,
+		space:   space,
+		quota:   quota,
+		appName: appName,
 	}
 }
 
@@ -87,7 +85,7 @@ func (c *cfWorkflow) Push(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.Cm
 		ccg.Api(c.cf.API),
 		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
 		ccg.Target(c.org, c.space),
-		ccg.Push(c.appName, c.appPath, c.appCommand, appInstancesToPush),
+		ccg.Push(c.appName, c.appPath, appInstancesToPush),
 	}
 }
 

@@ -10,8 +10,9 @@ import (
 type FakeBaseMeasurement struct {
 	NameStub        func() string
 	nameMutex       sync.RWMutex
-	nameArgsForCall []struct{}
-	nameReturns     struct {
+	nameArgsForCall []struct {
+	}
+	nameReturns struct {
 		result1 string
 	}
 	nameReturnsOnCall map[int]struct {
@@ -19,8 +20,9 @@ type FakeBaseMeasurement struct {
 	}
 	PerformMeasurementStub        func() (string, string, string, bool)
 	performMeasurementMutex       sync.RWMutex
-	performMeasurementArgsForCall []struct{}
-	performMeasurementReturns     struct {
+	performMeasurementArgsForCall []struct {
+	}
+	performMeasurementReturns struct {
 		result1 string
 		result2 string
 		result3 string
@@ -34,8 +36,9 @@ type FakeBaseMeasurement struct {
 	}
 	SummaryPhraseStub        func() string
 	summaryPhraseMutex       sync.RWMutex
-	summaryPhraseArgsForCall []struct{}
-	summaryPhraseReturns     struct {
+	summaryPhraseArgsForCall []struct {
+	}
+	summaryPhraseReturns struct {
 		result1 string
 	}
 	summaryPhraseReturnsOnCall map[int]struct {
@@ -48,7 +51,8 @@ type FakeBaseMeasurement struct {
 func (fake *FakeBaseMeasurement) Name() string {
 	fake.nameMutex.Lock()
 	ret, specificReturn := fake.nameReturnsOnCall[len(fake.nameArgsForCall)]
-	fake.nameArgsForCall = append(fake.nameArgsForCall, struct{}{})
+	fake.nameArgsForCall = append(fake.nameArgsForCall, struct {
+	}{})
 	fake.recordInvocation("Name", []interface{}{})
 	fake.nameMutex.Unlock()
 	if fake.NameStub != nil {
@@ -57,7 +61,8 @@ func (fake *FakeBaseMeasurement) Name() string {
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.nameReturns.result1
+	fakeReturns := fake.nameReturns
+	return fakeReturns.result1
 }
 
 func (fake *FakeBaseMeasurement) NameCallCount() int {
@@ -66,7 +71,15 @@ func (fake *FakeBaseMeasurement) NameCallCount() int {
 	return len(fake.nameArgsForCall)
 }
 
+func (fake *FakeBaseMeasurement) NameCalls(stub func() string) {
+	fake.nameMutex.Lock()
+	defer fake.nameMutex.Unlock()
+	fake.NameStub = stub
+}
+
 func (fake *FakeBaseMeasurement) NameReturns(result1 string) {
+	fake.nameMutex.Lock()
+	defer fake.nameMutex.Unlock()
 	fake.NameStub = nil
 	fake.nameReturns = struct {
 		result1 string
@@ -74,6 +87,8 @@ func (fake *FakeBaseMeasurement) NameReturns(result1 string) {
 }
 
 func (fake *FakeBaseMeasurement) NameReturnsOnCall(i int, result1 string) {
+	fake.nameMutex.Lock()
+	defer fake.nameMutex.Unlock()
 	fake.NameStub = nil
 	if fake.nameReturnsOnCall == nil {
 		fake.nameReturnsOnCall = make(map[int]struct {
@@ -88,7 +103,8 @@ func (fake *FakeBaseMeasurement) NameReturnsOnCall(i int, result1 string) {
 func (fake *FakeBaseMeasurement) PerformMeasurement() (string, string, string, bool) {
 	fake.performMeasurementMutex.Lock()
 	ret, specificReturn := fake.performMeasurementReturnsOnCall[len(fake.performMeasurementArgsForCall)]
-	fake.performMeasurementArgsForCall = append(fake.performMeasurementArgsForCall, struct{}{})
+	fake.performMeasurementArgsForCall = append(fake.performMeasurementArgsForCall, struct {
+	}{})
 	fake.recordInvocation("PerformMeasurement", []interface{}{})
 	fake.performMeasurementMutex.Unlock()
 	if fake.PerformMeasurementStub != nil {
@@ -97,7 +113,8 @@ func (fake *FakeBaseMeasurement) PerformMeasurement() (string, string, string, b
 	if specificReturn {
 		return ret.result1, ret.result2, ret.result3, ret.result4
 	}
-	return fake.performMeasurementReturns.result1, fake.performMeasurementReturns.result2, fake.performMeasurementReturns.result3, fake.performMeasurementReturns.result4
+	fakeReturns := fake.performMeasurementReturns
+	return fakeReturns.result1, fakeReturns.result2, fakeReturns.result3, fakeReturns.result4
 }
 
 func (fake *FakeBaseMeasurement) PerformMeasurementCallCount() int {
@@ -106,7 +123,15 @@ func (fake *FakeBaseMeasurement) PerformMeasurementCallCount() int {
 	return len(fake.performMeasurementArgsForCall)
 }
 
+func (fake *FakeBaseMeasurement) PerformMeasurementCalls(stub func() (string, string, string, bool)) {
+	fake.performMeasurementMutex.Lock()
+	defer fake.performMeasurementMutex.Unlock()
+	fake.PerformMeasurementStub = stub
+}
+
 func (fake *FakeBaseMeasurement) PerformMeasurementReturns(result1 string, result2 string, result3 string, result4 bool) {
+	fake.performMeasurementMutex.Lock()
+	defer fake.performMeasurementMutex.Unlock()
 	fake.PerformMeasurementStub = nil
 	fake.performMeasurementReturns = struct {
 		result1 string
@@ -117,6 +142,8 @@ func (fake *FakeBaseMeasurement) PerformMeasurementReturns(result1 string, resul
 }
 
 func (fake *FakeBaseMeasurement) PerformMeasurementReturnsOnCall(i int, result1 string, result2 string, result3 string, result4 bool) {
+	fake.performMeasurementMutex.Lock()
+	defer fake.performMeasurementMutex.Unlock()
 	fake.PerformMeasurementStub = nil
 	if fake.performMeasurementReturnsOnCall == nil {
 		fake.performMeasurementReturnsOnCall = make(map[int]struct {
@@ -137,7 +164,8 @@ func (fake *FakeBaseMeasurement) PerformMeasurementReturnsOnCall(i int, result1 
 func (fake *FakeBaseMeasurement) SummaryPhrase() string {
 	fake.summaryPhraseMutex.Lock()
 	ret, specificReturn := fake.summaryPhraseReturnsOnCall[len(fake.summaryPhraseArgsForCall)]
-	fake.summaryPhraseArgsForCall = append(fake.summaryPhraseArgsForCall, struct{}{})
+	fake.summaryPhraseArgsForCall = append(fake.summaryPhraseArgsForCall, struct {
+	}{})
 	fake.recordInvocation("SummaryPhrase", []interface{}{})
 	fake.summaryPhraseMutex.Unlock()
 	if fake.SummaryPhraseStub != nil {
@@ -146,7 +174,8 @@ func (fake *FakeBaseMeasurement) SummaryPhrase() string {
 	if specificReturn {
 		return ret.result1
 	}
-	return fake.summaryPhraseReturns.result1
+	fakeReturns := fake.summaryPhraseReturns
+	return fakeReturns.result1
 }
 
 func (fake *FakeBaseMeasurement) SummaryPhraseCallCount() int {
@@ -155,7 +184,15 @@ func (fake *FakeBaseMeasurement) SummaryPhraseCallCount() int {
 	return len(fake.summaryPhraseArgsForCall)
 }
 
+func (fake *FakeBaseMeasurement) SummaryPhraseCalls(stub func() string) {
+	fake.summaryPhraseMutex.Lock()
+	defer fake.summaryPhraseMutex.Unlock()
+	fake.SummaryPhraseStub = stub
+}
+
 func (fake *FakeBaseMeasurement) SummaryPhraseReturns(result1 string) {
+	fake.summaryPhraseMutex.Lock()
+	defer fake.summaryPhraseMutex.Unlock()
 	fake.SummaryPhraseStub = nil
 	fake.summaryPhraseReturns = struct {
 		result1 string
@@ -163,6 +200,8 @@ func (fake *FakeBaseMeasurement) SummaryPhraseReturns(result1 string) {
 }
 
 func (fake *FakeBaseMeasurement) SummaryPhraseReturnsOnCall(i int, result1 string) {
+	fake.summaryPhraseMutex.Lock()
+	defer fake.summaryPhraseMutex.Unlock()
 	fake.SummaryPhraseStub = nil
 	if fake.summaryPhraseReturnsOnCall == nil {
 		fake.summaryPhraseReturnsOnCall = make(map[int]struct {

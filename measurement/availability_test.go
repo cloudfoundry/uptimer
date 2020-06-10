@@ -95,11 +95,11 @@ var _ = Describe("Availability", func() {
 		})
 
 		It("returns error output when there is an error", func() {
-			fakeRoundTripper.RoundTripReturns(nil, fmt.Errorf("error"))
+			fakeRoundTripper.RoundTripReturns(nil, fmt.Errorf("fake roundtrip error"))
 
 			msg, _, _, _ := am.PerformMeasurement()
 
-			Expect(msg).To(Equal("Get https://example.com/foo: error"))
+			Expect(msg).To(ContainSubstring("fake roundtrip error"))
 		})
 
 		It("closes the body of the response when there is a 200 response", func() {
