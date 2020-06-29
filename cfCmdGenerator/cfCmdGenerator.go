@@ -45,7 +45,7 @@ func (c *cfCmdGenerator) addCfHome(cmd *exec.Cmd) *exec.Cmd {
 }
 
 func (c *cfCmdGenerator) addCfStagingTimeout(cmd *exec.Cmd) *exec.Cmd {
-	cmd.Env = append(cmd.Env, "CF_STAGING_TIMEOUT=1")
+	cmd.Env = append(cmd.Env, "CF_STAGING_TIMEOUT=5")
 	return cmd
 }
 
