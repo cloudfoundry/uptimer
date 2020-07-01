@@ -26,13 +26,16 @@ go get github.com/cloudfoundry/uptimer
 ```
 
 ## Usage
-`uptimer -configFile config.json`.
+`uptimer -configFile config.json [-resultFile result.json]`.
 
 Uptimer needs configuration to run.
 It reads a `json` file
 specified with the `-configFile` flag.
 The config describes how to target the CF you wish to measure,
 and commands to run while measuring uptime.
+
+Uptimer can optionally be given a resultFile (`-resultFile) to which 
+resultant measurements will be written in json format.
 
 ## Config
 Here is an example config `json`:
