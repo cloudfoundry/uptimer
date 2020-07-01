@@ -2,44 +2,122 @@
 
 
 [[projects]]
+  digest = "1:c6329733387205927ecb2d992cffcdc8c8fda91ef23919d6f514ca62fdfe2465"
+  name = "code.cloudfoundry.org/goshims"
+  packages = ["osshim"]
+  pruneopts = ""
+  revision = "8d5fe86a4075479f79dcdb7c60d4618a99da7093"
+  version = "v0.4.0"
+
+[[projects]]
   branch = "master"
+  digest = "1:68e76d18ba2432722d6eafdcf28bf3fcda73a918eb4a8afc1d7757bc5dc6a6c6"
+  name = "code.cloudfoundry.org/rfc5424"
+  packages = ["."]
+  pruneopts = ""
+  revision = "236a6d29298aea12f69978f33393d12465abc429"
+
+[[projects]]
+  branch = "master"
+  digest = "1:afaa6de27e2d86b66cf71d55096f00e32b2ef40ec3349b535555aa81c77bc7d3"
   name = "github.com/benbjohnson/clock"
   packages = ["."]
+  pruneopts = ""
   revision = "7dc76406b6d3c05b5f71a86293cbcf3c4ea03b19"
 
 [[projects]]
+  digest = "1:c6329733387205927ecb2d992cffcdc8c8fda91ef23919d6f514ca62fdfe2465"
+  name = "github.com/cloudfoundry/goshims"
+  packages = ["ioutilshim"]
+  pruneopts = ""
+  revision = "8d5fe86a4075479f79dcdb7c60d4618a99da7093"
+  version = "v0.4.0"
+
+[[projects]]
+  digest = "1:9ef1e277f5abd99e7112270a7093b0d87a2c608a85fc84392d52098bd1a74b27"
   name = "github.com/onsi/ginkgo"
-  packages = [".","config","internal/codelocation","internal/containernode","internal/failer","internal/leafnodes","internal/remote","internal/spec","internal/spec_iterator","internal/specrunner","internal/suite","internal/testingtproxy","internal/writer","reporters","reporters/stenographer","reporters/stenographer/support/go-colorable","reporters/stenographer/support/go-isatty","types"]
+  packages = [
+    ".",
+    "config",
+    "internal/codelocation",
+    "internal/containernode",
+    "internal/failer",
+    "internal/leafnodes",
+    "internal/remote",
+    "internal/spec",
+    "internal/spec_iterator",
+    "internal/specrunner",
+    "internal/suite",
+    "internal/testingtproxy",
+    "internal/writer",
+    "reporters",
+    "reporters/stenographer",
+    "reporters/stenographer/support/go-colorable",
+    "reporters/stenographer/support/go-isatty",
+    "types",
+  ]
+  pruneopts = ""
   revision = "77a8c1e5c40d6bb6c5eb4dd4bdce9763564f6298"
   version = "v1.3.1"
 
 [[projects]]
+  digest = "1:e3f109462222373fe841df74272fc1f7e3f4a011d4575394ebc36336cbf9fe85"
   name = "github.com/onsi/gomega"
-  packages = [".","format","internal/assertion","internal/asyncassertion","internal/oraclematcher","internal/testingtsupport","matchers","matchers/support/goraph/bipartitegraph","matchers/support/goraph/edge","matchers/support/goraph/node","matchers/support/goraph/util","types"]
+  packages = [
+    ".",
+    "format",
+    "gbytes",
+    "gexec",
+    "internal/assertion",
+    "internal/asyncassertion",
+    "internal/oraclematcher",
+    "internal/testingtsupport",
+    "matchers",
+    "matchers/support/goraph/bipartitegraph",
+    "matchers/support/goraph/edge",
+    "matchers/support/goraph/node",
+    "matchers/support/goraph/util",
+    "types",
+  ]
+  pruneopts = ""
   revision = "334b8f472b3af5d541c5642701c1e29e2126f486"
   version = "v1.1.0"
 
 [[projects]]
+  digest = "1:6b55df4b0517a459af9d3879c99330af4367adcf45f3d0d37ded80a6272ae057"
   name = "github.com/satori/go.uuid"
   packages = ["."]
+  pruneopts = ""
   revision = "879c5887cd475cd7864858769793b2ceb0d44feb"
   version = "v1.1.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:b78daec10cf61db3be8d7121bdaf68f8b181aba5ac1c958f239fbbb5c75daa4f"
   name = "golang.org/x/sys"
   packages = ["unix"]
+  pruneopts = ""
   revision = "abf9c25f54453410d0c6668e519582a9e1115027"
 
 [[projects]]
   branch = "v2"
+  digest = "1:fb5632d5b9b7d7b28498017fd6535c22075b27511273f3f6bcaf8eee29875b5b"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
+  pruneopts = ""
   revision = "1be3d31502d6eabc0dd7ce5b0daab022e14a5538"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fb1643b3f4fe8bf3fafd7d46b530838c9645f7003b18495bf589ab33110f5af4"
+  input-imports = [
+    "code.cloudfoundry.org/rfc5424",
+    "github.com/benbjohnson/clock",
+    "github.com/cloudfoundry/goshims/ioutilshim",
+    "github.com/onsi/ginkgo",
+    "github.com/onsi/gomega",
+    "github.com/onsi/gomega/gexec",
+    "github.com/satori/go.uuid",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

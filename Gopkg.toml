@@ -28,3 +28,7 @@
 [[constraint]]
   name = "github.com/onsi/gomega"
   version = "1.1.0"
+
+[[constraint]]
+  name = "github.com/cloudfoundry/goshims"
+  version = "0.4.0"
