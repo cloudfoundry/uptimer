@@ -3,8 +3,11 @@
 package orchestrator
 
 import (
+	"code.cloudfoundry.org/goshims/ioutilshim"
+	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"syscall"
 
@@ -20,7 +23,7 @@ import (
 //go:generate counterfeiter . Orchestrator
 type Orchestrator interface {
 	Setup(cmdRunner.CmdRunner, cfCmdGenerator.CfCmdGenerator, config.OptionalTests) error
-	Run(bool) (int, error)
+	Run(bool, string) (int, error)
 	TearDown(cmdRunner.CmdRunner, cfCmdGenerator.CfCmdGenerator) error
 }
 
@@ -30,15 +33,21 @@ type orchestrator struct {
 	workflow            cfWorkflow.CfWorkflow
 	whileCommandsRunner cmdRunner.CmdRunner
 	measurements        []measurement.Measurement
+	ioutilshim          ioutilshim.Ioutil
 }
 
-func New(whileConfig []*config.Command, logger *log.Logger, workflow cfWorkflow.CfWorkflow, runner cmdRunner.CmdRunner, measurements []measurement.Measurement) Orchestrator {
+type result struct {
+	Summaries []measurement.Summary `json:"summaries"`
+}
+
+func New(whileConfig []*config.Command, logger *log.Logger, workflow cfWorkflow.CfWorkflow, runner cmdRunner.CmdRunner, measurements []measurement.Measurement, ioutilShim ioutilshim.Ioutil) Orchestrator {
 	return &orchestrator{
 		logger:              logger,
 		whileConfig:         whileConfig,
 		workflow:            workflow,
 		whileCommandsRunner: runner,
 		measurements:        measurements,
+		ioutilshim:          ioutilShim,
 	}
 }
 
@@ -55,7 +64,7 @@ func (o *orchestrator) Setup(runner cmdRunner.CmdRunner, ccg cfCmdGenerator.CfCm
 	return runner.RunInSequence(cmds...)
 }
 
-func (o *orchestrator) Run(performMeasurements bool) (int, error) {
+func (o *orchestrator) Run(performMeasurements bool, resultFilePath string) (int, error) {
 	if !performMeasurements {
 		o.logger.Println("*****NOT PERFORMING ANY MEASUREMENTS*****")
 	}
@@ -92,6 +101,21 @@ func (o *orchestrator) Run(performMeasurements bool) (int, error) {
 
 			} else {
 				o.logger.Printf("\x1b[32m%s\x1b[0m\n", m.Summary())
+			}
+		}
+
+		if resultFilePath != "" {
+			r := result{}
+			for _, m := range o.measurements {
+				r.Summaries = append(r.Summaries, m.SummaryData())
+			}
+			resultJSON, err := json.Marshal(r)
+			if err != nil {
+				o.logger.Printf("WARN: Failed to serilaize results to json: %s", err.Error())
+			}
+			err = o.ioutilshim.WriteFile(resultFilePath, resultJSON, os.ModePerm)
+			if err != nil {
+				o.logger.Printf("WARN: Failed to write result JSON to file: %s", err.Error())
 			}
 		}
 	}

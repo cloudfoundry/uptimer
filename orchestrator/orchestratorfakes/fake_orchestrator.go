@@ -11,10 +11,11 @@ import (
 )
 
 type FakeOrchestrator struct {
-	RunStub        func(bool) (int, error)
+	RunStub        func(bool, string) (int, error)
 	runMutex       sync.RWMutex
 	runArgsForCall []struct {
 		arg1 bool
+		arg2 string
 	}
 	runReturns struct {
 		result1 int
@@ -53,16 +54,17 @@ type FakeOrchestrator struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeOrchestrator) Run(arg1 bool) (int, error) {
+func (fake *FakeOrchestrator) Run(arg1 bool, arg2 string) (int, error) {
 	fake.runMutex.Lock()
 	ret, specificReturn := fake.runReturnsOnCall[len(fake.runArgsForCall)]
 	fake.runArgsForCall = append(fake.runArgsForCall, struct {
 		arg1 bool
-	}{arg1})
-	fake.recordInvocation("Run", []interface{}{arg1})
+		arg2 string
+	}{arg1, arg2})
+	fake.recordInvocation("Run", []interface{}{arg1, arg2})
 	fake.runMutex.Unlock()
 	if fake.RunStub != nil {
-		return fake.RunStub(arg1)
+		return fake.RunStub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
@@ -77,17 +79,17 @@ func (fake *FakeOrchestrator) RunCallCount() int {
 	return len(fake.runArgsForCall)
 }
 
-func (fake *FakeOrchestrator) RunCalls(stub func(bool) (int, error)) {
+func (fake *FakeOrchestrator) RunCalls(stub func(bool, string) (int, error)) {
 	fake.runMutex.Lock()
 	defer fake.runMutex.Unlock()
 	fake.RunStub = stub
 }
 
-func (fake *FakeOrchestrator) RunArgsForCall(i int) bool {
+func (fake *FakeOrchestrator) RunArgsForCall(i int) (bool, string) {
 	fake.runMutex.RLock()
 	defer fake.runMutex.RUnlock()
 	argsForCall := fake.runArgsForCall[i]
-	return argsForCall.arg1
+	return argsForCall.arg1, argsForCall.arg2
 }
 
 func (fake *FakeOrchestrator) RunReturns(result1 int, result2 error) {

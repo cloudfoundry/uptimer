@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"code.cloudfoundry.org/goshims/ioutilshim"
 	"context"
 	"crypto/tls"
 	"flag"
@@ -34,6 +35,7 @@ func main() {
 	logger := log.New(os.Stdout, "\n[UPTIMER] ", log.Ldate|log.Ltime|log.LUTC)
 
 	configPath := flag.String("configFile", "", "Path to the config file")
+	resultPath := flag.String("resultFile", "", "Path to the result file")
 	showVersion := flag.Bool("v", false, "Prints the version of uptimer and exits")
 	flag.Parse()
 
@@ -160,7 +162,7 @@ func main() {
 	}
 
 	logger.Printf("Setting up main workflow with org %s ...", orcWorkflow.Org())
-	orc := orchestrator.New(cfg.While, logger, orcWorkflow, cmdRunner.New(os.Stdout, os.Stderr, io.Copy), measurements)
+	orc := orchestrator.New(cfg.While, logger, orcWorkflow, cmdRunner.New(os.Stdout, os.Stderr, io.Copy), measurements, &ioutilshim.IoutilShim{})
 	if err = orc.Setup(bufferedRunner, orcCmdGenerator, cfg.OptionalTests); err != nil {
 		logBufferedRunnerFailure(logger, "main workflow setup", err, runnerOutBuf, runnerErrBuf)
 		performMeasurements = false
@@ -172,7 +174,7 @@ func main() {
 		logger.Println("*NOT* running measurement: App syslog availability")
 	}
 
-	exitCode, err := orc.Run(performMeasurements)
+	exitCode, err := orc.Run(performMeasurements, *resultPath)
 	if err != nil {
 		logger.Println("Failed run:", err)
 	}
