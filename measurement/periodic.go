@@ -21,6 +21,14 @@ type periodic struct {
 	stopChan  chan int
 }
 
+type Summary struct {
+	Name string `json:"name"`
+	Failed int `json:"failed"`
+	SummaryPhrase string `json:"summaryPhrase"`
+	AllowedFailures int	`json:"allowedFailures"`
+	Total int `json:"total"`
+}
+
 func (p *periodic) Name() string {
 	return p.baseMeasurement.Name()
 }
@@ -120,4 +128,14 @@ func (p *periodic) Summary() string {
 		p.resultSet.Total(),
 		float32(100*p.resultSet.Successful())/float32(p.resultSet.Total()),
 	)
+}
+
+func (p *periodic) SummaryData() Summary {
+	return Summary{
+		p.baseMeasurement.Name(),
+		p.resultSet.Failed(),
+		p.baseMeasurement.SummaryPhrase(),
+		p.allowedFailures,
+		p.resultSet.Total(),
+	}
 }

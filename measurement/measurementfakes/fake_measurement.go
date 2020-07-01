@@ -56,6 +56,16 @@ type FakeMeasurement struct {
 	summaryReturnsOnCall map[int]struct {
 		result1 string
 	}
+	SummaryDataStub        func() measurement.Summary
+	summaryDataMutex       sync.RWMutex
+	summaryDataArgsForCall []struct {
+	}
+	summaryDataReturns struct {
+		result1 measurement.Summary
+	}
+	summaryDataReturnsOnCall map[int]struct {
+		result1 measurement.Summary
+	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
@@ -314,6 +324,58 @@ func (fake *FakeMeasurement) SummaryReturnsOnCall(i int, result1 string) {
 	}{result1}
 }
 
+func (fake *FakeMeasurement) SummaryData() measurement.Summary {
+	fake.summaryDataMutex.Lock()
+	ret, specificReturn := fake.summaryDataReturnsOnCall[len(fake.summaryDataArgsForCall)]
+	fake.summaryDataArgsForCall = append(fake.summaryDataArgsForCall, struct {
+	}{})
+	fake.recordInvocation("SummaryData", []interface{}{})
+	fake.summaryDataMutex.Unlock()
+	if fake.SummaryDataStub != nil {
+		return fake.SummaryDataStub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.summaryDataReturns
+	return fakeReturns.result1
+}
+
+func (fake *FakeMeasurement) SummaryDataCallCount() int {
+	fake.summaryDataMutex.RLock()
+	defer fake.summaryDataMutex.RUnlock()
+	return len(fake.summaryDataArgsForCall)
+}
+
+func (fake *FakeMeasurement) SummaryDataCalls(stub func() measurement.Summary) {
+	fake.summaryDataMutex.Lock()
+	defer fake.summaryDataMutex.Unlock()
+	fake.SummaryDataStub = stub
+}
+
+func (fake *FakeMeasurement) SummaryDataReturns(result1 measurement.Summary) {
+	fake.summaryDataMutex.Lock()
+	defer fake.summaryDataMutex.Unlock()
+	fake.SummaryDataStub = nil
+	fake.summaryDataReturns = struct {
+		result1 measurement.Summary
+	}{result1}
+}
+
+func (fake *FakeMeasurement) SummaryDataReturnsOnCall(i int, result1 measurement.Summary) {
+	fake.summaryDataMutex.Lock()
+	defer fake.summaryDataMutex.Unlock()
+	fake.SummaryDataStub = nil
+	if fake.summaryDataReturnsOnCall == nil {
+		fake.summaryDataReturnsOnCall = make(map[int]struct {
+			result1 measurement.Summary
+		})
+	}
+	fake.summaryDataReturnsOnCall[i] = struct {
+		result1 measurement.Summary
+	}{result1}
+}
+
 func (fake *FakeMeasurement) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -329,6 +391,8 @@ func (fake *FakeMeasurement) Invocations() map[string][][]interface{} {
 	defer fake.stopMutex.RUnlock()
 	fake.summaryMutex.RLock()
 	defer fake.summaryMutex.RUnlock()
+	fake.summaryDataMutex.RLock()
+	defer fake.summaryDataMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

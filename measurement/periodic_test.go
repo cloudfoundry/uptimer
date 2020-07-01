@@ -404,4 +404,25 @@ var _ = Describe("Periodic", func() {
 				)))
 		})
 	})
+
+	Describe("JsonSummary", func() {
+		It("returns a json summary", func() {
+			failed := 2
+			succeeded := 3
+			allowedFailures := 3
+
+			p = NewPeriodic(logger, mockClock, freq, fakeBaseMeasurement, fakeResultSet, allowedFailures, func(string, string) bool { return shouldRetry })
+			fakeResultSet.FailedReturns(failed)
+			fakeResultSet.SuccessfulReturns(succeeded)
+			fakeResultSet.TotalReturns(failed + succeeded)
+
+			Expect(p.SummaryData()).To(Equal(Summary{
+					Name: "foo measurement",
+					Failed: 2,
+					SummaryPhrase: "wingdang the foobrizzle",
+					AllowedFailures: 3,
+					Total: 5,
+				}))
+		})
+	})
 })

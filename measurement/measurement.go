@@ -22,6 +22,7 @@ type Measurement interface {
 	Results() ResultSet
 	Failed() bool
 	Summary() string
+	SummaryData() Summary
 }
 
 type ShouldRetryFunc func(stdOut, stdErr string) bool
