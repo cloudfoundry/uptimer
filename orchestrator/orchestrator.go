@@ -37,7 +37,8 @@ type orchestrator struct {
 }
 
 type result struct {
-	Summaries []measurement.Summary `json:"summaries"`
+	Summaries   []measurement.Summary `json:"summaries"`
+	CmdExitCode int                   `json:"commandExitCode"`
 }
 
 func New(whileConfig []*config.Command, logger *log.Logger, workflow cfWorkflow.CfWorkflow, runner cmdRunner.CmdRunner, measurements []measurement.Measurement, ioutilShim ioutilshim.Ioutil) Orchestrator {
@@ -78,9 +79,11 @@ func (o *orchestrator) Run(performMeasurements bool, resultFilePath string) (int
 
 	o.logger.Println("Running commands...")
 	exitCode := 0
+	commandExitCode := 0
 	err := o.whileCommandsRunner.RunInSequence(o.createWhileCmds()...)
 	if err != nil {
 		exitCode = getExitCodeFromErr(err)
+		commandExitCode = exitCode
 	}
 	o.logger.Println("Finished running commands")
 
@@ -109,6 +112,7 @@ func (o *orchestrator) Run(performMeasurements bool, resultFilePath string) (int
 			for _, m := range o.measurements {
 				r.Summaries = append(r.Summaries, m.SummaryData())
 			}
+			r.CmdExitCode = commandExitCode
 			resultJSON, err := json.Marshal(r)
 			if err != nil {
 				o.logger.Printf("WARN: Failed to serilaize results to json: %s", err.Error())

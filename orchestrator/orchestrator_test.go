@@ -388,6 +388,7 @@ var _ = Describe("Orchestrator", func() {
 				Expect(fakeIoutil.WriteFileCallCount()).To(Equal(1))
 				_, jsonBytes, _ := fakeIoutil.WriteFileArgsForCall(0)
 				Expect(jsonBytes).To(MatchJSON(`{
+					"commandExitCode": 0,
 					"summaries": [
 						{
 						   "name": "",
@@ -405,6 +406,38 @@ var _ = Describe("Orchestrator", func() {
 						}
 					]
 				}`))
+			})
+
+			Context("When command fails", func() {
+				It("outputs json results", func() {
+					fakeRunner.RunInSequenceReturns(fmt.Errorf("uh oh"))
+					fakeMeasurement1.SummaryDataReturns(measurement.Summary{})
+					fakeMeasurement1.FailedReturns(true)
+					fakeMeasurement2.SummaryDataReturns(measurement.Summary{})
+					orc.Run(true, "/tmp/results")
+
+					Expect(fakeIoutil.WriteFileCallCount()).To(Equal(1))
+					_, jsonBytes, _ := fakeIoutil.WriteFileArgsForCall(0)
+					Expect(jsonBytes).To(MatchJSON(`{
+					    "commandExitCode": -1,
+					    "summaries": [
+						    {
+						       "name": "",
+							    "failed": 0,
+							    "summaryPhrase": "",
+							    "allowedFailures": 0,
+							    "total": 0
+						    },
+						    {
+						       "name": "",
+							    "failed": 0,
+							    "summaryPhrase": "",
+							    "allowedFailures": 0,
+							    "total": 0
+						    }
+					    ]
+				    }`))
+				})
 			})
 		})
 
