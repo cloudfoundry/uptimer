@@ -6,12 +6,12 @@ resources:
     uri: https://github.com/cloudfoundry/uptimer.git
     branch: develop
 
-- name: uptimer-master
+- name: uptimer-stable
   type: git
   icon: github-box
   source:
     uri: git@github.com:cloudfoundry/uptimer.git
-    branch: master
+    branch: stable
     private_key: ((uptimer_readwrite_deploy_key.private_key))
 
 - name: runtime-ci
@@ -41,6 +41,6 @@ jobs:
   - get: uptimer-develop
     passed:
     - run-unit-tests
-  - put: uptimer-master
+  - put: uptimer-stable
     params:
       repository: uptimer-develop
