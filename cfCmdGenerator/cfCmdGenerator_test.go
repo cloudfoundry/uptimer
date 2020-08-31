@@ -15,14 +15,19 @@ import (
 var _ = Describe("CfCmdGenerator", func() {
 	var (
 		cfHome string
+		useBuildpackDetection bool
 
 		generator CfCmdGenerator
 	)
 
 	BeforeEach(func() {
 		cfHome = "/on/the/range"
+		useBuildpackDetection = false
 
-		generator = New(cfHome)
+	})
+
+	JustBeforeEach(func() {
+		generator = New(cfHome, useBuildpackDetection)
 	})
 
 	Describe("Api", func() {
@@ -110,14 +115,32 @@ var _ = Describe("CfCmdGenerator", func() {
 	})
 
 	Describe("Push", func() {
+
 		It("Generates the correct command", func() {
-			expectedCmd := exec.Command("cf", "push", "appName", "-p", "path/to/app", "-b", "binary_buildpack", "-i", "3", "-m", "64M", "-k", "16M")
+			expectedCmd := exec.Command("cf", "push", "appName", "-p", "path/to/app", "-i", "3", "-m", "64M", "-k", "16M", "-b", "binary_buildpack")
 			expectedCmd.Env = append(expectedCmd.Env, fmt.Sprintf("CF_HOME=%s", cfHome))
 			expectedCmd.Env = append(expectedCmd.Env, "CF_STAGING_TIMEOUT=5")
 
 			cmd := generator.Push("appName", "path/to/app", 3)
 
 			Expect(cmd).To(Equal(expectedCmd))
+		})
+
+		Context("given buildpack detection is turned on", func() {
+
+			BeforeEach(func() {
+				useBuildpackDetection = true
+			})
+
+			It("should not specify the binary_buildpack", func() {
+				expectedCmd := exec.Command("cf", "push", "appName", "-p", "path/to/app", "-i", "3", "-m", "64M", "-k", "16M")
+				expectedCmd.Env = append(expectedCmd.Env, fmt.Sprintf("CF_HOME=%s", cfHome))
+				expectedCmd.Env = append(expectedCmd.Env, "CF_STAGING_TIMEOUT=5")
+
+				cmd := generator.Push("appName", "path/to/app", 3)
+
+				Expect(cmd).To(Equal(expectedCmd))
+			})
 		})
 	})
 

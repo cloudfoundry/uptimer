@@ -39,7 +39,7 @@ var _ = Describe("CfWorkflow", func() {
 	})
 
 	JustBeforeEach(func() {
-		ccg = cfCmdGenerator.New("/cfhome")
+		ccg = cfCmdGenerator.New("/cfhome", false)
 		org = "someOrg"
 		space = "someSpace"
 		quota = "someQuota"

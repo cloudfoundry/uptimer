@@ -61,7 +61,7 @@ var _ = Describe("Orchestrator", func() {
 		fakeMeasurement1.NameReturns("name1")
 		fakeMeasurement2 = &measurementfakes.FakeMeasurement{}
 		fakeMeasurement2.NameReturns("name2")
-		ccg = cfCmdGenerator.New("/cfhome")
+		ccg = cfCmdGenerator.New("/cfhome", false)
 		fakeIoutil = &ioutil_fake.FakeIoutil{}
 
 		ot = config.OptionalTests{RunAppSyslogAvailability: false}

@@ -32,11 +32,12 @@ type CfCmdGenerator interface {
 }
 
 type cfCmdGenerator struct {
-	cfHome string
+	cfHome                string
+	useBuildpackDetection bool
 }
 
-func New(cfHome string) CfCmdGenerator {
-	return &cfCmdGenerator{cfHome: cfHome}
+func New(cfHome string, useBuildpackDetection bool) CfCmdGenerator {
+	return &cfCmdGenerator{cfHome: cfHome, useBuildpackDetection: useBuildpackDetection}
 }
 
 func (c *cfCmdGenerator) addCfHome(cmd *exec.Cmd) *exec.Cmd {
@@ -115,16 +116,24 @@ func (c *cfCmdGenerator) Target(org string, space string) cmdStartWaiter.CmdStar
 }
 
 func (c *cfCmdGenerator) Push(name, path string, instances int) cmdStartWaiter.CmdStartWaiter {
+
+	var cmd []string
+
+	cmd = []string{
+		"push", name,
+			"-p", path,
+			"-i", strconv.Itoa(instances),
+			"-m", "64M",
+			"-k", "16M",
+	}
+
+	if c.useBuildpackDetection == false {
+		cmd = append(cmd, "-b", "binary_buildpack")
+	}
+
 	return c.addCfStagingTimeout(
 		c.addCfHome(
-			exec.Command(
-				"cf", "push", name,
-				"-p", path,
-				"-b", "binary_buildpack",
-				"-i", strconv.Itoa(instances),
-				"-m", "64M",
-				"-k", "16M",
-			),
+			exec.Command("cf", cmd...),
 		),
 	)
 }

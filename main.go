@@ -34,6 +34,7 @@ import (
 func main() {
 	logger := log.New(os.Stdout, "\n[UPTIMER] ", log.Ldate|log.Ltime|log.LUTC)
 
+	useBuildpackDetection := flag.Bool("useBuildpackDetection", false, "Use buildpack detection (defaults to false)")
 	configPath := flag.String("configFile", "", "Path to the config file")
 	resultPath := flag.String("resultFile", "", "Path to the result file")
 	showVersion := flag.Bool("v", false, "Prints the version of uptimer and exits")
@@ -88,7 +89,7 @@ func main() {
 
 	bufferedRunner, runnerOutBuf, runnerErrBuf := createBufferedRunner()
 
-	pushCmdGenerator := cfCmdGenerator.New(pushTmpDir)
+	pushCmdGenerator := cfCmdGenerator.New(pushTmpDir, *useBuildpackDetection)
 	pushWorkflow := createWorkflow(cfg.CF, appPath)
 	logger.Printf("Setting up push workflow with org %s ...", pushWorkflow.Org())
 	if err := bufferedRunner.RunInSequence(pushWorkflow.Setup(pushCmdGenerator)...); err != nil {
@@ -111,7 +112,7 @@ func main() {
 	var sinkWorkflow cfWorkflow.CfWorkflow
 	var sinkCmdGenerator cfCmdGenerator.CfCmdGenerator
 	if cfg.OptionalTests.RunAppSyslogAvailability {
-		sinkCmdGenerator = cfCmdGenerator.New(sinkTmpDir)
+		sinkCmdGenerator = cfCmdGenerator.New(sinkTmpDir, *useBuildpackDetection)
 		sinkWorkflow = createWorkflow(cfg.CF, sinkAppPath)
 		logger.Printf("Setting up sink workflow with org %s ...", sinkWorkflow.Org())
 		err = bufferedRunner.RunInSequence(
@@ -127,7 +128,7 @@ func main() {
 		}
 	}
 
-	orcCmdGenerator := cfCmdGenerator.New(orcTmpDir)
+	orcCmdGenerator := cfCmdGenerator.New(orcTmpDir, *useBuildpackDetection)
 	orcWorkflow := createWorkflow(cfg.CF, appPath)
 
 	authFailedRetryFunc := func(stdOut, stdErr string) bool {
@@ -140,8 +141,8 @@ func main() {
 		logger,
 		orcWorkflow,
 		pushWorkflowGeneratorFunc,
-		cfCmdGenerator.New(recentLogsTmpDir),
-		cfCmdGenerator.New(streamingLogsTmpDir),
+		cfCmdGenerator.New(recentLogsTmpDir, *useBuildpackDetection),
+		cfCmdGenerator.New(streamingLogsTmpDir, *useBuildpackDetection),
 		pushCmdGenerator,
 		cfg.AllowedFailures,
 		authFailedRetryFunc,
