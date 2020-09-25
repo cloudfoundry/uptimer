@@ -5,6 +5,7 @@ import (
 	"code.cloudfoundry.org/goshims/ioutilshim"
 	"context"
 	"crypto/tls"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -224,8 +225,15 @@ func createTmpDirs() (string, string, string, string, string, error) {
 }
 
 func compileIncludedApp(appName string) (string, error) {
+	gopath, err := exec.Command("go", "env", "GOPATH").Output()
+	if err != nil {
+		return "", err
+	}
+	if len(gopath) == 0 {
+		return "", errors.New("GOPATH is not set and can't be determined (no ~/go directory found)")
+	}
 	appPath := path.Join(
-		os.Getenv("GOPATH"),
+		strings.TrimRight(string(gopath), "\r\n"),
 		fmt.Sprintf("/src/github.com/cloudfoundry/uptimer/%s", appName),
 	)
 
@@ -235,7 +243,7 @@ func compileIncludedApp(appName string) (string, error) {
 		"GOOS=linux",
 		"GOARCH=amd64",
 	)
-	err := buildCmd.Run()
+	err = buildCmd.Run()
 
 	return appPath, err
 }
