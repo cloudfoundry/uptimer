@@ -1,7 +1,0 @@
-memo = "21d9db028e67c5db030c301706b9975a275d64baedfcf170a992dfc3d317b3ac"
-
-[[projects]]
-  branch = "master"
-  name = "code.cloudfoundry.org/rfc5424"
-  packages = ["."]
-  revision = "769e2ed6887e639e9a2b9492fad9844dd2846ca0"
