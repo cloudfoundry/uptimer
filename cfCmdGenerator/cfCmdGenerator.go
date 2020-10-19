@@ -116,25 +116,21 @@ func (c *cfCmdGenerator) Target(org string, space string) cmdStartWaiter.CmdStar
 }
 
 func (c *cfCmdGenerator) Push(name, path string, instances int) cmdStartWaiter.CmdStartWaiter {
-
-	var cmd []string
-
-	cmd = []string{
+	args := []string{
 		"push", name,
-			"-p", path,
-			"-i", strconv.Itoa(instances),
-			"-m", "64M",
-			"-k", "16M",
+		"-f", "manifest.yml",
+		"-i", strconv.Itoa(instances),
 	}
 
 	if c.useBuildpackDetection == false {
-		cmd = append(cmd, "-b", "binary_buildpack")
+		args = append(args, "-b", "go_buildpack")
 	}
 
+	cmd := exec.Command("cf", args...)
+	cmd.Dir = path
+
 	return c.addCfStagingTimeout(
-		c.addCfHome(
-			exec.Command("cf", cmd...),
-		),
+		c.addCfHome(cmd),
 	)
 }
 

@@ -14,7 +14,7 @@ import (
 
 var _ = Describe("CfCmdGenerator", func() {
 	var (
-		cfHome string
+		cfHome                string
 		useBuildpackDetection bool
 
 		generator CfCmdGenerator
@@ -117,9 +117,10 @@ var _ = Describe("CfCmdGenerator", func() {
 	Describe("Push", func() {
 
 		It("Generates the correct command", func() {
-			expectedCmd := exec.Command("cf", "push", "appName", "-p", "path/to/app", "-i", "3", "-m", "64M", "-k", "16M", "-b", "binary_buildpack")
+			expectedCmd := exec.Command("cf", "push", "appName", "-f", "manifest.yml", "-i", "3", "-b", "go_buildpack")
 			expectedCmd.Env = append(expectedCmd.Env, fmt.Sprintf("CF_HOME=%s", cfHome))
 			expectedCmd.Env = append(expectedCmd.Env, "CF_STAGING_TIMEOUT=5")
+			expectedCmd.Dir = "path/to/app"
 
 			cmd := generator.Push("appName", "path/to/app", 3)
 
@@ -132,10 +133,11 @@ var _ = Describe("CfCmdGenerator", func() {
 				useBuildpackDetection = true
 			})
 
-			It("should not specify the binary_buildpack", func() {
-				expectedCmd := exec.Command("cf", "push", "appName", "-p", "path/to/app", "-i", "3", "-m", "64M", "-k", "16M")
+			It("should not specify the go_buildpack", func() {
+				expectedCmd := exec.Command("cf", "push", "appName", "-f", "manifest.yml", "-i", "3")
 				expectedCmd.Env = append(expectedCmd.Env, fmt.Sprintf("CF_HOME=%s", cfHome))
 				expectedCmd.Env = append(expectedCmd.Env, "CF_STAGING_TIMEOUT=5")
+				expectedCmd.Dir = "path/to/app"
 
 				cmd := generator.Push("appName", "path/to/app", 3)
 

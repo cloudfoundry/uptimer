@@ -1,4 +1,6 @@
-package main
+package app
+
+const Source = `package main
 
 import (
 	"fmt"
@@ -30,3 +32,4 @@ func periodicallyLog(fre time.Duration) {
 		}
 	}
 }
+`

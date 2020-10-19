@@ -2,10 +2,8 @@ package main
 
 import (
 	"bytes"
-	"code.cloudfoundry.org/goshims/ioutilshim"
 	"context"
 	"crypto/tls"
-	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -13,14 +11,16 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
-	"path"
+	"path/filepath"
 	"strings"
 	"time"
+
+	"code.cloudfoundry.org/goshims/ioutilshim"
 
 	"github.com/benbjohnson/clock"
 	uuid "github.com/satori/go.uuid"
 
+	"github.com/cloudfoundry/uptimer/app"
 	"github.com/cloudfoundry/uptimer/appLogValidator"
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
 	"github.com/cloudfoundry/uptimer/cfWorkflow"
@@ -29,6 +29,7 @@ import (
 	"github.com/cloudfoundry/uptimer/config"
 	"github.com/cloudfoundry/uptimer/measurement"
 	"github.com/cloudfoundry/uptimer/orchestrator"
+	"github.com/cloudfoundry/uptimer/syslogSink"
 	"github.com/cloudfoundry/uptimer/version"
 )
 
@@ -65,26 +66,27 @@ func main() {
 
 	performMeasurements := true
 
-	logger.Println("Building included app...")
-	appPath, err := compileIncludedApp("app")
+	logger.Println("Preparing included app...")
+	appPath, err := prepareIncludedApp("app", app.Source)
 	if err != nil {
-		logger.Println("Failed to build included app: ", err)
+		logger.Println("Failed to prepare included app: ", err)
 		performMeasurements = false
 	}
-	logger.Println("Finished building included app")
+	logger.Println("Finished preparing included app")
+	defer os.RemoveAll(appPath)
 
 	var sinkAppPath string
 	if cfg.OptionalTests.RunAppSyslogAvailability {
-		logger.Println("Building included syslog sink app...")
-		sinkAppPath, err = compileIncludedApp("syslogSink")
+		logger.Println("Preparing included syslog sink app...")
+		sinkAppPath, err = prepareIncludedApp("syslogSink", syslogSink.Source)
 		if err != nil {
-			logger.Println("Failed to build included syslog sink app: ", err)
+			logger.Println("Failed to prepare included syslog sink app: ", err)
 		}
-		logger.Println("Finished building included syslog sink app")
+		logger.Println("Finished preparing included syslog sink app")
 	}
 	orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, sinkTmpDir, err := createTmpDirs()
 	if err != nil {
-		logger.Println("Failed to create temp dir:", err)
+		logger.Println("Failed to create temp dirs:", err)
 		performMeasurements = false
 	}
 
@@ -224,28 +226,33 @@ func createTmpDirs() (string, string, string, string, string, error) {
 	return orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, sinkTmpDir, nil
 }
 
-func compileIncludedApp(appName string) (string, error) {
-	gopath, err := exec.Command("go", "env", "GOPATH").Output()
+func prepareIncludedApp(name, source string) (string, error) {
+	dir, err := ioutil.TempDir("", "uptimer-sample-*")
 	if err != nil {
 		return "", err
 	}
-	if len(gopath) == 0 {
-		return "", errors.New("GOPATH is not set and can't be determined (no ~/go directory found)")
+
+	if err := ioutil.WriteFile(filepath.Join(dir, "main.go"), []byte(app.Source), 0644); err != nil {
+		os.RemoveAll(dir)
+		return "", err
 	}
-	appPath := path.Join(
-		strings.TrimRight(string(gopath), "\r\n"),
-		fmt.Sprintf("/src/github.com/cloudfoundry/uptimer/%s", appName),
-	)
 
-	buildCmd := exec.Command("go", "build")
-	buildCmd.Dir = appPath
-	buildCmd.Env = append(os.Environ(),
-		"GOOS=linux",
-		"GOARCH=amd64",
-	)
-	err = buildCmd.Run()
+	manifest := goManifest(name)
+	if err := ioutil.WriteFile(filepath.Join(dir, "manifest.yml"), []byte(manifest), 0644); err != nil {
+		os.RemoveAll(dir)
+		return "", err
+	}
 
-	return appPath, err
+	return dir, nil
+}
+
+func goManifest(appName string) string {
+	return fmt.Sprintf(`applications:
+- name: %s
+  memory: 64M
+  disk: 16M
+  env:
+    GOPACKAGENAME: github.com/cloudfoundry/uptimer/%s`, appName, appName)
 }
 
 func createWorkflow(cfc *config.Cf, appPath string) cfWorkflow.CfWorkflow {
