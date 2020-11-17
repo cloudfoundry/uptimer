@@ -1,14 +1,14 @@
 resources:
 - name: uptimer-develop
   type: git
-  icon: github-box
+  icon: github
   source:
     uri: https://github.com/cloudfoundry/uptimer.git
     branch: develop
 
 - name: uptimer-stable
   type: git
-  icon: github-box
+  icon: github
   source:
     uri: git@github.com:cloudfoundry/uptimer.git
     branch: stable
@@ -16,9 +16,9 @@ resources:
 
 - name: runtime-ci
   type: git
-  icon: github-box
+  icon: github
   source:
-    branch: master
+    branch: main
     uri: https://github.com/cloudfoundry/runtime-ci.git
 
 jobs:
