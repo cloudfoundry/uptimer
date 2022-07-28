@@ -66,15 +66,16 @@ func (fake *FakeCmdRunner) Run(arg1 cmdStartWaiter.CmdStartWaiter) error {
 	fake.runArgsForCall = append(fake.runArgsForCall, struct {
 		arg1 cmdStartWaiter.CmdStartWaiter
 	}{arg1})
+	stub := fake.RunStub
+	fakeReturns := fake.runReturns
 	fake.recordInvocation("Run", []interface{}{arg1})
 	fake.runMutex.Unlock()
-	if fake.RunStub != nil {
-		return fake.RunStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.runReturns
 	return fakeReturns.result1
 }
 
@@ -126,15 +127,16 @@ func (fake *FakeCmdRunner) RunInSequence(arg1 ...cmdStartWaiter.CmdStartWaiter) 
 	fake.runInSequenceArgsForCall = append(fake.runInSequenceArgsForCall, struct {
 		arg1 []cmdStartWaiter.CmdStartWaiter
 	}{arg1})
+	stub := fake.RunInSequenceStub
+	fakeReturns := fake.runInSequenceReturns
 	fake.recordInvocation("RunInSequence", []interface{}{arg1})
 	fake.runInSequenceMutex.Unlock()
-	if fake.RunInSequenceStub != nil {
-		return fake.RunInSequenceStub(arg1...)
+	if stub != nil {
+		return stub(arg1...)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.runInSequenceReturns
 	return fakeReturns.result1
 }
 
@@ -187,15 +189,16 @@ func (fake *FakeCmdRunner) RunInSequenceWithContext(arg1 context.Context, arg2 .
 		arg1 context.Context
 		arg2 []cmdStartWaiter.CmdStartWaiter
 	}{arg1, arg2})
+	stub := fake.RunInSequenceWithContextStub
+	fakeReturns := fake.runInSequenceWithContextReturns
 	fake.recordInvocation("RunInSequenceWithContext", []interface{}{arg1, arg2})
 	fake.runInSequenceWithContextMutex.Unlock()
-	if fake.RunInSequenceWithContextStub != nil {
-		return fake.RunInSequenceWithContextStub(arg1, arg2...)
+	if stub != nil {
+		return stub(arg1, arg2...)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.runInSequenceWithContextReturns
 	return fakeReturns.result1
 }
 
@@ -248,15 +251,16 @@ func (fake *FakeCmdRunner) RunWithContext(arg1 context.Context, arg2 cmdStartWai
 		arg1 context.Context
 		arg2 cmdStartWaiter.CmdStartWaiter
 	}{arg1, arg2})
+	stub := fake.RunWithContextStub
+	fakeReturns := fake.runWithContextReturns
 	fake.recordInvocation("RunWithContext", []interface{}{arg1, arg2})
 	fake.runWithContextMutex.Unlock()
-	if fake.RunWithContextStub != nil {
-		return fake.RunWithContextStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.runWithContextReturns
 	return fakeReturns.result1
 }
 

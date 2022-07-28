@@ -68,15 +68,16 @@ func (fake *FakeResultSet) Failed() int {
 	ret, specificReturn := fake.failedReturnsOnCall[len(fake.failedArgsForCall)]
 	fake.failedArgsForCall = append(fake.failedArgsForCall, struct {
 	}{})
+	stub := fake.FailedStub
+	fakeReturns := fake.failedReturns
 	fake.recordInvocation("Failed", []interface{}{})
 	fake.failedMutex.Unlock()
-	if fake.FailedStub != nil {
-		return fake.FailedStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.failedReturns
 	return fakeReturns.result1
 }
 
@@ -119,9 +120,10 @@ func (fake *FakeResultSet) RecordFailure() {
 	fake.recordFailureMutex.Lock()
 	fake.recordFailureArgsForCall = append(fake.recordFailureArgsForCall, struct {
 	}{})
+	stub := fake.RecordFailureStub
 	fake.recordInvocation("RecordFailure", []interface{}{})
 	fake.recordFailureMutex.Unlock()
-	if fake.RecordFailureStub != nil {
+	if stub != nil {
 		fake.RecordFailureStub()
 	}
 }
@@ -142,9 +144,10 @@ func (fake *FakeResultSet) RecordSuccess() {
 	fake.recordSuccessMutex.Lock()
 	fake.recordSuccessArgsForCall = append(fake.recordSuccessArgsForCall, struct {
 	}{})
+	stub := fake.RecordSuccessStub
 	fake.recordInvocation("RecordSuccess", []interface{}{})
 	fake.recordSuccessMutex.Unlock()
-	if fake.RecordSuccessStub != nil {
+	if stub != nil {
 		fake.RecordSuccessStub()
 	}
 }
@@ -166,15 +169,16 @@ func (fake *FakeResultSet) SuccessesSinceLastFailure() (int, time.Time) {
 	ret, specificReturn := fake.successesSinceLastFailureReturnsOnCall[len(fake.successesSinceLastFailureArgsForCall)]
 	fake.successesSinceLastFailureArgsForCall = append(fake.successesSinceLastFailureArgsForCall, struct {
 	}{})
+	stub := fake.SuccessesSinceLastFailureStub
+	fakeReturns := fake.successesSinceLastFailureReturns
 	fake.recordInvocation("SuccessesSinceLastFailure", []interface{}{})
 	fake.successesSinceLastFailureMutex.Unlock()
-	if fake.SuccessesSinceLastFailureStub != nil {
-		return fake.SuccessesSinceLastFailureStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.successesSinceLastFailureReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -221,15 +225,16 @@ func (fake *FakeResultSet) Successful() int {
 	ret, specificReturn := fake.successfulReturnsOnCall[len(fake.successfulArgsForCall)]
 	fake.successfulArgsForCall = append(fake.successfulArgsForCall, struct {
 	}{})
+	stub := fake.SuccessfulStub
+	fakeReturns := fake.successfulReturns
 	fake.recordInvocation("Successful", []interface{}{})
 	fake.successfulMutex.Unlock()
-	if fake.SuccessfulStub != nil {
-		return fake.SuccessfulStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.successfulReturns
 	return fakeReturns.result1
 }
 
@@ -273,15 +278,16 @@ func (fake *FakeResultSet) Total() int {
 	ret, specificReturn := fake.totalReturnsOnCall[len(fake.totalArgsForCall)]
 	fake.totalArgsForCall = append(fake.totalArgsForCall, struct {
 	}{})
+	stub := fake.TotalStub
+	fakeReturns := fake.totalReturns
 	fake.recordInvocation("Total", []interface{}{})
 	fake.totalMutex.Unlock()
-	if fake.TotalStub != nil {
-		return fake.TotalStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.totalReturns
 	return fakeReturns.result1
 }
 

@@ -75,15 +75,16 @@ func (fake *FakeMeasurement) Failed() bool {
 	ret, specificReturn := fake.failedReturnsOnCall[len(fake.failedArgsForCall)]
 	fake.failedArgsForCall = append(fake.failedArgsForCall, struct {
 	}{})
+	stub := fake.FailedStub
+	fakeReturns := fake.failedReturns
 	fake.recordInvocation("Failed", []interface{}{})
 	fake.failedMutex.Unlock()
-	if fake.FailedStub != nil {
-		return fake.FailedStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.failedReturns
 	return fakeReturns.result1
 }
 
@@ -127,15 +128,16 @@ func (fake *FakeMeasurement) Name() string {
 	ret, specificReturn := fake.nameReturnsOnCall[len(fake.nameArgsForCall)]
 	fake.nameArgsForCall = append(fake.nameArgsForCall, struct {
 	}{})
+	stub := fake.NameStub
+	fakeReturns := fake.nameReturns
 	fake.recordInvocation("Name", []interface{}{})
 	fake.nameMutex.Unlock()
-	if fake.NameStub != nil {
-		return fake.NameStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.nameReturns
 	return fakeReturns.result1
 }
 
@@ -179,15 +181,16 @@ func (fake *FakeMeasurement) Results() measurement.ResultSet {
 	ret, specificReturn := fake.resultsReturnsOnCall[len(fake.resultsArgsForCall)]
 	fake.resultsArgsForCall = append(fake.resultsArgsForCall, struct {
 	}{})
+	stub := fake.ResultsStub
+	fakeReturns := fake.resultsReturns
 	fake.recordInvocation("Results", []interface{}{})
 	fake.resultsMutex.Unlock()
-	if fake.ResultsStub != nil {
-		return fake.ResultsStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.resultsReturns
 	return fakeReturns.result1
 }
 
@@ -230,9 +233,10 @@ func (fake *FakeMeasurement) Start() {
 	fake.startMutex.Lock()
 	fake.startArgsForCall = append(fake.startArgsForCall, struct {
 	}{})
+	stub := fake.StartStub
 	fake.recordInvocation("Start", []interface{}{})
 	fake.startMutex.Unlock()
-	if fake.StartStub != nil {
+	if stub != nil {
 		fake.StartStub()
 	}
 }
@@ -253,9 +257,10 @@ func (fake *FakeMeasurement) Stop() {
 	fake.stopMutex.Lock()
 	fake.stopArgsForCall = append(fake.stopArgsForCall, struct {
 	}{})
+	stub := fake.StopStub
 	fake.recordInvocation("Stop", []interface{}{})
 	fake.stopMutex.Unlock()
-	if fake.StopStub != nil {
+	if stub != nil {
 		fake.StopStub()
 	}
 }
@@ -277,15 +282,16 @@ func (fake *FakeMeasurement) Summary() string {
 	ret, specificReturn := fake.summaryReturnsOnCall[len(fake.summaryArgsForCall)]
 	fake.summaryArgsForCall = append(fake.summaryArgsForCall, struct {
 	}{})
+	stub := fake.SummaryStub
+	fakeReturns := fake.summaryReturns
 	fake.recordInvocation("Summary", []interface{}{})
 	fake.summaryMutex.Unlock()
-	if fake.SummaryStub != nil {
-		return fake.SummaryStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.summaryReturns
 	return fakeReturns.result1
 }
 
@@ -329,15 +335,16 @@ func (fake *FakeMeasurement) SummaryData() measurement.Summary {
 	ret, specificReturn := fake.summaryDataReturnsOnCall[len(fake.summaryDataArgsForCall)]
 	fake.summaryDataArgsForCall = append(fake.summaryDataArgsForCall, struct {
 	}{})
+	stub := fake.SummaryDataStub
+	fakeReturns := fake.summaryDataReturns
 	fake.recordInvocation("SummaryData", []interface{}{})
 	fake.summaryDataMutex.Unlock()
-	if fake.SummaryDataStub != nil {
-		return fake.SummaryDataStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.summaryDataReturns
 	return fakeReturns.result1
 }
 

@@ -61,15 +61,16 @@ func (fake *FakeOrchestrator) Run(arg1 bool, arg2 string) (int, error) {
 		arg1 bool
 		arg2 string
 	}{arg1, arg2})
+	stub := fake.RunStub
+	fakeReturns := fake.runReturns
 	fake.recordInvocation("Run", []interface{}{arg1, arg2})
 	fake.runMutex.Unlock()
-	if fake.RunStub != nil {
-		return fake.RunStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.runReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -126,15 +127,16 @@ func (fake *FakeOrchestrator) Setup(arg1 cmdRunner.CmdRunner, arg2 cfCmdGenerato
 		arg2 cfCmdGenerator.CfCmdGenerator
 		arg3 config.OptionalTests
 	}{arg1, arg2, arg3})
+	stub := fake.SetupStub
+	fakeReturns := fake.setupReturns
 	fake.recordInvocation("Setup", []interface{}{arg1, arg2, arg3})
 	fake.setupMutex.Unlock()
-	if fake.SetupStub != nil {
-		return fake.SetupStub(arg1, arg2, arg3)
+	if stub != nil {
+		return stub(arg1, arg2, arg3)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.setupReturns
 	return fakeReturns.result1
 }
 
@@ -187,15 +189,16 @@ func (fake *FakeOrchestrator) TearDown(arg1 cmdRunner.CmdRunner, arg2 cfCmdGener
 		arg1 cmdRunner.CmdRunner
 		arg2 cfCmdGenerator.CfCmdGenerator
 	}{arg1, arg2})
+	stub := fake.TearDownStub
+	fakeReturns := fake.tearDownReturns
 	fake.recordInvocation("TearDown", []interface{}{arg1, arg2})
 	fake.tearDownMutex.Unlock()
-	if fake.TearDownStub != nil {
-		return fake.TearDownStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.tearDownReturns
 	return fakeReturns.result1
 }
 

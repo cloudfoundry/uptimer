@@ -53,15 +53,16 @@ func (fake *FakeBaseMeasurement) Name() string {
 	ret, specificReturn := fake.nameReturnsOnCall[len(fake.nameArgsForCall)]
 	fake.nameArgsForCall = append(fake.nameArgsForCall, struct {
 	}{})
+	stub := fake.NameStub
+	fakeReturns := fake.nameReturns
 	fake.recordInvocation("Name", []interface{}{})
 	fake.nameMutex.Unlock()
-	if fake.NameStub != nil {
-		return fake.NameStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.nameReturns
 	return fakeReturns.result1
 }
 
@@ -105,15 +106,16 @@ func (fake *FakeBaseMeasurement) PerformMeasurement() (string, string, string, b
 	ret, specificReturn := fake.performMeasurementReturnsOnCall[len(fake.performMeasurementArgsForCall)]
 	fake.performMeasurementArgsForCall = append(fake.performMeasurementArgsForCall, struct {
 	}{})
+	stub := fake.PerformMeasurementStub
+	fakeReturns := fake.performMeasurementReturns
 	fake.recordInvocation("PerformMeasurement", []interface{}{})
 	fake.performMeasurementMutex.Unlock()
-	if fake.PerformMeasurementStub != nil {
-		return fake.PerformMeasurementStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1, ret.result2, ret.result3, ret.result4
 	}
-	fakeReturns := fake.performMeasurementReturns
 	return fakeReturns.result1, fakeReturns.result2, fakeReturns.result3, fakeReturns.result4
 }
 
@@ -166,15 +168,16 @@ func (fake *FakeBaseMeasurement) SummaryPhrase() string {
 	ret, specificReturn := fake.summaryPhraseReturnsOnCall[len(fake.summaryPhraseArgsForCall)]
 	fake.summaryPhraseArgsForCall = append(fake.summaryPhraseArgsForCall, struct {
 	}{})
+	stub := fake.SummaryPhraseStub
+	fakeReturns := fake.summaryPhraseReturns
 	fake.recordInvocation("SummaryPhrase", []interface{}{})
 	fake.summaryPhraseMutex.Unlock()
-	if fake.SummaryPhraseStub != nil {
-		return fake.SummaryPhraseStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.summaryPhraseReturns
 	return fakeReturns.result1
 }
 
