@@ -10,7 +10,7 @@ import (
 	. "github.com/cloudfoundry/uptimer/measurement"
 
 	"github.com/cloudfoundry/uptimer/measurement/measurementfakes"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
@@ -417,12 +417,12 @@ var _ = Describe("Periodic", func() {
 			fakeResultSet.TotalReturns(failed + succeeded)
 
 			Expect(p.SummaryData()).To(Equal(Summary{
-					Name: "foo measurement",
-					Failed: 2,
-					SummaryPhrase: "wingdang the foobrizzle",
-					AllowedFailures: 3,
-					Total: 5,
-				}))
+				Name:            "foo measurement",
+				Failed:          2,
+				SummaryPhrase:   "wingdang the foobrizzle",
+				AllowedFailures: 3,
+				Total:           5,
+			}))
 		})
 	})
 })

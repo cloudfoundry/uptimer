@@ -2,26 +2,28 @@ package cfCmdGenerator_test
 
 import (
 	"context"
-	"fmt"
+	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	"os/exec"
 	"time"
 
 	. "github.com/cloudfoundry/uptimer/cfCmdGenerator"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("CfCmdGenerator", func() {
-	var (
-		cfHome                string
-		useBuildpackDetection bool
+	const (
+		cfHome       = "/on/the/range"
+		cfHomeEnvVar = "CF_HOME=" + cfHome
+	)
 
-		generator CfCmdGenerator
+	var (
+		useBuildpackDetection bool
+		generator             CfCmdGenerator
 	)
 
 	BeforeEach(func() {
-		cfHome = "/on/the/range"
 		useBuildpackDetection = false
 
 	})
@@ -33,33 +35,24 @@ var _ = Describe("CfCmdGenerator", func() {
 	Describe("Api", func() {
 		It("Generates the correct command skipping ssl validation", func() {
 			expectedCmd := exec.Command("cf", "api", "api.example.com", "--skip-ssl-validation")
-			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
-
 			cmd := generator.Api("api.example.com")
-
-			Expect(cmd).To(Equal(expectedCmd))
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
 		})
 	})
 
 	Describe("Auth", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "auth", "user44", "pass55")
-			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
-
 			cmd := generator.Auth("user44", "pass55")
-
-			Expect(cmd).To(Equal(expectedCmd))
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
 		})
 	})
 
 	Describe("CreateOrg", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "create-org", "someOrg")
-			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
-
 			cmd := generator.CreateOrg("someOrg")
-
-			Expect(cmd).To(Equal(expectedCmd))
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
 		})
 	})
 
@@ -73,44 +66,33 @@ var _ = Describe("CfCmdGenerator", func() {
 				"-s", "100",
 				"--reserved-route-ports", "1",
 			)
-			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
-
 			cmd := generator.CreateQuota("someQuota")
-
-			Expect(cmd).To(Equal(expectedCmd))
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
 		})
 	})
 
 	Describe("SetQuota", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "set-quota", "someQuota", "someOrg")
-			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
-
 			cmd := generator.SetQuota("someQuota", "someOrg")
-
-			Expect(cmd).To(Equal(expectedCmd))
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
 		})
 	})
 
 	Describe("CreateSpace", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "create-space", "someSpace", "-o", "someOrg")
-			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
-
 			cmd := generator.CreateSpace("someOrg", "someSpace")
-
-			Expect(cmd).To(Equal(expectedCmd))
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
 		})
 	})
 
 	Describe("Target", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "target", "-o", "someOrg", "-s", "someSpace")
-			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
 
 			cmd := generator.Target("someOrg", "someSpace")
-
-			Expect(cmd).To(Equal(expectedCmd))
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
 		})
 	})
 
@@ -118,13 +100,10 @@ var _ = Describe("CfCmdGenerator", func() {
 
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "push", "appName", "-f", "manifest.yml", "-i", "3", "-b", "go_buildpack")
-			expectedCmd.Env = append(expectedCmd.Env, fmt.Sprintf("CF_HOME=%s", cfHome))
-			expectedCmd.Env = append(expectedCmd.Env, "CF_STAGING_TIMEOUT=5")
 			expectedCmd.Dir = "path/to/app"
 
 			cmd := generator.Push("appName", "path/to/app", 3)
-
-			Expect(cmd).To(Equal(expectedCmd))
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar, "CF_STAGING_TIMEOUT=5")
 		})
 
 		Context("given buildpack detection is turned on", func() {
@@ -135,13 +114,9 @@ var _ = Describe("CfCmdGenerator", func() {
 
 			It("should not specify the go_buildpack", func() {
 				expectedCmd := exec.Command("cf", "push", "appName", "-f", "manifest.yml", "-i", "3")
-				expectedCmd.Env = append(expectedCmd.Env, fmt.Sprintf("CF_HOME=%s", cfHome))
-				expectedCmd.Env = append(expectedCmd.Env, "CF_STAGING_TIMEOUT=5")
 				expectedCmd.Dir = "path/to/app"
-
 				cmd := generator.Push("appName", "path/to/app", 3)
-
-				Expect(cmd).To(Equal(expectedCmd))
+				expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar, "CF_STAGING_TIMEOUT=5")
 			})
 		})
 	})
@@ -149,55 +124,40 @@ var _ = Describe("CfCmdGenerator", func() {
 	Describe("Delete", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "delete", "appName", "-f", "-r")
-			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
-
 			cmd := generator.Delete("appName")
-
-			Expect(cmd).To(Equal(expectedCmd))
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
 		})
 	})
 
 	Describe("DeleteOrg", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "delete-org", "orgName", "-f")
-			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
-
 			cmd := generator.DeleteOrg("orgName")
-
-			Expect(cmd).To(Equal(expectedCmd))
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
 		})
 	})
 
 	Describe("DeleteQuota", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "delete-quota", "quotaName", "-f")
-			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
-
 			cmd := generator.DeleteQuota("quotaName")
-
-			Expect(cmd).To(Equal(expectedCmd))
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
 		})
 	})
 
 	Describe("LogOut", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "logout")
-			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
-
 			cmd := generator.LogOut()
-
-			Expect(cmd).To(Equal(expectedCmd))
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
 		})
 	})
 
 	Describe("RecentLogs", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "logs", "appName", "--recent")
-			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
-
 			cmd := generator.RecentLogs("appName")
-
-			Expect(cmd).To(Equal(expectedCmd))
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
 		})
 	})
 
@@ -206,55 +166,50 @@ var _ = Describe("CfCmdGenerator", func() {
 			ctx, cancelFunc := context.WithTimeout(context.Background(), time.Second)
 			defer cancelFunc()
 			expectedCmd := exec.CommandContext(ctx, "cf", "logs", "appName")
-			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
-
 			cmd := generator.StreamLogs(ctx, "appName")
-
-			Expect(cmd).To(Equal(expectedCmd))
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
 		})
 	})
 
 	Describe("MapRoute", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "map-route", "appName", "tcp.example.com", "--port", "1025")
-			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
-
 			cmd := generator.MapRoute("appName", "tcp.example.com", 1025)
-
-			Expect(cmd).To(Equal(expectedCmd))
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
 		})
 	})
 
 	Describe("CreateUserProvidedService", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "create-user-provided-service", "serviceName", "-l", "syslog://tcp.example.com:54321")
-			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
-
 			cmd := generator.CreateUserProvidedService("serviceName", "syslog://tcp.example.com:54321")
-
-			Expect(cmd).To(Equal(expectedCmd))
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
 		})
 	})
 
 	Describe("BindService", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "bind-service", "appName", "serviceName")
-			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
-
 			cmd := generator.BindService("appName", "serviceName")
-
-			Expect(cmd).To(Equal(expectedCmd))
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
 		})
 	})
 
 	Describe("Restage", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "restage", "appName")
-			expectedCmd.Env = []string{fmt.Sprintf("CF_HOME=%s", cfHome)}
-
 			cmd := generator.Restage("appName")
-
-			Expect(cmd).To(Equal(expectedCmd))
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
 		})
 	})
 })
+
+func expectCommandToBeEquivalent(cmd cmdStartWaiter.CmdStartWaiter, expectedCmd *exec.Cmd, envIncludes ...string) {
+	ExpectWithOffset(1, cmd).To(BeAssignableToTypeOf(expectedCmd))
+	rawCmd := cmd.(*exec.Cmd)
+
+	ExpectWithOffset(1, rawCmd.Path).To(Equal(expectedCmd.Path))
+	ExpectWithOffset(1, rawCmd.Args).To(Equal(expectedCmd.Args))
+	ExpectWithOffset(1, rawCmd.Dir).To(Equal(expectedCmd.Dir))
+	ExpectWithOffset(1, rawCmd.Env).To(ContainElements(envIncludes))
+}

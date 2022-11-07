@@ -10,7 +10,7 @@ import (
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	. "github.com/cloudfoundry/uptimer/measurement"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

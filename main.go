@@ -37,6 +37,7 @@ func main() {
 	logger := log.New(os.Stdout, "\n[UPTIMER] ", log.Ldate|log.Ltime|log.LUTC)
 
 	useBuildpackDetection := flag.Bool("useBuildpackDetection", false, "Use buildpack detection (defaults to false)")
+	useQuotas := flag.Bool("useQuotas", true, "Create and set quotas for orgs (defaults to true)")
 	configPath := flag.String("configFile", "", "Path to the config file")
 	resultPath := flag.String("resultFile", "", "Path to the result file")
 	showVersion := flag.Bool("v", false, "Prints the version of uptimer and exits")
@@ -93,7 +94,7 @@ func main() {
 	bufferedRunner, runnerOutBuf, runnerErrBuf := createBufferedRunner()
 
 	pushCmdGenerator := cfCmdGenerator.New(pushTmpDir, *useBuildpackDetection)
-	pushWorkflow := createWorkflow(cfg.CF, appPath)
+	pushWorkflow := createWorkflow(cfg.CF, appPath, *useQuotas)
 	logger.Printf("Setting up push workflow with org %s ...", pushWorkflow.Org())
 	if err := bufferedRunner.RunInSequence(pushWorkflow.Setup(pushCmdGenerator)...); err != nil {
 		logBufferedRunnerFailure(logger, "push workflow setup", err, runnerOutBuf, runnerErrBuf)
@@ -116,7 +117,7 @@ func main() {
 	var sinkCmdGenerator cfCmdGenerator.CfCmdGenerator
 	if cfg.OptionalTests.RunAppSyslogAvailability {
 		sinkCmdGenerator = cfCmdGenerator.New(sinkTmpDir, *useBuildpackDetection)
-		sinkWorkflow = createWorkflow(cfg.CF, sinkAppPath)
+		sinkWorkflow = createWorkflow(cfg.CF, sinkAppPath, *useQuotas)
 		logger.Printf("Setting up sink workflow with org %s ...", sinkWorkflow.Org())
 		err = bufferedRunner.RunInSequence(
 			append(append(
@@ -132,7 +133,7 @@ func main() {
 	}
 
 	orcCmdGenerator := cfCmdGenerator.New(orcTmpDir, *useBuildpackDetection)
-	orcWorkflow := createWorkflow(cfg.CF, appPath)
+	orcWorkflow := createWorkflow(cfg.CF, appPath, *useQuotas)
 
 	authFailedRetryFunc := func(stdOut, stdErr string) bool {
 		authFailedMessage := "Authentication has expired.  Please log back in to re-authenticate."
@@ -255,12 +256,16 @@ func goManifest(appName string) string {
     GOPACKAGENAME: github.com/cloudfoundry/uptimer/%s`, appName, appName)
 }
 
-func createWorkflow(cfc *config.Cf, appPath string) cfWorkflow.CfWorkflow {
+func createWorkflow(cfc *config.Cf, appPath string, useQuotas bool) cfWorkflow.CfWorkflow {
+	var quota string
+	if useQuotas {
+		quota = fmt.Sprintf("uptimer-quota-%s", uuid.NewV4().String())
+	}
 	return cfWorkflow.New(
 		cfc,
 		fmt.Sprintf("uptimer-org-%s", uuid.NewV4().String()),
 		fmt.Sprintf("uptimer-space-%s", uuid.NewV4().String()),
-		fmt.Sprintf("uptimer-quota-%s", uuid.NewV4().String()),
+		quota,
 		fmt.Sprintf("uptimer-app-%s", uuid.NewV4().String()),
 		appPath,
 	)
