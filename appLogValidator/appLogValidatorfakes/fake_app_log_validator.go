@@ -31,15 +31,16 @@ func (fake *FakeAppLogValidator) IsNewer(arg1 string) (bool, error) {
 	fake.isNewerArgsForCall = append(fake.isNewerArgsForCall, struct {
 		arg1 string
 	}{arg1})
+	stub := fake.IsNewerStub
+	fakeReturns := fake.isNewerReturns
 	fake.recordInvocation("IsNewer", []interface{}{arg1})
 	fake.isNewerMutex.Unlock()
-	if fake.IsNewerStub != nil {
-		return fake.IsNewerStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.isNewerReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 

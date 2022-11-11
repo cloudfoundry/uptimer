@@ -21,7 +21,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/cloudfoundry/goshims/ioutilshim/ioutil_fake"
+	"code.cloudfoundry.org/goshims/ioutilshim/ioutil_fake"
 )
 
 var _ = Describe("Orchestrator", func() {

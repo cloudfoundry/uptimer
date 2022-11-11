@@ -228,15 +228,16 @@ func (fake *FakeCfCmdGenerator) Api(arg1 string) cmdStartWaiter.CmdStartWaiter {
 	fake.apiArgsForCall = append(fake.apiArgsForCall, struct {
 		arg1 string
 	}{arg1})
+	stub := fake.ApiStub
+	fakeReturns := fake.apiReturns
 	fake.recordInvocation("Api", []interface{}{arg1})
 	fake.apiMutex.Unlock()
-	if fake.ApiStub != nil {
-		return fake.ApiStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.apiReturns
 	return fakeReturns.result1
 }
 
@@ -289,15 +290,16 @@ func (fake *FakeCfCmdGenerator) Auth(arg1 string, arg2 string) cmdStartWaiter.Cm
 		arg1 string
 		arg2 string
 	}{arg1, arg2})
+	stub := fake.AuthStub
+	fakeReturns := fake.authReturns
 	fake.recordInvocation("Auth", []interface{}{arg1, arg2})
 	fake.authMutex.Unlock()
-	if fake.AuthStub != nil {
-		return fake.AuthStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.authReturns
 	return fakeReturns.result1
 }
 
@@ -350,15 +352,16 @@ func (fake *FakeCfCmdGenerator) BindService(arg1 string, arg2 string) cmdStartWa
 		arg1 string
 		arg2 string
 	}{arg1, arg2})
+	stub := fake.BindServiceStub
+	fakeReturns := fake.bindServiceReturns
 	fake.recordInvocation("BindService", []interface{}{arg1, arg2})
 	fake.bindServiceMutex.Unlock()
-	if fake.BindServiceStub != nil {
-		return fake.BindServiceStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.bindServiceReturns
 	return fakeReturns.result1
 }
 
@@ -410,15 +413,16 @@ func (fake *FakeCfCmdGenerator) CreateOrg(arg1 string) cmdStartWaiter.CmdStartWa
 	fake.createOrgArgsForCall = append(fake.createOrgArgsForCall, struct {
 		arg1 string
 	}{arg1})
+	stub := fake.CreateOrgStub
+	fakeReturns := fake.createOrgReturns
 	fake.recordInvocation("CreateOrg", []interface{}{arg1})
 	fake.createOrgMutex.Unlock()
-	if fake.CreateOrgStub != nil {
-		return fake.CreateOrgStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.createOrgReturns
 	return fakeReturns.result1
 }
 
@@ -470,15 +474,16 @@ func (fake *FakeCfCmdGenerator) CreateQuota(arg1 string) cmdStartWaiter.CmdStart
 	fake.createQuotaArgsForCall = append(fake.createQuotaArgsForCall, struct {
 		arg1 string
 	}{arg1})
+	stub := fake.CreateQuotaStub
+	fakeReturns := fake.createQuotaReturns
 	fake.recordInvocation("CreateQuota", []interface{}{arg1})
 	fake.createQuotaMutex.Unlock()
-	if fake.CreateQuotaStub != nil {
-		return fake.CreateQuotaStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.createQuotaReturns
 	return fakeReturns.result1
 }
 
@@ -531,15 +536,16 @@ func (fake *FakeCfCmdGenerator) CreateSpace(arg1 string, arg2 string) cmdStartWa
 		arg1 string
 		arg2 string
 	}{arg1, arg2})
+	stub := fake.CreateSpaceStub
+	fakeReturns := fake.createSpaceReturns
 	fake.recordInvocation("CreateSpace", []interface{}{arg1, arg2})
 	fake.createSpaceMutex.Unlock()
-	if fake.CreateSpaceStub != nil {
-		return fake.CreateSpaceStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.createSpaceReturns
 	return fakeReturns.result1
 }
 
@@ -592,15 +598,16 @@ func (fake *FakeCfCmdGenerator) CreateUserProvidedService(arg1 string, arg2 stri
 		arg1 string
 		arg2 string
 	}{arg1, arg2})
+	stub := fake.CreateUserProvidedServiceStub
+	fakeReturns := fake.createUserProvidedServiceReturns
 	fake.recordInvocation("CreateUserProvidedService", []interface{}{arg1, arg2})
 	fake.createUserProvidedServiceMutex.Unlock()
-	if fake.CreateUserProvidedServiceStub != nil {
-		return fake.CreateUserProvidedServiceStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.createUserProvidedServiceReturns
 	return fakeReturns.result1
 }
 
@@ -652,15 +659,16 @@ func (fake *FakeCfCmdGenerator) Delete(arg1 string) cmdStartWaiter.CmdStartWaite
 	fake.deleteArgsForCall = append(fake.deleteArgsForCall, struct {
 		arg1 string
 	}{arg1})
+	stub := fake.DeleteStub
+	fakeReturns := fake.deleteReturns
 	fake.recordInvocation("Delete", []interface{}{arg1})
 	fake.deleteMutex.Unlock()
-	if fake.DeleteStub != nil {
-		return fake.DeleteStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.deleteReturns
 	return fakeReturns.result1
 }
 
@@ -712,15 +720,16 @@ func (fake *FakeCfCmdGenerator) DeleteOrg(arg1 string) cmdStartWaiter.CmdStartWa
 	fake.deleteOrgArgsForCall = append(fake.deleteOrgArgsForCall, struct {
 		arg1 string
 	}{arg1})
+	stub := fake.DeleteOrgStub
+	fakeReturns := fake.deleteOrgReturns
 	fake.recordInvocation("DeleteOrg", []interface{}{arg1})
 	fake.deleteOrgMutex.Unlock()
-	if fake.DeleteOrgStub != nil {
-		return fake.DeleteOrgStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.deleteOrgReturns
 	return fakeReturns.result1
 }
 
@@ -772,15 +781,16 @@ func (fake *FakeCfCmdGenerator) DeleteQuota(arg1 string) cmdStartWaiter.CmdStart
 	fake.deleteQuotaArgsForCall = append(fake.deleteQuotaArgsForCall, struct {
 		arg1 string
 	}{arg1})
+	stub := fake.DeleteQuotaStub
+	fakeReturns := fake.deleteQuotaReturns
 	fake.recordInvocation("DeleteQuota", []interface{}{arg1})
 	fake.deleteQuotaMutex.Unlock()
-	if fake.DeleteQuotaStub != nil {
-		return fake.DeleteQuotaStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.deleteQuotaReturns
 	return fakeReturns.result1
 }
 
@@ -831,15 +841,16 @@ func (fake *FakeCfCmdGenerator) LogOut() cmdStartWaiter.CmdStartWaiter {
 	ret, specificReturn := fake.logOutReturnsOnCall[len(fake.logOutArgsForCall)]
 	fake.logOutArgsForCall = append(fake.logOutArgsForCall, struct {
 	}{})
+	stub := fake.LogOutStub
+	fakeReturns := fake.logOutReturns
 	fake.recordInvocation("LogOut", []interface{}{})
 	fake.logOutMutex.Unlock()
-	if fake.LogOutStub != nil {
-		return fake.LogOutStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.logOutReturns
 	return fakeReturns.result1
 }
 
@@ -886,15 +897,16 @@ func (fake *FakeCfCmdGenerator) MapRoute(arg1 string, arg2 string, arg3 int) cmd
 		arg2 string
 		arg3 int
 	}{arg1, arg2, arg3})
+	stub := fake.MapRouteStub
+	fakeReturns := fake.mapRouteReturns
 	fake.recordInvocation("MapRoute", []interface{}{arg1, arg2, arg3})
 	fake.mapRouteMutex.Unlock()
-	if fake.MapRouteStub != nil {
-		return fake.MapRouteStub(arg1, arg2, arg3)
+	if stub != nil {
+		return stub(arg1, arg2, arg3)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.mapRouteReturns
 	return fakeReturns.result1
 }
 
@@ -948,15 +960,16 @@ func (fake *FakeCfCmdGenerator) Push(arg1 string, arg2 string, arg3 int) cmdStar
 		arg2 string
 		arg3 int
 	}{arg1, arg2, arg3})
+	stub := fake.PushStub
+	fakeReturns := fake.pushReturns
 	fake.recordInvocation("Push", []interface{}{arg1, arg2, arg3})
 	fake.pushMutex.Unlock()
-	if fake.PushStub != nil {
-		return fake.PushStub(arg1, arg2, arg3)
+	if stub != nil {
+		return stub(arg1, arg2, arg3)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.pushReturns
 	return fakeReturns.result1
 }
 
@@ -1008,15 +1021,16 @@ func (fake *FakeCfCmdGenerator) RecentLogs(arg1 string) cmdStartWaiter.CmdStartW
 	fake.recentLogsArgsForCall = append(fake.recentLogsArgsForCall, struct {
 		arg1 string
 	}{arg1})
+	stub := fake.RecentLogsStub
+	fakeReturns := fake.recentLogsReturns
 	fake.recordInvocation("RecentLogs", []interface{}{arg1})
 	fake.recentLogsMutex.Unlock()
-	if fake.RecentLogsStub != nil {
-		return fake.RecentLogsStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.recentLogsReturns
 	return fakeReturns.result1
 }
 
@@ -1068,15 +1082,16 @@ func (fake *FakeCfCmdGenerator) Restage(arg1 string) cmdStartWaiter.CmdStartWait
 	fake.restageArgsForCall = append(fake.restageArgsForCall, struct {
 		arg1 string
 	}{arg1})
+	stub := fake.RestageStub
+	fakeReturns := fake.restageReturns
 	fake.recordInvocation("Restage", []interface{}{arg1})
 	fake.restageMutex.Unlock()
-	if fake.RestageStub != nil {
-		return fake.RestageStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.restageReturns
 	return fakeReturns.result1
 }
 
@@ -1129,15 +1144,16 @@ func (fake *FakeCfCmdGenerator) SetQuota(arg1 string, arg2 string) cmdStartWaite
 		arg1 string
 		arg2 string
 	}{arg1, arg2})
+	stub := fake.SetQuotaStub
+	fakeReturns := fake.setQuotaReturns
 	fake.recordInvocation("SetQuota", []interface{}{arg1, arg2})
 	fake.setQuotaMutex.Unlock()
-	if fake.SetQuotaStub != nil {
-		return fake.SetQuotaStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.setQuotaReturns
 	return fakeReturns.result1
 }
 
@@ -1190,15 +1206,16 @@ func (fake *FakeCfCmdGenerator) StreamLogs(arg1 context.Context, arg2 string) cm
 		arg1 context.Context
 		arg2 string
 	}{arg1, arg2})
+	stub := fake.StreamLogsStub
+	fakeReturns := fake.streamLogsReturns
 	fake.recordInvocation("StreamLogs", []interface{}{arg1, arg2})
 	fake.streamLogsMutex.Unlock()
-	if fake.StreamLogsStub != nil {
-		return fake.StreamLogsStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.streamLogsReturns
 	return fakeReturns.result1
 }
 
@@ -1251,15 +1268,16 @@ func (fake *FakeCfCmdGenerator) Target(arg1 string, arg2 string) cmdStartWaiter.
 		arg1 string
 		arg2 string
 	}{arg1, arg2})
+	stub := fake.TargetStub
+	fakeReturns := fake.targetReturns
 	fake.recordInvocation("Target", []interface{}{arg1, arg2})
 	fake.targetMutex.Unlock()
-	if fake.TargetStub != nil {
-		return fake.TargetStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.targetReturns
 	return fakeReturns.result1
 }
 

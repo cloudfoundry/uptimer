@@ -150,15 +150,16 @@ func (fake *FakeCfWorkflow) AppUrl() string {
 	ret, specificReturn := fake.appUrlReturnsOnCall[len(fake.appUrlArgsForCall)]
 	fake.appUrlArgsForCall = append(fake.appUrlArgsForCall, struct {
 	}{})
+	stub := fake.AppUrlStub
+	fakeReturns := fake.appUrlReturns
 	fake.recordInvocation("AppUrl", []interface{}{})
 	fake.appUrlMutex.Unlock()
-	if fake.AppUrlStub != nil {
-		return fake.AppUrlStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.appUrlReturns
 	return fakeReturns.result1
 }
 
@@ -204,15 +205,16 @@ func (fake *FakeCfWorkflow) CreateAndBindSyslogDrainService(arg1 cfCmdGenerator.
 		arg1 cfCmdGenerator.CfCmdGenerator
 		arg2 string
 	}{arg1, arg2})
+	stub := fake.CreateAndBindSyslogDrainServiceStub
+	fakeReturns := fake.createAndBindSyslogDrainServiceReturns
 	fake.recordInvocation("CreateAndBindSyslogDrainService", []interface{}{arg1, arg2})
 	fake.createAndBindSyslogDrainServiceMutex.Unlock()
-	if fake.CreateAndBindSyslogDrainServiceStub != nil {
-		return fake.CreateAndBindSyslogDrainServiceStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.createAndBindSyslogDrainServiceReturns
 	return fakeReturns.result1
 }
 
@@ -264,15 +266,16 @@ func (fake *FakeCfWorkflow) Delete(arg1 cfCmdGenerator.CfCmdGenerator) []cmdStar
 	fake.deleteArgsForCall = append(fake.deleteArgsForCall, struct {
 		arg1 cfCmdGenerator.CfCmdGenerator
 	}{arg1})
+	stub := fake.DeleteStub
+	fakeReturns := fake.deleteReturns
 	fake.recordInvocation("Delete", []interface{}{arg1})
 	fake.deleteMutex.Unlock()
-	if fake.DeleteStub != nil {
-		return fake.DeleteStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.deleteReturns
 	return fakeReturns.result1
 }
 
@@ -324,15 +327,16 @@ func (fake *FakeCfWorkflow) MapRoute(arg1 cfCmdGenerator.CfCmdGenerator) []cmdSt
 	fake.mapRouteArgsForCall = append(fake.mapRouteArgsForCall, struct {
 		arg1 cfCmdGenerator.CfCmdGenerator
 	}{arg1})
+	stub := fake.MapRouteStub
+	fakeReturns := fake.mapRouteReturns
 	fake.recordInvocation("MapRoute", []interface{}{arg1})
 	fake.mapRouteMutex.Unlock()
-	if fake.MapRouteStub != nil {
-		return fake.MapRouteStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.mapRouteReturns
 	return fakeReturns.result1
 }
 
@@ -383,15 +387,16 @@ func (fake *FakeCfWorkflow) Org() string {
 	ret, specificReturn := fake.orgReturnsOnCall[len(fake.orgArgsForCall)]
 	fake.orgArgsForCall = append(fake.orgArgsForCall, struct {
 	}{})
+	stub := fake.OrgStub
+	fakeReturns := fake.orgReturns
 	fake.recordInvocation("Org", []interface{}{})
 	fake.orgMutex.Unlock()
-	if fake.OrgStub != nil {
-		return fake.OrgStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.orgReturns
 	return fakeReturns.result1
 }
 
@@ -436,15 +441,16 @@ func (fake *FakeCfWorkflow) Push(arg1 cfCmdGenerator.CfCmdGenerator) []cmdStartW
 	fake.pushArgsForCall = append(fake.pushArgsForCall, struct {
 		arg1 cfCmdGenerator.CfCmdGenerator
 	}{arg1})
+	stub := fake.PushStub
+	fakeReturns := fake.pushReturns
 	fake.recordInvocation("Push", []interface{}{arg1})
 	fake.pushMutex.Unlock()
-	if fake.PushStub != nil {
-		return fake.PushStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.pushReturns
 	return fakeReturns.result1
 }
 
@@ -495,15 +501,16 @@ func (fake *FakeCfWorkflow) Quota() string {
 	ret, specificReturn := fake.quotaReturnsOnCall[len(fake.quotaArgsForCall)]
 	fake.quotaArgsForCall = append(fake.quotaArgsForCall, struct {
 	}{})
+	stub := fake.QuotaStub
+	fakeReturns := fake.quotaReturns
 	fake.recordInvocation("Quota", []interface{}{})
 	fake.quotaMutex.Unlock()
-	if fake.QuotaStub != nil {
-		return fake.QuotaStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.quotaReturns
 	return fakeReturns.result1
 }
 
@@ -548,15 +555,16 @@ func (fake *FakeCfWorkflow) RecentLogs(arg1 cfCmdGenerator.CfCmdGenerator) []cmd
 	fake.recentLogsArgsForCall = append(fake.recentLogsArgsForCall, struct {
 		arg1 cfCmdGenerator.CfCmdGenerator
 	}{arg1})
+	stub := fake.RecentLogsStub
+	fakeReturns := fake.recentLogsReturns
 	fake.recordInvocation("RecentLogs", []interface{}{arg1})
 	fake.recentLogsMutex.Unlock()
-	if fake.RecentLogsStub != nil {
-		return fake.RecentLogsStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.recentLogsReturns
 	return fakeReturns.result1
 }
 
@@ -608,15 +616,16 @@ func (fake *FakeCfWorkflow) Setup(arg1 cfCmdGenerator.CfCmdGenerator) []cmdStart
 	fake.setupArgsForCall = append(fake.setupArgsForCall, struct {
 		arg1 cfCmdGenerator.CfCmdGenerator
 	}{arg1})
+	stub := fake.SetupStub
+	fakeReturns := fake.setupReturns
 	fake.recordInvocation("Setup", []interface{}{arg1})
 	fake.setupMutex.Unlock()
-	if fake.SetupStub != nil {
-		return fake.SetupStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.setupReturns
 	return fakeReturns.result1
 }
 
@@ -667,15 +676,16 @@ func (fake *FakeCfWorkflow) Space() string {
 	ret, specificReturn := fake.spaceReturnsOnCall[len(fake.spaceArgsForCall)]
 	fake.spaceArgsForCall = append(fake.spaceArgsForCall, struct {
 	}{})
+	stub := fake.SpaceStub
+	fakeReturns := fake.spaceReturns
 	fake.recordInvocation("Space", []interface{}{})
 	fake.spaceMutex.Unlock()
-	if fake.SpaceStub != nil {
-		return fake.SpaceStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.spaceReturns
 	return fakeReturns.result1
 }
 
@@ -721,15 +731,16 @@ func (fake *FakeCfWorkflow) StreamLogs(arg1 context.Context, arg2 cfCmdGenerator
 		arg1 context.Context
 		arg2 cfCmdGenerator.CfCmdGenerator
 	}{arg1, arg2})
+	stub := fake.StreamLogsStub
+	fakeReturns := fake.streamLogsReturns
 	fake.recordInvocation("StreamLogs", []interface{}{arg1, arg2})
 	fake.streamLogsMutex.Unlock()
-	if fake.StreamLogsStub != nil {
-		return fake.StreamLogsStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.streamLogsReturns
 	return fakeReturns.result1
 }
 
@@ -781,15 +792,16 @@ func (fake *FakeCfWorkflow) TearDown(arg1 cfCmdGenerator.CfCmdGenerator) []cmdSt
 	fake.tearDownArgsForCall = append(fake.tearDownArgsForCall, struct {
 		arg1 cfCmdGenerator.CfCmdGenerator
 	}{arg1})
+	stub := fake.TearDownStub
+	fakeReturns := fake.tearDownReturns
 	fake.recordInvocation("TearDown", []interface{}{arg1})
 	fake.tearDownMutex.Unlock()
-	if fake.TearDownStub != nil {
-		return fake.TearDownStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.tearDownReturns
 	return fakeReturns.result1
 }
 

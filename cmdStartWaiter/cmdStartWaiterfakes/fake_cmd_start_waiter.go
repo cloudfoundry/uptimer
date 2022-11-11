@@ -62,15 +62,16 @@ func (fake *FakeCmdStartWaiter) Start() error {
 	ret, specificReturn := fake.startReturnsOnCall[len(fake.startArgsForCall)]
 	fake.startArgsForCall = append(fake.startArgsForCall, struct {
 	}{})
+	stub := fake.StartStub
+	fakeReturns := fake.startReturns
 	fake.recordInvocation("Start", []interface{}{})
 	fake.startMutex.Unlock()
-	if fake.StartStub != nil {
-		return fake.StartStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.startReturns
 	return fakeReturns.result1
 }
 
@@ -114,15 +115,16 @@ func (fake *FakeCmdStartWaiter) StderrPipe() (io.ReadCloser, error) {
 	ret, specificReturn := fake.stderrPipeReturnsOnCall[len(fake.stderrPipeArgsForCall)]
 	fake.stderrPipeArgsForCall = append(fake.stderrPipeArgsForCall, struct {
 	}{})
+	stub := fake.StderrPipeStub
+	fakeReturns := fake.stderrPipeReturns
 	fake.recordInvocation("StderrPipe", []interface{}{})
 	fake.stderrPipeMutex.Unlock()
-	if fake.StderrPipeStub != nil {
-		return fake.StderrPipeStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.stderrPipeReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -169,15 +171,16 @@ func (fake *FakeCmdStartWaiter) StdoutPipe() (io.ReadCloser, error) {
 	ret, specificReturn := fake.stdoutPipeReturnsOnCall[len(fake.stdoutPipeArgsForCall)]
 	fake.stdoutPipeArgsForCall = append(fake.stdoutPipeArgsForCall, struct {
 	}{})
+	stub := fake.StdoutPipeStub
+	fakeReturns := fake.stdoutPipeReturns
 	fake.recordInvocation("StdoutPipe", []interface{}{})
 	fake.stdoutPipeMutex.Unlock()
-	if fake.StdoutPipeStub != nil {
-		return fake.StdoutPipeStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.stdoutPipeReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -224,15 +227,16 @@ func (fake *FakeCmdStartWaiter) Wait() error {
 	ret, specificReturn := fake.waitReturnsOnCall[len(fake.waitArgsForCall)]
 	fake.waitArgsForCall = append(fake.waitArgsForCall, struct {
 	}{})
+	stub := fake.WaitStub
+	fakeReturns := fake.waitReturns
 	fake.recordInvocation("Wait", []interface{}{})
 	fake.waitMutex.Unlock()
-	if fake.WaitStub != nil {
-		return fake.WaitStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.waitReturns
 	return fakeReturns.result1
 }
 
