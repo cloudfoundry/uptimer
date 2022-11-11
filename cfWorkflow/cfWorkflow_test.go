@@ -9,7 +9,7 @@ import (
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	"github.com/cloudfoundry/uptimer/config"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
@@ -36,16 +36,16 @@ var _ = Describe("CfWorkflow", func() {
 			TCPDomain:     "tcp.jigglypuff.cf-app.com",
 			AvailablePort: 1025,
 		}
-	})
 
-	JustBeforeEach(func() {
 		ccg = cfCmdGenerator.New("/cfhome", false)
 		org = "someOrg"
 		space = "someSpace"
 		quota = "someQuota"
 		appName = "doraApp"
 		appPath = "this/is/an/app/path"
+	})
 
+	JustBeforeEach(func() {
 		cw = New(cfc, org, space, quota, appName, appPath)
 	})
 
@@ -137,6 +137,22 @@ var _ = Describe("CfWorkflow", func() {
 				},
 			))
 		})
+		When("Quotas are disabled", func() {
+			BeforeEach(func() { quota = "" })
+
+			It("returns a series of commands to create a new org and space without setting quotas", func() {
+				cmds := cw.Setup(ccg)
+
+				Expect(cmds).To(Equal(
+					[]cmdStartWaiter.CmdStartWaiter{
+						ccg.Api("jigglypuff.cf-app.com"),
+						ccg.Auth("pika", "chu"),
+						ccg.CreateOrg("someOrg"),
+						ccg.CreateSpace("someOrg", "someSpace"),
+					},
+				))
+			})
+		})
 	})
 
 	Describe("TearDown", func() {
@@ -152,6 +168,21 @@ var _ = Describe("CfWorkflow", func() {
 					ccg.LogOut(),
 				},
 			))
+		})
+		When("Quotas are disabled", func() {
+			BeforeEach(func() { quota = "" })
+			It("returns a set of commands to delete an org without deleting the quota", func() {
+				cmds := cw.TearDown(ccg)
+
+				Expect(cmds).To(Equal(
+					[]cmdStartWaiter.CmdStartWaiter{
+						ccg.Api("jigglypuff.cf-app.com"),
+						ccg.Auth("pika", "chu"),
+						ccg.DeleteOrg("someOrg"),
+						ccg.LogOut(),
+					},
+				))
+			})
 		})
 	})
 

@@ -65,14 +65,17 @@ func New(cfConfig *config.Cf, org, space, quota, appName, appPath string) CfWork
 }
 
 func (c *cfWorkflow) Setup(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
-	return []cmdStartWaiter.CmdStartWaiter{
+	ret := []cmdStartWaiter.CmdStartWaiter{
 		ccg.Api(c.cf.API),
 		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
 		ccg.CreateOrg(c.org),
 		ccg.CreateSpace(c.org, c.space),
-		ccg.CreateQuota(c.quota),
-		ccg.SetQuota(c.org, c.quota),
 	}
+	if c.quota != "" {
+		ret = append(ret, ccg.CreateQuota(c.quota), ccg.SetQuota(c.org, c.quota))
+	}
+
+	return ret
 }
 
 func (c *cfWorkflow) Push(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
@@ -99,13 +102,17 @@ func (c *cfWorkflow) Delete(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.
 }
 
 func (c *cfWorkflow) TearDown(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
-	return []cmdStartWaiter.CmdStartWaiter{
+	ret := []cmdStartWaiter.CmdStartWaiter{
 		ccg.Api(c.cf.API),
 		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
 		ccg.DeleteOrg(c.org),
-		ccg.DeleteQuota(c.quota),
-		ccg.LogOut(),
 	}
+	if c.quota != "" {
+		ret = append(ret, ccg.DeleteQuota(c.quota))
+	}
+	ret = append(ret, ccg.LogOut())
+
+	return ret
 }
 
 func (c *cfWorkflow) RecentLogs(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
