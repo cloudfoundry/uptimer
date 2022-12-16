@@ -23,7 +23,7 @@ func (t *tcpAvailability) SummaryPhrase() string {
 }
 
 func (t *tcpAvailability) PerformMeasurement() (string, string, string, bool) {
-	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", t.url, t.port, 5*time.Second))
+	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", t.url, t.port), 5*time.Second)
 	if err != nil {
 		return err.Error(), "", "", false
 	}
@@ -36,6 +36,7 @@ func (t *tcpAvailability) PerformMeasurement() (string, string, string, bool) {
 		return err.Error(), "", "", false
 	}
 	body := string(buf[:n])
+	fmt.Println(body)
 	if strings.Contains(body, "Hello from Uptimer.") {
 		return "", "", "", true
 	}

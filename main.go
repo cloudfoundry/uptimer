@@ -418,13 +418,12 @@ func createTcpAvailabilityMeasurement(
 	logger *log.Logger,
 	tcpAppWorkflow cfWorkflow.CfWorkflow,
 	tcpAppCmdGenerator cfCmdGenerator.CfCmdGenerator,
-	pushWorkFlowGeneratorFunc func() cfWorkflow.CfWorkflow,
 	allowedFailures config.AllowedFailures,
 	authFailedRetryFunc func(stdOut, stdErr string) bool,
 ) measurement.Measurement {
 	tcpAvailabilityMeasurement := measurement.NewTCPAvailability(
 		tcpAppWorkflow.AppUrl(),
-		tcpAppWorkflow.AppPort(),
+		tcpAppWorkflow.TCPPort(),
 	)
 
 	return measurement.NewPeriodic(

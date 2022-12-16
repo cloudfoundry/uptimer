@@ -15,6 +15,7 @@ type CfWorkflow interface {
 	Space() string
 	Quota() string
 	AppUrl() string
+	TCPPort() int
 
 	Setup(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 	Push(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter

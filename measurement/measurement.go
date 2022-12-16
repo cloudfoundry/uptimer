@@ -108,7 +108,7 @@ func NewRecentLogs(
 }
 
 func NewTCPAvailability(url string, port int) BaseMeasurement {
-	return &availability{
+	return &tcpAvailability{
 		name:          "TCP availability",
 		summaryPhrase: "perform netcat requests",
 		url:           url,
