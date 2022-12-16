@@ -124,11 +124,13 @@ func main() {
 			appPath,
 		)
 	}
-	tcpAppCmdGenerator := cfCmdGenerator.New(pushTmpDir, *useBuildpackDetection)
-	tcpAppWorkflow := createWorkflow(cfg.CF, tcpAppPath, *useQuotas)
 
+	var tcpAppWorkflow cfWorkflow.CfWorkflow
+	var tcpAppCmdGenerator cfCmdGenerator.CfCmdGenerator
 	if cfg.OptionalTests.RunTcpAvailability {
-		logger.Printf("Setting up tcp app workflow with org %s ...", tcpAppWorkflow.Org())
+		tcpAppCmdGenerator = cfCmdGenerator.New(pushTmpDir, *useBuildpackDetection)
+		tcpAppWorkflow = createWorkflow(cfg.CF, tcpAppPath, *useQuotas)
+		logger.Printf("SetCting up tcp app workflow with org %s ...", tcpAppWorkflow.Org())
 		err = bufferedRunner.RunInSequence(
 			append(append(
 				tcpAppWorkflow.Setup(tcpAppCmdGenerator),
@@ -187,8 +189,8 @@ func main() {
 			createTcpAvailabilityMeasurement(
 				clock,
 				logger,
-				tcpWorkflow,
-				tcpCmdGenerator,
+				tcpAppWorkflow,
+				tcpAppCmdGenerator,
 				cfg.AllowedFailures,
 				authFailedRetryFunc,
 			),
@@ -414,25 +416,27 @@ func createMeasurements(
 func createTcpAvailabilityMeasurement(
 	clock clock.Clock,
 	logger *log.Logger,
-	orcWorkflow cfWorkflow.CfWorkflow,
+	tcpAppWorkflow cfWorkflow.CfWorkflow,
+	tcpAppCmdGenerator cfCmdGenerator.CfCmdGenerator,
 	pushWorkFlowGeneratorFunc func() cfWorkflow.CfWorkflow,
-	recentLogsCmdGenerator, streamingLogsCmdGenerator, pushCmdGenerator cfCmdGenerator.CfCmdGenerator,
 	allowedFailures config.AllowedFailures,
 	authFailedRetryFunc func(stdOut, stdErr string) bool,
 ) measurement.Measurement {
-	r 
 	tcpAvailabilityMeasurement := measurement.NewTCPAvailability(
-		orcWorkflow.AppUrl(),
-		// &.Client{
-		// 	Timeout: 30 * time.Second,
-		// 	Transport: &http.Transport{
-		// 		TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
-		// 		DisableKeepAlives: true,
-		// 	},
-		// },
+		tcpAppWorkflow.AppUrl(),
+		tcpAppWorkflow.AppPort(),
+	)
+
+	return measurement.NewPeriodic(
+		logger,
+		clock,
+		time.Second,
+		tcpAvailabilityMeasurement,
+		measurement.NewResultSet(),
+		allowedFailures.TCPAvailability,
+		func(string, string) bool { return false },
 	)
 }
-
 
 func createAppSyslogAvailabilityMeasurement(
 	clock clock.Clock,

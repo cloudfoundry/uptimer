@@ -29,7 +29,7 @@ func main() {
 }
 
 func handleRequest(conn net.Conn) {
-	conn.Write([]byte("Message received.\n"))
+	conn.Write([]byte("Hello from Uptimer.\n"))
 	conn.Close()
 }
 `

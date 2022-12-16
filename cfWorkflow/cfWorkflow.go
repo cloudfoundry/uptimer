@@ -53,6 +53,14 @@ func (c *cfWorkflow) AppUrl() string {
 	return fmt.Sprintf("https://%s.%s", c.appName, c.cf.AppDomain)
 }
 
+func (c *cfWorkflow) TCPUrl() string {
+	return fmt.Sprintf("tcp.%s", c.cf.AppDomain)
+}
+
+func (c *cfWorkflow) TCPPort() int {
+	return c.cf.TCPPort
+}
+
 func New(cfConfig *config.Cf, org, space, quota, appName, appPath string) CfWorkflow {
 	return &cfWorkflow{
 		cf:      cfConfig,
@@ -133,7 +141,7 @@ func (c *cfWorkflow) StreamLogs(ctx context.Context, ccg cfCmdGenerator.CfCmdGen
 	}
 }
 
-func (c *cfWorkflow) MapTcpRoute(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
+func (c *cfWorkflow) MapTCPRoute(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
 	return []cmdStartWaiter.CmdStartWaiter{
 		ccg.Api(c.cf.API),
 		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
