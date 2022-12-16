@@ -1,5 +1,7 @@
 package tcpApp
 
+const Source = `package main
+
 import (
 	"fmt"
 	"net"
@@ -30,3 +32,4 @@ func handleRequest(conn net.Conn) {
 	conn.Write([]byte("Message received.\n"))
 	conn.Close()
 }
+`

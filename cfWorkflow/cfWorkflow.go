@@ -133,6 +133,16 @@ func (c *cfWorkflow) StreamLogs(ctx context.Context, ccg cfCmdGenerator.CfCmdGen
 	}
 }
 
+func (c *cfWorkflow) MapTcpRoute(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
+	return []cmdStartWaiter.CmdStartWaiter{
+		ccg.Api(c.cf.API),
+		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
+		ccg.Target(c.org, c.space),
+		ccg.MapRoute(c.appName, c.cf.TCPDomain, c.cf.TCPPort),
+	}
+}
+
+// Todo Rename this to MapSyslogAppRoute?
 func (c *cfWorkflow) MapRoute(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
 	return []cmdStartWaiter.CmdStartWaiter{
 		ccg.Api(c.cf.API),

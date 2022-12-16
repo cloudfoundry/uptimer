@@ -100,10 +100,10 @@ func NewRecentLogs(
 		name:                           "Recent logs",
 		summaryPhrase:                  "fetch recent logs",
 		recentLogsCommandGeneratorFunc: recentLogsCommandGeneratorFunc,
-		runner:          runner,
-		runnerOutBuf:    runnerOutBuf,
-		runnerErrBuf:    runnerErrBuf,
-		appLogValidator: appLogValidator,
+		runner:                         runner,
+		runnerOutBuf:                   runnerOutBuf,
+		runnerErrBuf:                   runnerErrBuf,
+		appLogValidator:                appLogValidator,
 	}
 }
 

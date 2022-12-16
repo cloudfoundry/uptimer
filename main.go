@@ -30,6 +30,7 @@ import (
 	"github.com/cloudfoundry/uptimer/measurement"
 	"github.com/cloudfoundry/uptimer/orchestrator"
 	"github.com/cloudfoundry/uptimer/syslogSink"
+	"github.com/cloudfoundry/uptimer/tcpApp"
 	"github.com/cloudfoundry/uptimer/version"
 )
 
@@ -76,6 +77,17 @@ func main() {
 	logger.Println("Finished preparing included app")
 	defer os.RemoveAll(appPath)
 
+	var tcpAppPath string
+	if cfg.OptionalTests.RunTcpAvailability {
+		tcpAppPath, err = prepareIncludedApp("tcpApp", tcpApp.Source)
+		if err != nil {
+			logger.Println("Failed to prepare included tcpAapp: ", err)
+			performMeasurements = false
+		}
+		logger.Println("Finished preparing included tcpApp")
+		defer os.RemoveAll(appPath)
+	}
+
 	var sinkAppPath string
 	if cfg.OptionalTests.RunAppSyslogAvailability {
 		logger.Println("Preparing included syslog sink app...")
@@ -111,6 +123,23 @@ func main() {
 			fmt.Sprintf("uptimer-app-%s", uuid.NewV4().String()),
 			appPath,
 		)
+	}
+	tcpAppCmdGenerator := cfCmdGenerator.New(pushTmpDir, *useBuildpackDetection)
+	tcpAppWorkflow := createWorkflow(cfg.CF, tcpAppPath, *useQuotas)
+
+	if cfg.OptionalTests.RunTcpAvailability {
+		logger.Printf("Setting up tcp app workflow with org %s ...", tcpAppWorkflow.Org())
+		err = bufferedRunner.RunInSequence(
+			append(append(
+				tcpAppWorkflow.Setup(tcpAppCmdGenerator),
+				tcpAppWorkflow.Push(tcpAppCmdGenerator)...),
+				tcpAppWorkflow.MapRoute(tcpAppCmdGenerator)...)...)
+		if err != nil {
+			logBufferedRunnerFailure(logger, "tcp workflow setup", err, runnerOutBuf, runnerErrBuf)
+			performMeasurements = false
+		} else {
+			logger.Println("Finished setting up tcp workflow")
+		}
 	}
 
 	var sinkWorkflow cfWorkflow.CfWorkflow
@@ -151,6 +180,20 @@ func main() {
 		cfg.AllowedFailures,
 		authFailedRetryFunc,
 	)
+
+	if cfg.OptionalTests.RunTcpAvailability {
+		measurements = append(
+			measurements,
+			createTcpAvailabilityMeasurement(
+				clock,
+				logger,
+				tcpWorkflow,
+				tcpCmdGenerator,
+				cfg.AllowedFailures,
+				authFailedRetryFunc,
+			),
+		)
+	}
 
 	if cfg.OptionalTests.RunAppSyslogAvailability {
 		measurements = append(
@@ -367,6 +410,29 @@ func createMeasurements(
 		),
 	}
 }
+
+func createTcpAvailabilityMeasurement(
+	clock clock.Clock,
+	logger *log.Logger,
+	orcWorkflow cfWorkflow.CfWorkflow,
+	pushWorkFlowGeneratorFunc func() cfWorkflow.CfWorkflow,
+	recentLogsCmdGenerator, streamingLogsCmdGenerator, pushCmdGenerator cfCmdGenerator.CfCmdGenerator,
+	allowedFailures config.AllowedFailures,
+	authFailedRetryFunc func(stdOut, stdErr string) bool,
+) measurement.Measurement {
+	r 
+	tcpAvailabilityMeasurement := measurement.NewTCPAvailability(
+		orcWorkflow.AppUrl(),
+		// &.Client{
+		// 	Timeout: 30 * time.Second,
+		// 	Transport: &http.Transport{
+		// 		TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
+		// 		DisableKeepAlives: true,
+		// 	},
+		// },
+	)
+}
+
 
 func createAppSyslogAvailabilityMeasurement(
 	clock clock.Clock,
