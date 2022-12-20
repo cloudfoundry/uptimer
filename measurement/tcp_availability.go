@@ -1,7 +1,9 @@
 package measurement
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"net"
 	"strings"
 	"time"
@@ -32,11 +34,11 @@ func (t *tcpAvailability) PerformMeasurement() (string, string, string, bool) {
 	buf := make([]byte, 1024)
 	n, err := conn.Read(buf)
 
-	if err != nil || n <= 0 {
+	if err != nil && !errors.Is(err, io.EOF) {
 		return err.Error(), "", "", false
 	}
 	body := string(buf[:n])
-	fmt.Println(body)
+
 	if strings.Contains(body, "Hello from Uptimer.") {
 		return "", "", "", true
 	}

@@ -85,7 +85,7 @@ func main() {
 			performMeasurements = false
 		}
 		logger.Println("Finished preparing included tcpApp")
-		defer os.RemoveAll(appPath)
+		defer os.RemoveAll(tcpAppPath)
 	}
 
 	var sinkAppPath string
