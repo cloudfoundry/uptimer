@@ -15,21 +15,26 @@ type CfWorkflow interface {
 	Space() string
 	Quota() string
 	AppUrl() string
+	TCPDomain() string
 	TCPPort() int
 
 	Setup(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 	Push(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
+	PushNoRoute(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
+	CreateTCPDomain(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 	Delete(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 	TearDown(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 	RecentLogs(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 	StreamLogs(context.Context, cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 
 	MapRoute(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
+	MapTCPRoute(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 	CreateAndBindSyslogDrainService(cfCmdGenerator.CfCmdGenerator, string) []cmdStartWaiter.CmdStartWaiter
 }
 
 type cfWorkflow struct {
-	cf *config.Cf
+	cf            *config.Cf
+	optionalTests *config.OptionalTests
 
 	appPath string
 	org     string
@@ -54,7 +59,7 @@ func (c *cfWorkflow) AppUrl() string {
 	return fmt.Sprintf("https://%s.%s", c.appName, c.cf.AppDomain)
 }
 
-func (c *cfWorkflow) TCPUrl() string {
+func (c *cfWorkflow) TCPDomain() string {
 	return fmt.Sprintf("tcp.%s", c.cf.AppDomain)
 }
 
@@ -97,10 +102,23 @@ func (c *cfWorkflow) Push(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.Cm
 		ccg.Api(c.cf.API),
 		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
 		ccg.Target(c.org, c.space),
-		ccg.Push(c.appName, c.appPath, appInstancesToPush),
+		ccg.Push(c.appName, c.appPath, appInstancesToPush, false),
 	}
 }
 
+func (c *cfWorkflow) PushNoRoute(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
+	appInstancesToPush := 2
+	if c.cf.UseSingleAppInstance {
+		appInstancesToPush = 1
+	}
+
+	return []cmdStartWaiter.CmdStartWaiter{
+		ccg.Api(c.cf.API),
+		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
+		ccg.Target(c.org, c.space),
+		ccg.Push(c.appName, c.appPath, appInstancesToPush, true),
+	}
+}
 func (c *cfWorkflow) Delete(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
 	return []cmdStartWaiter.CmdStartWaiter{
 		ccg.Api(c.cf.API),
@@ -116,6 +134,11 @@ func (c *cfWorkflow) TearDown(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaite
 		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
 		ccg.DeleteOrg(c.org),
 	}
+
+	if c.optionalTests.RunTcpAvailability {
+		ret = append(ret, ccg.DeleteDomain(c.cf.TCPDomain))
+	}
+
 	if c.quota != "" {
 		ret = append(ret, ccg.DeleteQuota(c.quota))
 	}
@@ -142,15 +165,6 @@ func (c *cfWorkflow) StreamLogs(ctx context.Context, ccg cfCmdGenerator.CfCmdGen
 	}
 }
 
-func (c *cfWorkflow) MapTCPRoute(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
-	return []cmdStartWaiter.CmdStartWaiter{
-		ccg.Api(c.cf.API),
-		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
-		ccg.Target(c.org, c.space),
-		ccg.MapRoute(c.appName, c.cf.TCPDomain, c.cf.TCPPort),
-	}
-}
-
 // Todo Rename this to MapSyslogAppRoute?
 func (c *cfWorkflow) MapRoute(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
 	return []cmdStartWaiter.CmdStartWaiter{
@@ -158,6 +172,24 @@ func (c *cfWorkflow) MapRoute(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaite
 		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
 		ccg.Target(c.org, c.space),
 		ccg.MapRoute(c.appName, c.cf.TCPDomain, c.cf.AvailablePort),
+	}
+}
+
+func (c *cfWorkflow) CreateTCPDomain(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
+	return []cmdStartWaiter.CmdStartWaiter{
+		ccg.Api(c.cf.API),
+		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
+		ccg.Target(c.org, c.space),
+		ccg.CreateDomain(c.cf.TCPDomain),
+	}
+}
+
+func (c *cfWorkflow) MapTCPRoute(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
+	return []cmdStartWaiter.CmdStartWaiter{
+		ccg.Api(c.cf.API),
+		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
+		ccg.Target(c.org, c.space),
+		ccg.MapRoute(c.appName, c.cf.TCPDomain, c.cf.TCPPort),
 	}
 }
 

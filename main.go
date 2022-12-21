@@ -130,12 +130,14 @@ func main() {
 	if cfg.OptionalTests.RunTcpAvailability {
 		tcpAppCmdGenerator = cfCmdGenerator.New(pushTmpDir, *useBuildpackDetection)
 		tcpAppWorkflow = createWorkflow(cfg.CF, tcpAppPath, *useQuotas)
-		logger.Printf("SetCting up tcp app workflow with org %s ...", tcpAppWorkflow.Org())
+		logger.Printf("Setting up tcp app workflow with org %s ...", tcpAppWorkflow.Org())
 		err = bufferedRunner.RunInSequence(
-			append(append(
+			append(append(append(
 				tcpAppWorkflow.Setup(tcpAppCmdGenerator),
-				tcpAppWorkflow.Push(tcpAppCmdGenerator)...),
-				tcpAppWorkflow.MapRoute(tcpAppCmdGenerator)...)...)
+				tcpAppWorkflow.CreateTCPDomain(tcpAppCmdGenerator)...),
+				tcpAppWorkflow.PushNoRoute(tcpAppCmdGenerator)...),
+				tcpAppWorkflow.MapTCPRoute(tcpAppCmdGenerator)...)...)
+
 		if err != nil {
 			logBufferedRunnerFailure(logger, "tcp workflow setup", err, runnerOutBuf, runnerErrBuf)
 			performMeasurements = false
@@ -422,9 +424,8 @@ func createTcpAvailabilityMeasurement(
 	authFailedRetryFunc func(stdOut, stdErr string) bool,
 ) measurement.Measurement {
 	tcpAvailabilityMeasurement := measurement.NewTCPAvailability(
-		tcpAppWorkflow.AppUrl(),
-		tcpAppWorkflow.TCPPort(),
-	)
+		tcpAppWorkflow.TCPDomain(),
+		tcpAppWorkflow.TCPPort())
 
 	return measurement.NewPeriodic(
 		logger,
