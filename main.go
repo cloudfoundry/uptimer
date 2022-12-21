@@ -97,7 +97,7 @@ func main() {
 		}
 		logger.Println("Finished preparing included syslog sink app")
 	}
-	orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, sinkTmpDir, err := createTmpDirs()
+	orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, tcpAppTmpDir, sinkTmpDir, err := createTmpDirs()
 	if err != nil {
 		logger.Println("Failed to create temp dirs:", err)
 		performMeasurements = false
@@ -128,7 +128,7 @@ func main() {
 	var tcpAppWorkflow cfWorkflow.CfWorkflow
 	var tcpAppCmdGenerator cfCmdGenerator.CfCmdGenerator
 	if cfg.OptionalTests.RunTcpAvailability {
-		tcpAppCmdGenerator = cfCmdGenerator.New(pushTmpDir, *useBuildpackDetection)
+		tcpAppCmdGenerator = cfCmdGenerator.New(tcpAppTmpDir, *useBuildpackDetection)
 		tcpAppWorkflow = createWorkflow(cfg.CF, tcpAppPath, *useQuotas)
 		logger.Printf("Setting up tcp app workflow with org %s ...", tcpAppWorkflow.Org())
 		err = bufferedRunner.RunInSequence(
@@ -249,7 +249,7 @@ func main() {
 	os.Exit(exitCode)
 }
 
-func createTmpDirs() (string, string, string, string, string, error) {
+func createTmpDirs() (string, string, string, string, string, string, error) {
 	orcTmpDir, err := ioutil.TempDir("", "uptimer")
 	if err != nil {
 		return "", "", "", "", "", err
@@ -266,12 +266,16 @@ func createTmpDirs() (string, string, string, string, string, error) {
 	if err != nil {
 		return "", "", "", "", "", err
 	}
+	tcpAppTmpDir, err := ioutil.TempDir("", "uptimer")
+	if err != nil {
+		return "", "", "", "", "", err
+	}
 	sinkTmpDir, err := ioutil.TempDir("", "uptimer")
 	if err != nil {
 		return "", "", "", "", "", err
 	}
 
-	return orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, sinkTmpDir, nil
+	return orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, tcpAppTmpDir, sinkTmpDir, nil
 }
 
 func prepareIncludedApp(name, source string) (string, error) {
