@@ -21,20 +21,18 @@ type CfWorkflow interface {
 	Setup(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 	Push(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 	PushNoRoute(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
-	CreateTCPDomain(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 	Delete(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 	TearDown(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 	RecentLogs(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 	StreamLogs(context.Context, cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 
-	MapRoute(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
+	MapSyslogRoute(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 	MapTCPRoute(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 	CreateAndBindSyslogDrainService(cfCmdGenerator.CfCmdGenerator, string) []cmdStartWaiter.CmdStartWaiter
 }
 
 type cfWorkflow struct {
-	cf            *config.Cf
-	optionalTests *config.OptionalTests
+	cf *config.Cf
 
 	appPath string
 	org     string
@@ -135,10 +133,6 @@ func (c *cfWorkflow) TearDown(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaite
 		ccg.DeleteOrg(c.org),
 	}
 
-	if c.optionalTests.RunTcpAvailability {
-		ret = append(ret, ccg.DeleteDomain(c.cf.TCPDomain))
-	}
-
 	if c.quota != "" {
 		ret = append(ret, ccg.DeleteQuota(c.quota))
 	}
@@ -165,22 +159,12 @@ func (c *cfWorkflow) StreamLogs(ctx context.Context, ccg cfCmdGenerator.CfCmdGen
 	}
 }
 
-// Todo Rename this to MapSyslogAppRoute?
-func (c *cfWorkflow) MapRoute(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
+func (c *cfWorkflow) MapSyslogRoute(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
 	return []cmdStartWaiter.CmdStartWaiter{
 		ccg.Api(c.cf.API),
 		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
 		ccg.Target(c.org, c.space),
 		ccg.MapRoute(c.appName, c.cf.TCPDomain, c.cf.AvailablePort),
-	}
-}
-
-func (c *cfWorkflow) CreateTCPDomain(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
-	return []cmdStartWaiter.CmdStartWaiter{
-		ccg.Api(c.cf.API),
-		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
-		ccg.Target(c.org, c.space),
-		ccg.CreateDomain(c.cf.TCPDomain),
 	}
 }
 

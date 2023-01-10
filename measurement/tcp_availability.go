@@ -31,6 +31,7 @@ func (t *tcpAvailability) PerformMeasurement() (string, string, string, bool) {
 	}
 	defer conn.Close()
 
+	conn.Write([]byte("knock-knock"))
 	buf := make([]byte, 1024)
 	n, err := conn.Read(buf)
 

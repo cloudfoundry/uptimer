@@ -118,11 +118,26 @@ if you understand
 the implications it has
 for your uptime measurements.
 
+### Creating TCP Domain (optional)
+If running `run_tcp_availability` or `run_app_syslog_availability`
+optional tests, you must create a tcp domain on your environment prior
+to running uptimer. To create a TCP domain, run:
+```
+cf create-shared-domain tcp.[SYSTEM_DOMAIN] --router-group default-tcp
+```
+Save the value of `tcp.[SYSTEM_DOMAIN]` in the uptimer config under `tcp_domain`.
+
 ### Optional tests (optional)
 The `optional_tests` section is optional,
 as are each entry in the section.
 If these values are omitted,
 they are assumed to be false.
+
+For the `run_tcp_availability` test,
+TCP routing is required,
+and you must specify
+the `tcp_domain` and `available_port` values
+in the `Cf` section of the configuration.
 
 For the `run_app_syslog_availability` test,
 TCP routing is required,

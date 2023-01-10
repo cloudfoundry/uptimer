@@ -18,9 +18,9 @@ var _ = Describe("TCPAvailability", func() {
 
 		am BaseMeasurement
 
-		server net.Listener
-		conn   net.Conn
-		err    error
+		listener net.Listener
+		conn     net.Conn
+		err      error
 	)
 
 	BeforeEach(func() {
@@ -45,7 +45,7 @@ var _ = Describe("TCPAvailability", func() {
 	Describe("PerformMeasurement", func() {
 		Context("When the measurement client gets the expected response", func() {
 			BeforeEach(func() {
-				server, err = net.Listen("tcp", fmt.Sprintf("%s:%d", url, port))
+				listener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", url, port))
 				if err != nil {
 					fmt.Println("Error listening: ", err.Error())
 					os.Exit(1)
@@ -53,7 +53,7 @@ var _ = Describe("TCPAvailability", func() {
 
 				// Listen for an incoming connection.
 				go func() {
-					conn, err = server.Accept()
+					conn, err = listener.Accept()
 					if err != nil {
 						fmt.Println("Error accepting: ", err.Error())
 						os.Exit(1)
@@ -72,7 +72,7 @@ var _ = Describe("TCPAvailability", func() {
 			})
 
 			AfterEach(func() {
-				server.Close()
+				listener.Close()
 			})
 
 			It("records a matching string as success", func() {
@@ -85,7 +85,7 @@ var _ = Describe("TCPAvailability", func() {
 
 		Context("When the measurement client does not get the expected response", func() {
 			BeforeEach(func() {
-				server, err = net.Listen("tcp", fmt.Sprintf("%s:%d", url, port))
+				listener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", url, port))
 				if err != nil {
 					fmt.Println("Error listening: ", err.Error())
 					os.Exit(1)
@@ -93,7 +93,7 @@ var _ = Describe("TCPAvailability", func() {
 
 				// Listen for an incoming connection.
 				go func() {
-					conn, err = server.Accept()
+					conn, err = listener.Accept()
 					if err != nil {
 						fmt.Println("Error accepting: ", err.Error())
 						os.Exit(1)
@@ -101,7 +101,7 @@ var _ = Describe("TCPAvailability", func() {
 					// Handle connections in a new goroutine.
 					go func(conn net.Conn) {
 
-						_, err = conn.Write([]byte(""))
+						_, err = conn.Write([]byte("Hello from Zuptimer."))
 						if err != nil {
 							fmt.Println("Error writing:", err.Error())
 							os.Exit(1)
@@ -112,12 +112,13 @@ var _ = Describe("TCPAvailability", func() {
 			})
 
 			AfterEach(func() {
-				server.Close()
+				listener.Close()
 			})
 
 			It("records a mismatched string as failure", func() {
 				err, _, _, res := am.PerformMeasurement()
 
+				listener.Close()
 				Expect(err).To(Equal("TCP App not returning expected response"))
 				Expect(res).To(BeFalse())
 			})

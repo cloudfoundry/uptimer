@@ -132,9 +132,8 @@ func main() {
 		tcpAppWorkflow = createWorkflow(cfg.CF, tcpAppPath, *useQuotas)
 		logger.Printf("Setting up tcp app workflow with org %s ...", tcpAppWorkflow.Org())
 		err = bufferedRunner.RunInSequence(
-			append(append(append(
+			append(append(
 				tcpAppWorkflow.Setup(tcpAppCmdGenerator),
-				tcpAppWorkflow.CreateTCPDomain(tcpAppCmdGenerator)...),
 				tcpAppWorkflow.PushNoRoute(tcpAppCmdGenerator)...),
 				tcpAppWorkflow.MapTCPRoute(tcpAppCmdGenerator)...)...)
 
@@ -156,7 +155,7 @@ func main() {
 			append(append(
 				sinkWorkflow.Setup(sinkCmdGenerator),
 				sinkWorkflow.Push(sinkCmdGenerator)...),
-				sinkWorkflow.MapRoute(sinkCmdGenerator)...)...)
+				sinkWorkflow.MapSyslogRoute(sinkCmdGenerator)...)...)
 		if err != nil {
 			logBufferedRunnerFailure(logger, "sink workflow setup", err, runnerOutBuf, runnerErrBuf)
 			performMeasurements = false
@@ -238,6 +237,8 @@ func main() {
 		logger,
 		pushWorkflow,
 		pushCmdGenerator,
+		tcpAppWorkflow,
+		tcpAppCmdGenerator,
 		sinkWorkflow,
 		sinkCmdGenerator,
 		bufferedRunner,
@@ -252,27 +253,27 @@ func main() {
 func createTmpDirs() (string, string, string, string, string, string, error) {
 	orcTmpDir, err := ioutil.TempDir("", "uptimer")
 	if err != nil {
-		return "", "", "", "", "", err
+		return "", "", "", "", "", "", err
 	}
 	recentLogsTmpDir, err := ioutil.TempDir("", "uptimer")
 	if err != nil {
-		return "", "", "", "", "", err
+		return "", "", "", "", "", "", err
 	}
 	streamingLogsTmpDir, err := ioutil.TempDir("", "uptimer")
 	if err != nil {
-		return "", "", "", "", "", err
+		return "", "", "", "", "", "", err
 	}
 	pushTmpDir, err := ioutil.TempDir("", "uptimer")
 	if err != nil {
-		return "", "", "", "", "", err
+		return "", "", "", "", "", "", err
 	}
 	tcpAppTmpDir, err := ioutil.TempDir("", "uptimer")
 	if err != nil {
-		return "", "", "", "", "", err
+		return "", "", "", "", "", "", err
 	}
 	sinkTmpDir, err := ioutil.TempDir("", "uptimer")
 	if err != nil {
-		return "", "", "", "", "", err
+		return "", "", "", "", "", "", err
 	}
 
 	return orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, tcpAppTmpDir, sinkTmpDir, nil
@@ -284,7 +285,7 @@ func prepareIncludedApp(name, source string) (string, error) {
 		return "", err
 	}
 
-	if err := ioutil.WriteFile(filepath.Join(dir, "main.go"), []byte(app.Source), 0644); err != nil {
+	if err := ioutil.WriteFile(filepath.Join(dir, "main.go"), []byte(source), 0644); err != nil {
 		os.RemoveAll(dir)
 		return "", err
 	}
@@ -502,6 +503,8 @@ func tearDown(
 	logger *log.Logger,
 	pushWorkflow cfWorkflow.CfWorkflow,
 	pushCmdGenerator cfCmdGenerator.CfCmdGenerator,
+	tcpWorkflow cfWorkflow.CfWorkflow,
+	tcpCmdGenerator cfCmdGenerator.CfCmdGenerator,
 	sinkWorkflow cfWorkflow.CfWorkflow,
 	sinkCmdGenerator cfCmdGenerator.CfCmdGenerator,
 	runner cmdRunner.CmdRunner,
@@ -516,6 +519,11 @@ func tearDown(
 		logBufferedRunnerFailure(logger, "push workflow teardown", err, runnerOutBuf, runnerErrBuf)
 	}
 
+	if tcpWorkflow != nil {
+		if err := runner.RunInSequence(tcpWorkflow.TearDown(tcpCmdGenerator)...); err != nil {
+			logBufferedRunnerFailure(logger, "tcp workflow teardown", err, runnerOutBuf, runnerErrBuf)
+		}
+	}
 	if sinkWorkflow != nil {
 		if err := runner.RunInSequence(sinkWorkflow.TearDown(sinkCmdGenerator)...); err != nil {
 			logBufferedRunnerFailure(logger, "sink workflow teardown", err, runnerOutBuf, runnerErrBuf)

@@ -35,6 +35,7 @@ var _ = Describe("CfWorkflow", func() {
 
 			TCPDomain:     "tcp.jigglypuff.cf-app.com",
 			AvailablePort: 1025,
+			TCPPort:       1026,
 		}
 
 		ccg = cfCmdGenerator.New("/cfhome", false)
@@ -82,7 +83,7 @@ var _ = Describe("CfWorkflow", func() {
 					ccg.Api("jigglypuff.cf-app.com"),
 					ccg.Auth("pika", "chu"),
 					ccg.Target("someOrg", "someSpace"),
-					ccg.Push("doraApp", "this/is/an/app/path", 2),
+					ccg.Push("doraApp", "this/is/an/app/path", 2, false),
 				},
 			))
 		})
@@ -100,10 +101,24 @@ var _ = Describe("CfWorkflow", func() {
 						ccg.Api("jigglypuff.cf-app.com"),
 						ccg.Auth("pika", "chu"),
 						ccg.Target("someOrg", "someSpace"),
-						ccg.Push("doraApp", "this/is/an/app/path", 1),
+						ccg.Push("doraApp", "this/is/an/app/path", 1, false),
 					},
 				))
 			})
+		})
+	})
+	Describe("PushNoRoute", func() {
+		It("calls the push command with the noStart flag as true", func() {
+			cmds := cw.PushNoRoute(ccg)
+
+			Expect(cmds).To(Equal(
+				[]cmdStartWaiter.CmdStartWaiter{
+					ccg.Api("jigglypuff.cf-app.com"),
+					ccg.Auth("pika", "chu"),
+					ccg.Target("someOrg", "someSpace"),
+					ccg.Push("doraApp", "this/is/an/app/path", 2, true),
+				},
+			))
 		})
 	})
 
@@ -218,9 +233,23 @@ var _ = Describe("CfWorkflow", func() {
 		})
 	})
 
-	Describe("MapRoute", func() {
+	Describe("MapTCPRoute", func() {
+		It("returns a set of commands to map a route to a tcp app", func() {
+			cmds := cw.MapTCPRoute(ccg)
+
+			Expect(cmds).To(Equal(
+				[]cmdStartWaiter.CmdStartWaiter{
+					ccg.Api("jigglypuff.cf-app.com"),
+					ccg.Auth("pika", "chu"),
+					ccg.Target("someOrg", "someSpace"),
+					ccg.MapRoute("doraApp", "tcp.jigglypuff.cf-app.com", 1026),
+				},
+			))
+		})
+	})
+	Describe("MapSyslogRoute", func() {
 		It("returns a set of commands to map a route to a syslog sink app", func() {
-			cmds := cw.MapRoute(ccg)
+			cmds := cw.MapSyslogRoute(ccg)
 
 			Expect(cmds).To(Equal(
 				[]cmdStartWaiter.CmdStartWaiter{
