@@ -58,7 +58,7 @@ func (c *cfWorkflow) AppUrl() string {
 }
 
 func (c *cfWorkflow) TCPDomain() string {
-	return fmt.Sprintf("tcp.%s", c.cf.AppDomain)
+	return fmt.Sprintf(c.cf.TCPDomain)
 }
 
 func (c *cfWorkflow) TCPPort() int {

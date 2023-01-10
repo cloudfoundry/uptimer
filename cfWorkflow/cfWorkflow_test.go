@@ -74,6 +74,16 @@ var _ = Describe("CfWorkflow", func() {
 		})
 	})
 
+	Describe("TCPDomain", func() {
+		It("returns the correct tcp domain", func() {
+			Expect(cw.TCPDomain()).To(Equal("tcp.jigglypuff.cf-app.com"))
+		})
+	})
+	Describe("TCPPort", func() {
+		It("returns the correct tcp port", func() {
+			Expect(cw.TCPPort()).To(Equal(1026))
+		})
+	})
 	Describe("Push", func() {
 		It("returns a series of commands to push an app with exactly 2 instances", func() {
 			cmds := cw.Push(ccg)
