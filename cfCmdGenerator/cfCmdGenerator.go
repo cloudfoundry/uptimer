@@ -18,12 +18,10 @@ type CfCmdGenerator interface {
 	SetQuota(org, quota string) cmdStartWaiter.CmdStartWaiter
 	CreateOrg(org string) cmdStartWaiter.CmdStartWaiter
 	CreateSpace(org, space string) cmdStartWaiter.CmdStartWaiter
-	CreateDomain(domain string) cmdStartWaiter.CmdStartWaiter
 	Target(org, space string) cmdStartWaiter.CmdStartWaiter
 	Push(name, path string, instances int, noRoute bool) cmdStartWaiter.CmdStartWaiter
 	Delete(name string) cmdStartWaiter.CmdStartWaiter
 	DeleteOrg(org string) cmdStartWaiter.CmdStartWaiter
-	DeleteDomain(domainString string) cmdStartWaiter.CmdStartWaiter
 	DeleteQuota(quota string) cmdStartWaiter.CmdStartWaiter
 	LogOut() cmdStartWaiter.CmdStartWaiter
 	RecentLogs(appName string) cmdStartWaiter.CmdStartWaiter
@@ -118,16 +116,6 @@ func (c *cfCmdGenerator) Target(org string, space string) cmdStartWaiter.CmdStar
 		),
 	)
 }
-func (c *cfCmdGenerator) CreateDomain(tcpDomain string) cmdStartWaiter.CmdStartWaiter {
-	return c.setCfHome(
-		exec.Command(
-			"cf", "create-shared-domain",
-			tcpDomain,
-			"--router-group", "default-tcp",
-		),
-	)
-}
-
 func (c *cfCmdGenerator) Push(name, path string, instances int, noRoute bool) cmdStartWaiter.CmdStartWaiter {
 	args := []string{
 		"push", name,
@@ -170,14 +158,6 @@ func (c *cfCmdGenerator) DeleteOrg(org string) cmdStartWaiter.CmdStartWaiter {
 	)
 }
 
-func (c *cfCmdGenerator) DeleteDomain(domain string) cmdStartWaiter.CmdStartWaiter {
-	return c.setCfHome(
-		exec.Command(
-			"cf", "delete-shared-domain", domain,
-			"-f",
-		),
-	)
-}
 func (c *cfCmdGenerator) DeleteQuota(quota string) cmdStartWaiter.CmdStartWaiter {
 	return c.setCfHome(
 		exec.Command(

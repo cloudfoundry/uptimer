@@ -147,12 +147,13 @@ type FakeCfCmdGenerator struct {
 	mapRouteReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
-	PushStub        func(string, string, int) cmdStartWaiter.CmdStartWaiter
+	PushStub        func(string, string, int, bool) cmdStartWaiter.CmdStartWaiter
 	pushMutex       sync.RWMutex
 	pushArgsForCall []struct {
 		arg1 string
 		arg2 string
 		arg3 int
+		arg4 bool
 	}
 	pushReturns struct {
 		result1 cmdStartWaiter.CmdStartWaiter
@@ -952,20 +953,21 @@ func (fake *FakeCfCmdGenerator) MapRouteReturnsOnCall(i int, result1 cmdStartWai
 	}{result1}
 }
 
-func (fake *FakeCfCmdGenerator) Push(arg1 string, arg2 string, arg3 int) cmdStartWaiter.CmdStartWaiter {
+func (fake *FakeCfCmdGenerator) Push(arg1 string, arg2 string, arg3 int, arg4 bool) cmdStartWaiter.CmdStartWaiter {
 	fake.pushMutex.Lock()
 	ret, specificReturn := fake.pushReturnsOnCall[len(fake.pushArgsForCall)]
 	fake.pushArgsForCall = append(fake.pushArgsForCall, struct {
 		arg1 string
 		arg2 string
 		arg3 int
-	}{arg1, arg2, arg3})
+		arg4 bool
+	}{arg1, arg2, arg3, arg4})
 	stub := fake.PushStub
 	fakeReturns := fake.pushReturns
-	fake.recordInvocation("Push", []interface{}{arg1, arg2, arg3})
+	fake.recordInvocation("Push", []interface{}{arg1, arg2, arg3, arg4})
 	fake.pushMutex.Unlock()
 	if stub != nil {
-		return stub(arg1, arg2, arg3)
+		return stub(arg1, arg2, arg3, arg4)
 	}
 	if specificReturn {
 		return ret.result1
@@ -979,17 +981,17 @@ func (fake *FakeCfCmdGenerator) PushCallCount() int {
 	return len(fake.pushArgsForCall)
 }
 
-func (fake *FakeCfCmdGenerator) PushCalls(stub func(string, string, int) cmdStartWaiter.CmdStartWaiter) {
+func (fake *FakeCfCmdGenerator) PushCalls(stub func(string, string, int, bool) cmdStartWaiter.CmdStartWaiter) {
 	fake.pushMutex.Lock()
 	defer fake.pushMutex.Unlock()
 	fake.PushStub = stub
 }
 
-func (fake *FakeCfCmdGenerator) PushArgsForCall(i int) (string, string, int) {
+func (fake *FakeCfCmdGenerator) PushArgsForCall(i int) (string, string, int, bool) {
 	fake.pushMutex.RLock()
 	defer fake.pushMutex.RUnlock()
 	argsForCall := fake.pushArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4
 }
 
 func (fake *FakeCfCmdGenerator) PushReturns(result1 cmdStartWaiter.CmdStartWaiter) {
