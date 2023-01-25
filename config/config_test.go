@@ -26,7 +26,7 @@ var _ = Describe("Config", func() {
 	})
 
 	Describe("#Validate", func() {
-		It("Returns no error if run_tcp_availability is set to true and tcp_domain and tcp_port are not provided", func() {
+		It("Returns no error if run_tcp_availability is set to true and tcp_domain and tcp_port not provided", func() {
 			cfg := config.Config{
 				CF: &config.Cf{
 					TCPDomain: "tcp.my-cf.com",

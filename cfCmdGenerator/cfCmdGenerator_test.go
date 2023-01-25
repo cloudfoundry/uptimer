@@ -120,8 +120,7 @@ var _ = Describe("CfCmdGenerator", func() {
 				expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar, "CF_STAGING_TIMEOUT=5")
 			})
 		})
-		Context("when the noStart flag is true", func() {
-
+		Context("when the noRoute flag is true", func() {
 			It("append the right flag to the cf cli", func() {
 				expectedCmd := exec.Command("cf", "push", "appName", "-f", "manifest.yml", "-i", "3", "-b", "go_buildpack", "--no-route")
 				expectedCmd.Dir = "path/to/app"

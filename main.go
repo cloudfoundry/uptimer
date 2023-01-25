@@ -77,15 +77,16 @@ func main() {
 	logger.Println("Finished preparing included app")
 	defer os.RemoveAll(appPath)
 
-	var tcpAppPath string
+	var tcpPath string
 	if cfg.OptionalTests.RunTcpAvailability {
-		tcpAppPath, err = prepareIncludedApp("tcpApp", tcpApp.Source)
+		logger.Println("Preparing included tcp app...")
+		tcpPath, err = prepareIncludedApp("tcpApp", tcpApp.Source)
 		if err != nil {
-			logger.Println("Failed to prepare included tcpAapp: ", err)
+			logger.Println("Failed to prepare included tcp app: ", err)
 			performMeasurements = false
 		}
-		logger.Println("Finished preparing included tcpApp")
-		defer os.RemoveAll(tcpAppPath)
+		logger.Println("Finished preparing included tcp app")
+		defer os.RemoveAll(tcpPath)
 	}
 
 	var sinkAppPath string
@@ -97,7 +98,7 @@ func main() {
 		}
 		logger.Println("Finished preparing included syslog sink app")
 	}
-	orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, tcpAppTmpDir, sinkTmpDir, err := createTmpDirs()
+	orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, tcpTmpDir, sinkTmpDir, err := createTmpDirs()
 	if err != nil {
 		logger.Println("Failed to create temp dirs:", err)
 		performMeasurements = false
@@ -125,17 +126,17 @@ func main() {
 		)
 	}
 
-	var tcpAppWorkflow cfWorkflow.CfWorkflow
-	var tcpAppCmdGenerator cfCmdGenerator.CfCmdGenerator
+	var tcpWorkflow cfWorkflow.CfWorkflow
+	var tcpCmdGenerator cfCmdGenerator.CfCmdGenerator
 	if cfg.OptionalTests.RunTcpAvailability {
-		tcpAppCmdGenerator = cfCmdGenerator.New(tcpAppTmpDir, *useBuildpackDetection)
-		tcpAppWorkflow = createWorkflow(cfg.CF, tcpAppPath, *useQuotas)
-		logger.Printf("Setting up tcp app workflow with org %s ...", tcpAppWorkflow.Org())
+		tcpCmdGenerator = cfCmdGenerator.New(tcpTmpDir, *useBuildpackDetection)
+		tcpWorkflow = createWorkflow(cfg.CF, tcpPath, *useQuotas)
+		logger.Printf("Setting up tcp app workflow with org %s ...", tcpWorkflow.Org())
 		err = bufferedRunner.RunInSequence(
 			append(append(
-				tcpAppWorkflow.Setup(tcpAppCmdGenerator),
-				tcpAppWorkflow.PushNoRoute(tcpAppCmdGenerator)...),
-				tcpAppWorkflow.MapTCPRoute(tcpAppCmdGenerator)...)...)
+				tcpWorkflow.Setup(tcpCmdGenerator),
+				tcpWorkflow.PushNoRoute(tcpCmdGenerator)...),
+				tcpWorkflow.MapTCPRoute(tcpCmdGenerator)...)...)
 
 		if err != nil {
 			logBufferedRunnerFailure(logger, "tcp workflow setup", err, runnerOutBuf, runnerErrBuf)
@@ -190,8 +191,8 @@ func main() {
 			createTcpAvailabilityMeasurement(
 				clock,
 				logger,
-				tcpAppWorkflow,
-				tcpAppCmdGenerator,
+				tcpWorkflow,
+				tcpCmdGenerator,
 				cfg.AllowedFailures,
 				authFailedRetryFunc,
 			),
@@ -237,8 +238,8 @@ func main() {
 		logger,
 		pushWorkflow,
 		pushCmdGenerator,
-		tcpAppWorkflow,
-		tcpAppCmdGenerator,
+		tcpWorkflow,
+		tcpCmdGenerator,
 		sinkWorkflow,
 		sinkCmdGenerator,
 		bufferedRunner,
@@ -267,7 +268,7 @@ func createTmpDirs() (string, string, string, string, string, string, error) {
 	if err != nil {
 		return "", "", "", "", "", "", err
 	}
-	tcpAppTmpDir, err := ioutil.TempDir("", "uptimer")
+	tcpTmpDir, err := ioutil.TempDir("", "uptimer")
 	if err != nil {
 		return "", "", "", "", "", "", err
 	}
@@ -276,7 +277,7 @@ func createTmpDirs() (string, string, string, string, string, string, error) {
 		return "", "", "", "", "", "", err
 	}
 
-	return orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, tcpAppTmpDir, sinkTmpDir, nil
+	return orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, tcpTmpDir, sinkTmpDir, nil
 }
 
 func prepareIncludedApp(name, source string) (string, error) {
@@ -423,14 +424,14 @@ func createMeasurements(
 func createTcpAvailabilityMeasurement(
 	clock clock.Clock,
 	logger *log.Logger,
-	tcpAppWorkflow cfWorkflow.CfWorkflow,
-	tcpAppCmdGenerator cfCmdGenerator.CfCmdGenerator,
+	tcpWorkflow cfWorkflow.CfWorkflow,
+	tcpCmdGenerator cfCmdGenerator.CfCmdGenerator,
 	allowedFailures config.AllowedFailures,
 	authFailedRetryFunc func(stdOut, stdErr string) bool,
 ) measurement.Measurement {
 	tcpAvailabilityMeasurement := measurement.NewTCPAvailability(
-		tcpAppWorkflow.TCPDomain(),
-		tcpAppWorkflow.TCPPort())
+		tcpWorkflow.TCPDomain(),
+		tcpWorkflow.TCPPort())
 
 	return measurement.NewPeriodic(
 		logger,

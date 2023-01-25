@@ -48,7 +48,6 @@ func handleRequest(conn net.Conn) {
         writeBuffer.WriteString("uptimer")
         writeBuffer.WriteString(":")
         writeBuffer.Write(buff[0:readBytes])
-        fmt.Printf("Message to %s: %s\n", remoteAddr, writeBuffer.String())
         conn.Write([]byte("Hello from Uptimer.\n"))
         if err != nil {
             fmt.Printf("Closing connection to %s: %s\n", remoteAddr, err.Error())
