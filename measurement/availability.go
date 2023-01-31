@@ -30,7 +30,10 @@ func (a *availability) PerformMeasurement() (string, string, string, bool) {
 
 	if res.StatusCode != http.StatusOK {
 		buf := new(bytes.Buffer)
-		buf.ReadFrom(res.Body)
+		_, err := buf.ReadFrom(res.Body)
+		if err != nil {
+			return err.Error(), "", "", false
+		}
 		return fmt.Sprintf("response had status %d; %s; %s", res.StatusCode, res.Status, buf.String()), "", "", false
 	}
 
