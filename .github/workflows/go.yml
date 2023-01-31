@@ -18,7 +18,7 @@ jobs:
     - uses: actions/setup-go@v3
       with:
         go-version-file: go.mod
-    - run: go run github.com/onsi/ginkgo/v2/ginkgo -r -p --randomize-all --randomize-suites --fail-on-pending --keep-going --trace
+    - run: go run github.com/onsi/ginkgo/v2/ginkgo -r -p --randomize-all --randomize-suites --fail-on-pending --keep-going --race --trace
 
   lint:
     runs-on: ubuntu-latest
