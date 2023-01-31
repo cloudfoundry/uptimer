@@ -1,7 +1,6 @@
 package main_test
 
 import (
-	"io/ioutil"
 	"os"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -10,7 +9,7 @@ import (
 
 var _ = Describe("Main", func() {
 	It("Prints error when when run_app_syslog_availability and tcp_domain and available_port are not provided", func() {
-		configFile, err := ioutil.TempFile("", "config")
+		configFile, err := os.CreateTemp("", "config")
 		Expect(err).ToNot(HaveOccurred())
 
 		defer os.Remove(configFile.Name())

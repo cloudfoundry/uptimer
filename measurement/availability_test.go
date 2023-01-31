@@ -9,7 +9,6 @@ import (
 	. "github.com/cloudfoundry/uptimer/measurement"
 
 	"bytes"
-	"io/ioutil"
 
 	"time"
 
@@ -33,12 +32,12 @@ var _ = Describe("Availability", func() {
 		fakeRoundTripper = &FakeRoundTripper{}
 		successResponse = &http.Response{
 			StatusCode: 200,
-			Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+			Body:       io.NopCloser(bytes.NewBufferString("")),
 		}
 		failResponse = &http.Response{
 			StatusCode: 400,
 			Status:     "Bad Request",
-			Body:       ioutil.NopCloser(bytes.NewBufferString("Body of the error here")),
+			Body:       io.NopCloser(bytes.NewBufferString("Body of the error here")),
 		}
 		fakeRoundTripper.RoundTripReturns(successResponse, nil)
 		client = &http.Client{
