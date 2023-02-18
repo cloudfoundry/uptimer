@@ -31,13 +31,17 @@ func (t *tcpAvailability) PerformMeasurement() (string, string, string, bool) {
 	}
 	defer conn.Close()
 
-	conn.Write([]byte("knock-knock"))
+	_, err = conn.Write([]byte("knock-knock"))
+	if err != nil {
+		return err.Error(), "", "", false
+	}
+
 	buf := make([]byte, 1024)
 	n, err := conn.Read(buf)
-
 	if err != nil && !errors.Is(err, io.EOF) {
 		return err.Error(), "", "", false
 	}
+
 	body := string(buf[:n])
 
 	if strings.Contains(body, "Hello from Uptimer.") {
