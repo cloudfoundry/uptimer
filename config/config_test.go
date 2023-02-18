@@ -1,7 +1,6 @@
 package config_test
 
 import (
-	"io/ioutil"
 	"os"
 
 	"github.com/cloudfoundry/uptimer/config"
@@ -16,7 +15,7 @@ var _ = Describe("Config", func() {
 	)
 
 	BeforeEach(func() {
-		configFile, err = ioutil.TempFile("", "config")
+		configFile, err = os.CreateTemp("", "config")
 		Expect(err).ToNot(HaveOccurred())
 	})
 

@@ -1,18 +1,10 @@
 resources:
-- name: uptimer-develop
+- name: uptimer
   type: git
   icon: github
   source:
     uri: https://github.com/cloudfoundry/uptimer.git
-    branch: develop
-
-- name: uptimer-main
-  type: git
-  icon: github
-  source:
-    uri: git@github.com:cloudfoundry/uptimer.git
     branch: main
-    private_key: ((uptimer_readwrite_deploy_key.private_key))
 
 - name: runtime-ci
   type: git
@@ -25,22 +17,8 @@ jobs:
 - name: run-unit-tests
   public: true
   plan:
-  - get: uptimer-develop
+  - get: uptimer
     trigger: true
   - get: runtime-ci
   - task: run-unit-tests
     file: runtime-ci/tasks/run-uptimer-unit-tests/task.yml
-    input_mapping:
-      uptimer: uptimer-develop
-
-- name: ship-it
-  public: true
-  serial: true
-  plan:
-  - get: runtime-ci
-  - get: uptimer-develop
-    passed:
-    - run-unit-tests
-  - put: uptimer-main
-    params:
-      repository: uptimer-develop

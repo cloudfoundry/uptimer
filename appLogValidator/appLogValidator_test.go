@@ -26,7 +26,8 @@ var _ = Describe("AppLogValidator", func() {
 
 		Context("the second time around...", func() {
 			BeforeEach(func() {
-				alv.IsNewer("[APP OUT 1500006820\n")
+				_, err := alv.IsNewer("[APP OUT 1500006820\n")
+				Expect(err).NotTo(HaveOccurred())
 			})
 
 			It("returns true if the next log's last line has a larger epoch value", func() {
@@ -72,7 +73,8 @@ var _ = Describe("AppLogValidator", func() {
 
 		Context("when the last line is not a number", func() {
 			BeforeEach(func() {
-				alv.IsNewer("[APP OUT 1510680926\n")
+				_, err := alv.IsNewer("[APP OUT 1510680926\n")
+				Expect(err).NotTo(HaveOccurred())
 			})
 
 			It("returns the last number line", func() {

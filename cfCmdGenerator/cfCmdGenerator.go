@@ -123,7 +123,7 @@ func (c *cfCmdGenerator) Push(name, path string, instances int, noRoute bool) cm
 		"-i", strconv.Itoa(instances),
 	}
 
-	if c.useBuildpackDetection == false {
+	if !c.useBuildpackDetection {
 		args = append(args, "-b", "go_buildpack")
 	}
 

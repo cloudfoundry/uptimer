@@ -7,7 +7,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -256,15 +255,15 @@ func createTmpDirs() (string, string, string, string, string, string, error) {
 	if err != nil {
 		return "", "", "", "", "", "", err
 	}
-	recentLogsTmpDir, err := ioutil.TempDir("", "uptimer")
+	recentLogsTmpDir, err := os.MkdirTemp("", "uptimer")
 	if err != nil {
 		return "", "", "", "", "", "", err
 	}
-	streamingLogsTmpDir, err := ioutil.TempDir("", "uptimer")
+	streamingLogsTmpDir, err := os.MkdirTemp("", "uptimer")
 	if err != nil {
 		return "", "", "", "", "", "", err
 	}
-	pushTmpDir, err := ioutil.TempDir("", "uptimer")
+	pushTmpDir, err := os.MkdirTemp("", "uptimer")
 	if err != nil {
 		return "", "", "", "", "", "", err
 	}
@@ -272,7 +271,7 @@ func createTmpDirs() (string, string, string, string, string, string, error) {
 	if err != nil {
 		return "", "", "", "", "", "", err
 	}
-	sinkTmpDir, err := ioutil.TempDir("", "uptimer")
+	sinkTmpDir, err := os.MkdirTemp("", "uptimer")
 	if err != nil {
 		return "", "", "", "", "", "", err
 	}
@@ -281,18 +280,18 @@ func createTmpDirs() (string, string, string, string, string, string, error) {
 }
 
 func prepareIncludedApp(name, source string) (string, error) {
-	dir, err := ioutil.TempDir("", "uptimer-sample-*")
+	dir, err := os.MkdirTemp("", "uptimer-sample-*")
 	if err != nil {
 		return "", err
 	}
 
-	if err := ioutil.WriteFile(filepath.Join(dir, "main.go"), []byte(source), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(app.Source), 0644); err != nil {
 		os.RemoveAll(dir)
 		return "", err
 	}
 
 	manifest := goManifest(name)
-	if err := ioutil.WriteFile(filepath.Join(dir, "manifest.yml"), []byte(manifest), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "manifest.yml"), []byte(manifest), 0644); err != nil {
 		os.RemoveAll(dir)
 		return "", err
 	}

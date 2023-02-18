@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"time"
 
 	. "github.com/cloudfoundry/uptimer/cmdRunner"
@@ -30,8 +29,8 @@ var _ = Describe("CmdRunner", func() {
 		errBuf = bytes.NewBuffer([]byte{})
 
 		fakeCmdStartWaiter = &cmdStartWaiterfakes.FakeCmdStartWaiter{}
-		fakeCmdStartWaiter.StdoutPipeReturns(ioutil.NopCloser(bytes.NewBufferString("")), nil)
-		fakeCmdStartWaiter.StderrPipeReturns(ioutil.NopCloser(bytes.NewBufferString("")), nil)
+		fakeCmdStartWaiter.StdoutPipeReturns(io.NopCloser(bytes.NewBufferString("")), nil)
+		fakeCmdStartWaiter.StderrPipeReturns(io.NopCloser(bytes.NewBufferString("")), nil)
 
 		runner = New(outBuf, errBuf, io.Copy)
 	})
@@ -62,7 +61,7 @@ var _ = Describe("CmdRunner", func() {
 		})
 
 		It("writes the command's stdout to outWriter", func() {
-			fakeCmdStartWaiter.StdoutPipeReturns(ioutil.NopCloser(bytes.NewBufferString("something happened on stdout")), nil)
+			fakeCmdStartWaiter.StdoutPipeReturns(io.NopCloser(bytes.NewBufferString("something happened on stdout")), nil)
 
 			err := runner.Run(fakeCmdStartWaiter)
 
@@ -71,7 +70,7 @@ var _ = Describe("CmdRunner", func() {
 		})
 
 		It("returns an error when failing to write the command's stdout to outWriter", func() {
-			fakeCmdStartWaiter.StdoutPipeReturns(ioutil.NopCloser(bytes.NewBufferString("")), fmt.Errorf("something bad happened"))
+			fakeCmdStartWaiter.StdoutPipeReturns(io.NopCloser(bytes.NewBufferString("")), fmt.Errorf("something bad happened"))
 
 			err := runner.Run(fakeCmdStartWaiter)
 
@@ -79,7 +78,7 @@ var _ = Describe("CmdRunner", func() {
 		})
 
 		It("writes the command's stderr to errWriter", func() {
-			fakeCmdStartWaiter.StderrPipeReturns(ioutil.NopCloser(bytes.NewBufferString("something happened on stderr")), nil)
+			fakeCmdStartWaiter.StderrPipeReturns(io.NopCloser(bytes.NewBufferString("something happened on stderr")), nil)
 
 			err := runner.Run(fakeCmdStartWaiter)
 
@@ -88,7 +87,7 @@ var _ = Describe("CmdRunner", func() {
 		})
 
 		It("returns an error when failing to write the command's stderr to errWriter", func() {
-			fakeCmdStartWaiter.StderrPipeReturns(ioutil.NopCloser(bytes.NewBufferString("")), fmt.Errorf("something bad happened"))
+			fakeCmdStartWaiter.StderrPipeReturns(io.NopCloser(bytes.NewBufferString("")), fmt.Errorf("something bad happened"))
 
 			err := runner.Run(fakeCmdStartWaiter)
 
@@ -163,10 +162,10 @@ var _ = Describe("CmdRunner", func() {
 
 		BeforeEach(func() {
 			fakeCmdStartWaiter2 = &cmdStartWaiterfakes.FakeCmdStartWaiter{}
-			fakeCmdStartWaiter2.StderrPipeReturns(ioutil.NopCloser(bytes.NewBufferString("")), nil)
+			fakeCmdStartWaiter2.StderrPipeReturns(io.NopCloser(bytes.NewBufferString("")), nil)
 
-			fakeCmdStartWaiter.StdoutPipeReturns(ioutil.NopCloser(bytes.NewBufferString("1")), nil)
-			fakeCmdStartWaiter2.StdoutPipeReturns(ioutil.NopCloser(bytes.NewBufferString("2")), nil)
+			fakeCmdStartWaiter.StdoutPipeReturns(io.NopCloser(bytes.NewBufferString("1")), nil)
+			fakeCmdStartWaiter2.StdoutPipeReturns(io.NopCloser(bytes.NewBufferString("2")), nil)
 		})
 
 		It("runs commands in sequence", func() {
@@ -177,8 +176,8 @@ var _ = Describe("CmdRunner", func() {
 		})
 
 		It("returns the error produced by the first command", func() {
-			fakeCmdStartWaiter.StdoutPipeReturns(ioutil.NopCloser(bytes.NewBufferString("")), fmt.Errorf("something bad happened"))
-			fakeCmdStartWaiter2.StdoutPipeReturns(ioutil.NopCloser(bytes.NewBufferString("")), fmt.Errorf("something even worse happened"))
+			fakeCmdStartWaiter.StdoutPipeReturns(io.NopCloser(bytes.NewBufferString("")), fmt.Errorf("something bad happened"))
+			fakeCmdStartWaiter2.StdoutPipeReturns(io.NopCloser(bytes.NewBufferString("")), fmt.Errorf("something even worse happened"))
 
 			err := runner.RunInSequence(fakeCmdStartWaiter, fakeCmdStartWaiter2)
 
@@ -187,7 +186,7 @@ var _ = Describe("CmdRunner", func() {
 		})
 
 		It("runs until it encounters an error, returning that error", func() {
-			fakeCmdStartWaiter2.StdoutPipeReturns(ioutil.NopCloser(bytes.NewBufferString("")), fmt.Errorf("something even worse happened"))
+			fakeCmdStartWaiter2.StdoutPipeReturns(io.NopCloser(bytes.NewBufferString("")), fmt.Errorf("something even worse happened"))
 
 			err := runner.RunInSequence(fakeCmdStartWaiter, fakeCmdStartWaiter2)
 
