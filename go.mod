@@ -5,7 +5,7 @@ go 1.18
 require (
 	code.cloudfoundry.org/goshims v0.11.0
 	github.com/benbjohnson/clock v1.3.0
-	github.com/onsi/ginkgo/v2 v2.8.1
+	github.com/onsi/ginkgo/v2 v2.8.3
 	github.com/onsi/gomega v1.27.1
 	github.com/satori/go.uuid v1.2.0
 )
