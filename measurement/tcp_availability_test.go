@@ -19,8 +19,6 @@ var _ = Describe("TCPAvailability", func() {
 		am BaseMeasurement
 
 		listener net.Listener
-		conn     net.Conn
-		err      error
 	)
 
 	BeforeEach(func() {
@@ -45,6 +43,7 @@ var _ = Describe("TCPAvailability", func() {
 	Describe("PerformMeasurement", func() {
 		Context("When the measurement client gets the expected response", func() {
 			BeforeEach(func() {
+				var err error
 				listener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", url, port))
 				if err != nil {
 					fmt.Println("Error listening: ", err.Error())
@@ -53,20 +52,20 @@ var _ = Describe("TCPAvailability", func() {
 
 				// Listen for an incoming connection.
 				go func() {
-					conn, err = listener.Accept()
+					conn, err := listener.Accept()
 					if err != nil {
 						fmt.Println("Error accepting: ", err.Error())
 						os.Exit(1)
 					}
 					// Handle connections in a new goroutine.
 					go func(conn net.Conn) {
+						defer conn.Close()
 
-						_, err = conn.Write([]byte("Hello from Uptimer."))
+						_, err := conn.Write([]byte("Hello from Uptimer."))
 						if err != nil {
 							fmt.Println("Error writing:", err.Error())
 							os.Exit(1)
 						}
-						conn.Close()
 					}(conn)
 				}()
 			})
@@ -85,6 +84,7 @@ var _ = Describe("TCPAvailability", func() {
 
 		Context("When the measurement client does not get the expected response", func() {
 			BeforeEach(func() {
+				var err error
 				listener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", url, port))
 				if err != nil {
 					fmt.Println("Error listening: ", err.Error())
@@ -93,26 +93,22 @@ var _ = Describe("TCPAvailability", func() {
 
 				// Listen for an incoming connection.
 				go func() {
-					conn, err = listener.Accept()
+					conn, err := listener.Accept()
 					if err != nil {
 						fmt.Println("Error accepting: ", err.Error())
 						os.Exit(1)
 					}
 					// Handle connections in a new goroutine.
 					go func(conn net.Conn) {
+						defer conn.Close()
 
-						_, err = conn.Write([]byte("Hello from Zuptimer."))
+						_, err := conn.Write([]byte("Hello from Zuptimer."))
 						if err != nil {
 							fmt.Println("Error writing:", err.Error())
 							os.Exit(1)
 						}
-						conn.Close()
 					}(conn)
 				}()
-			})
-
-			AfterEach(func() {
-				listener.Close()
 			})
 
 			It("records a mismatched string as failure", func() {
