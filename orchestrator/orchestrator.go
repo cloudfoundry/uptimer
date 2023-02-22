@@ -1,15 +1,17 @@
+//go:build !windows
 // +build !windows
 
 package orchestrator
 
 import (
-	"code.cloudfoundry.org/goshims/ioutilshim"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"syscall"
+
+	"code.cloudfoundry.org/goshims/ioutilshim"
 
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
 	"github.com/cloudfoundry/uptimer/cfWorkflow"

@@ -25,6 +25,7 @@ type Cf struct {
 	AdminPassword string `json:"admin_password"`
 
 	TCPDomain     string `json:"tcp_domain"`
+	TCPPort       int    `json:"tcp_port"`
 	AvailablePort int    `json:"available_port"`
 
 	UseSingleAppInstance bool `json:"use_single_app_instance"`
@@ -36,10 +37,12 @@ type AllowedFailures struct {
 	RecentLogs            int `json:"recent_logs"`
 	StreamingLogs         int `json:"streaming_logs"`
 	AppSyslogAvailability int `json:"app_syslog_availability"`
+	TCPAvailability       int `json:"tcp_availability"`
 }
 
 type OptionalTests struct {
 	RunAppSyslogAvailability bool `json:"run_app_syslog_availability"`
+	RunTcpAvailability       bool `json:"run_tcp_availability"`
 }
 
 func Load(filename string) (*Config, error) {
@@ -58,6 +61,11 @@ func (c Config) Validate() error {
 	if c.OptionalTests.RunAppSyslogAvailability {
 		if c.CF != nil && (c.CF.TCPDomain == "" || c.CF.AvailablePort == 0) {
 			return errors.New("`cf.tcp_domain` and `cf.available_port` must be set in order to run App Syslog Availability tests.")
+		}
+	}
+	if c.OptionalTests.RunTcpAvailability {
+		if c.CF != nil && (c.CF.TCPDomain == "" || c.CF.TCPPort == 0) {
+			return errors.New("`cf.tcp_domain` and `cf.tcp_port` must be set in order to run TCP Availability tests.")
 		}
 	}
 	return nil

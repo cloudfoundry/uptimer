@@ -100,13 +100,21 @@ func NewRecentLogs(
 		name:                           "Recent logs",
 		summaryPhrase:                  "fetch recent logs",
 		recentLogsCommandGeneratorFunc: recentLogsCommandGeneratorFunc,
-		runner:          runner,
-		runnerOutBuf:    runnerOutBuf,
-		runnerErrBuf:    runnerErrBuf,
-		appLogValidator: appLogValidator,
+		runner:                         runner,
+		runnerOutBuf:                   runnerOutBuf,
+		runnerErrBuf:                   runnerErrBuf,
+		appLogValidator:                appLogValidator,
 	}
 }
 
+func NewTCPAvailability(url string, port int) BaseMeasurement {
+	return &tcpAvailability{
+		name:          "TCP availability",
+		summaryPhrase: "perform netcat requests",
+		url:           url,
+		port:          port,
+	}
+}
 func NewSyslogDrain(
 	recentLogsCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter,
 	runner cmdRunner.CmdRunner,
@@ -118,10 +126,10 @@ func NewSyslogDrain(
 		name:                           "App syslog availability",
 		summaryPhrase:                  "check application syslogs",
 		recentLogsCommandGeneratorFunc: recentLogsCommandGeneratorFunc,
-		runner:          runner,
-		runnerOutBuf:    runnerOutBuf,
-		runnerErrBuf:    runnerErrBuf,
-		appLogValidator: appLogValidator,
+		runner:                         runner,
+		runnerOutBuf:                   runnerOutBuf,
+		runnerErrBuf:                   runnerErrBuf,
+		appLogValidator:                appLogValidator,
 	}
 }
 
@@ -136,10 +144,10 @@ func NewStreamingLogs(
 		name:                           "Streaming logs",
 		summaryPhrase:                  "stream logs",
 		streamLogsCommandGeneratorFunc: streamLogsCommandGeneratorFunc,
-		runner:          runner,
-		runnerOutBuf:    runnerOutBuf,
-		runnerErrBuf:    runnerErrBuf,
-		appLogValidator: appLogValidator,
+		runner:                         runner,
+		runnerOutBuf:                   runnerOutBuf,
+		runnerErrBuf:                   runnerErrBuf,
+		appLogValidator:                appLogValidator,
 	}
 }
 
@@ -153,8 +161,8 @@ func NewAppPushability(
 		name:                                 "App pushability",
 		summaryPhrase:                        "push and delete an app",
 		pushAndDeleteAppCommandGeneratorFunc: pushAndDeleteAppCommandGeneratorFunc,
-		runner:       runner,
-		runnerOutBuf: runnerOutBuf,
-		runnerErrBuf: runnerErrBuf,
+		runner:                               runner,
+		runnerOutBuf:                         runnerOutBuf,
+		runnerErrBuf:                         runnerErrBuf,
 	}
 }

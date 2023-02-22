@@ -2,9 +2,10 @@ package cfCmdGenerator_test
 
 import (
 	"context"
-	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	"os/exec"
 	"time"
+
+	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 
 	. "github.com/cloudfoundry/uptimer/cfCmdGenerator"
 
@@ -102,7 +103,7 @@ var _ = Describe("CfCmdGenerator", func() {
 			expectedCmd := exec.Command("cf", "push", "appName", "-f", "manifest.yml", "-i", "3", "-b", "go_buildpack")
 			expectedCmd.Dir = "path/to/app"
 
-			cmd := generator.Push("appName", "path/to/app", 3)
+			cmd := generator.Push("appName", "path/to/app", 3, false)
 			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar, "CF_STAGING_TIMEOUT=5")
 		})
 
@@ -115,7 +116,15 @@ var _ = Describe("CfCmdGenerator", func() {
 			It("should not specify the go_buildpack", func() {
 				expectedCmd := exec.Command("cf", "push", "appName", "-f", "manifest.yml", "-i", "3")
 				expectedCmd.Dir = "path/to/app"
-				cmd := generator.Push("appName", "path/to/app", 3)
+				cmd := generator.Push("appName", "path/to/app", 3, false)
+				expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar, "CF_STAGING_TIMEOUT=5")
+			})
+		})
+		Context("when the noRoute flag is true", func() {
+			It("append the right flag to the cf cli", func() {
+				expectedCmd := exec.Command("cf", "push", "appName", "-f", "manifest.yml", "-i", "3", "-b", "go_buildpack", "--no-route")
+				expectedCmd.Dir = "path/to/app"
+				cmd := generator.Push("appName", "path/to/app", 3, true)
 				expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar, "CF_STAGING_TIMEOUT=5")
 			})
 		})

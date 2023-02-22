@@ -44,15 +44,26 @@ type FakeCfWorkflow struct {
 	deleteReturnsOnCall map[int]struct {
 		result1 []cmdStartWaiter.CmdStartWaiter
 	}
-	MapRouteStub        func(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
-	mapRouteMutex       sync.RWMutex
-	mapRouteArgsForCall []struct {
+	MapSyslogRouteStub        func(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
+	mapSyslogRouteMutex       sync.RWMutex
+	mapSyslogRouteArgsForCall []struct {
 		arg1 cfCmdGenerator.CfCmdGenerator
 	}
-	mapRouteReturns struct {
+	mapSyslogRouteReturns struct {
 		result1 []cmdStartWaiter.CmdStartWaiter
 	}
-	mapRouteReturnsOnCall map[int]struct {
+	mapSyslogRouteReturnsOnCall map[int]struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}
+	MapTCPRouteStub        func(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
+	mapTCPRouteMutex       sync.RWMutex
+	mapTCPRouteArgsForCall []struct {
+		arg1 cfCmdGenerator.CfCmdGenerator
+	}
+	mapTCPRouteReturns struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}
+	mapTCPRouteReturnsOnCall map[int]struct {
 		result1 []cmdStartWaiter.CmdStartWaiter
 	}
 	OrgStub        func() string
@@ -74,6 +85,17 @@ type FakeCfWorkflow struct {
 		result1 []cmdStartWaiter.CmdStartWaiter
 	}
 	pushReturnsOnCall map[int]struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}
+	PushNoRouteStub        func(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
+	pushNoRouteMutex       sync.RWMutex
+	pushNoRouteArgsForCall []struct {
+		arg1 cfCmdGenerator.CfCmdGenerator
+	}
+	pushNoRouteReturns struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}
+	pushNoRouteReturnsOnCall map[int]struct {
 		result1 []cmdStartWaiter.CmdStartWaiter
 	}
 	QuotaStub        func() string
@@ -129,6 +151,26 @@ type FakeCfWorkflow struct {
 	}
 	streamLogsReturnsOnCall map[int]struct {
 		result1 []cmdStartWaiter.CmdStartWaiter
+	}
+	TCPDomainStub        func() string
+	tCPDomainMutex       sync.RWMutex
+	tCPDomainArgsForCall []struct {
+	}
+	tCPDomainReturns struct {
+		result1 string
+	}
+	tCPDomainReturnsOnCall map[int]struct {
+		result1 string
+	}
+	TCPPortStub        func() int
+	tCPPortMutex       sync.RWMutex
+	tCPPortArgsForCall []struct {
+	}
+	tCPPortReturns struct {
+		result1 int
+	}
+	tCPPortReturnsOnCall map[int]struct {
+		result1 int
 	}
 	TearDownStub        func(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 	tearDownMutex       sync.RWMutex
@@ -321,16 +363,16 @@ func (fake *FakeCfWorkflow) DeleteReturnsOnCall(i int, result1 []cmdStartWaiter.
 	}{result1}
 }
 
-func (fake *FakeCfWorkflow) MapRoute(arg1 cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
-	fake.mapRouteMutex.Lock()
-	ret, specificReturn := fake.mapRouteReturnsOnCall[len(fake.mapRouteArgsForCall)]
-	fake.mapRouteArgsForCall = append(fake.mapRouteArgsForCall, struct {
+func (fake *FakeCfWorkflow) MapSyslogRoute(arg1 cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
+	fake.mapSyslogRouteMutex.Lock()
+	ret, specificReturn := fake.mapSyslogRouteReturnsOnCall[len(fake.mapSyslogRouteArgsForCall)]
+	fake.mapSyslogRouteArgsForCall = append(fake.mapSyslogRouteArgsForCall, struct {
 		arg1 cfCmdGenerator.CfCmdGenerator
 	}{arg1})
-	stub := fake.MapRouteStub
-	fakeReturns := fake.mapRouteReturns
-	fake.recordInvocation("MapRoute", []interface{}{arg1})
-	fake.mapRouteMutex.Unlock()
+	stub := fake.MapSyslogRouteStub
+	fakeReturns := fake.mapSyslogRouteReturns
+	fake.recordInvocation("MapSyslogRoute", []interface{}{arg1})
+	fake.mapSyslogRouteMutex.Unlock()
 	if stub != nil {
 		return stub(arg1)
 	}
@@ -340,44 +382,105 @@ func (fake *FakeCfWorkflow) MapRoute(arg1 cfCmdGenerator.CfCmdGenerator) []cmdSt
 	return fakeReturns.result1
 }
 
-func (fake *FakeCfWorkflow) MapRouteCallCount() int {
-	fake.mapRouteMutex.RLock()
-	defer fake.mapRouteMutex.RUnlock()
-	return len(fake.mapRouteArgsForCall)
+func (fake *FakeCfWorkflow) MapSyslogRouteCallCount() int {
+	fake.mapSyslogRouteMutex.RLock()
+	defer fake.mapSyslogRouteMutex.RUnlock()
+	return len(fake.mapSyslogRouteArgsForCall)
 }
 
-func (fake *FakeCfWorkflow) MapRouteCalls(stub func(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter) {
-	fake.mapRouteMutex.Lock()
-	defer fake.mapRouteMutex.Unlock()
-	fake.MapRouteStub = stub
+func (fake *FakeCfWorkflow) MapSyslogRouteCalls(stub func(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter) {
+	fake.mapSyslogRouteMutex.Lock()
+	defer fake.mapSyslogRouteMutex.Unlock()
+	fake.MapSyslogRouteStub = stub
 }
 
-func (fake *FakeCfWorkflow) MapRouteArgsForCall(i int) cfCmdGenerator.CfCmdGenerator {
-	fake.mapRouteMutex.RLock()
-	defer fake.mapRouteMutex.RUnlock()
-	argsForCall := fake.mapRouteArgsForCall[i]
+func (fake *FakeCfWorkflow) MapSyslogRouteArgsForCall(i int) cfCmdGenerator.CfCmdGenerator {
+	fake.mapSyslogRouteMutex.RLock()
+	defer fake.mapSyslogRouteMutex.RUnlock()
+	argsForCall := fake.mapSyslogRouteArgsForCall[i]
 	return argsForCall.arg1
 }
 
-func (fake *FakeCfWorkflow) MapRouteReturns(result1 []cmdStartWaiter.CmdStartWaiter) {
-	fake.mapRouteMutex.Lock()
-	defer fake.mapRouteMutex.Unlock()
-	fake.MapRouteStub = nil
-	fake.mapRouteReturns = struct {
+func (fake *FakeCfWorkflow) MapSyslogRouteReturns(result1 []cmdStartWaiter.CmdStartWaiter) {
+	fake.mapSyslogRouteMutex.Lock()
+	defer fake.mapSyslogRouteMutex.Unlock()
+	fake.MapSyslogRouteStub = nil
+	fake.mapSyslogRouteReturns = struct {
 		result1 []cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
 
-func (fake *FakeCfWorkflow) MapRouteReturnsOnCall(i int, result1 []cmdStartWaiter.CmdStartWaiter) {
-	fake.mapRouteMutex.Lock()
-	defer fake.mapRouteMutex.Unlock()
-	fake.MapRouteStub = nil
-	if fake.mapRouteReturnsOnCall == nil {
-		fake.mapRouteReturnsOnCall = make(map[int]struct {
+func (fake *FakeCfWorkflow) MapSyslogRouteReturnsOnCall(i int, result1 []cmdStartWaiter.CmdStartWaiter) {
+	fake.mapSyslogRouteMutex.Lock()
+	defer fake.mapSyslogRouteMutex.Unlock()
+	fake.MapSyslogRouteStub = nil
+	if fake.mapSyslogRouteReturnsOnCall == nil {
+		fake.mapSyslogRouteReturnsOnCall = make(map[int]struct {
 			result1 []cmdStartWaiter.CmdStartWaiter
 		})
 	}
-	fake.mapRouteReturnsOnCall[i] = struct {
+	fake.mapSyslogRouteReturnsOnCall[i] = struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfWorkflow) MapTCPRoute(arg1 cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
+	fake.mapTCPRouteMutex.Lock()
+	ret, specificReturn := fake.mapTCPRouteReturnsOnCall[len(fake.mapTCPRouteArgsForCall)]
+	fake.mapTCPRouteArgsForCall = append(fake.mapTCPRouteArgsForCall, struct {
+		arg1 cfCmdGenerator.CfCmdGenerator
+	}{arg1})
+	stub := fake.MapTCPRouteStub
+	fakeReturns := fake.mapTCPRouteReturns
+	fake.recordInvocation("MapTCPRoute", []interface{}{arg1})
+	fake.mapTCPRouteMutex.Unlock()
+	if stub != nil {
+		return stub(arg1)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeCfWorkflow) MapTCPRouteCallCount() int {
+	fake.mapTCPRouteMutex.RLock()
+	defer fake.mapTCPRouteMutex.RUnlock()
+	return len(fake.mapTCPRouteArgsForCall)
+}
+
+func (fake *FakeCfWorkflow) MapTCPRouteCalls(stub func(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter) {
+	fake.mapTCPRouteMutex.Lock()
+	defer fake.mapTCPRouteMutex.Unlock()
+	fake.MapTCPRouteStub = stub
+}
+
+func (fake *FakeCfWorkflow) MapTCPRouteArgsForCall(i int) cfCmdGenerator.CfCmdGenerator {
+	fake.mapTCPRouteMutex.RLock()
+	defer fake.mapTCPRouteMutex.RUnlock()
+	argsForCall := fake.mapTCPRouteArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeCfWorkflow) MapTCPRouteReturns(result1 []cmdStartWaiter.CmdStartWaiter) {
+	fake.mapTCPRouteMutex.Lock()
+	defer fake.mapTCPRouteMutex.Unlock()
+	fake.MapTCPRouteStub = nil
+	fake.mapTCPRouteReturns = struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfWorkflow) MapTCPRouteReturnsOnCall(i int, result1 []cmdStartWaiter.CmdStartWaiter) {
+	fake.mapTCPRouteMutex.Lock()
+	defer fake.mapTCPRouteMutex.Unlock()
+	fake.MapTCPRouteStub = nil
+	if fake.mapTCPRouteReturnsOnCall == nil {
+		fake.mapTCPRouteReturnsOnCall = make(map[int]struct {
+			result1 []cmdStartWaiter.CmdStartWaiter
+		})
+	}
+	fake.mapTCPRouteReturnsOnCall[i] = struct {
 		result1 []cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
@@ -492,6 +595,67 @@ func (fake *FakeCfWorkflow) PushReturnsOnCall(i int, result1 []cmdStartWaiter.Cm
 		})
 	}
 	fake.pushReturnsOnCall[i] = struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfWorkflow) PushNoRoute(arg1 cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
+	fake.pushNoRouteMutex.Lock()
+	ret, specificReturn := fake.pushNoRouteReturnsOnCall[len(fake.pushNoRouteArgsForCall)]
+	fake.pushNoRouteArgsForCall = append(fake.pushNoRouteArgsForCall, struct {
+		arg1 cfCmdGenerator.CfCmdGenerator
+	}{arg1})
+	stub := fake.PushNoRouteStub
+	fakeReturns := fake.pushNoRouteReturns
+	fake.recordInvocation("PushNoRoute", []interface{}{arg1})
+	fake.pushNoRouteMutex.Unlock()
+	if stub != nil {
+		return stub(arg1)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeCfWorkflow) PushNoRouteCallCount() int {
+	fake.pushNoRouteMutex.RLock()
+	defer fake.pushNoRouteMutex.RUnlock()
+	return len(fake.pushNoRouteArgsForCall)
+}
+
+func (fake *FakeCfWorkflow) PushNoRouteCalls(stub func(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter) {
+	fake.pushNoRouteMutex.Lock()
+	defer fake.pushNoRouteMutex.Unlock()
+	fake.PushNoRouteStub = stub
+}
+
+func (fake *FakeCfWorkflow) PushNoRouteArgsForCall(i int) cfCmdGenerator.CfCmdGenerator {
+	fake.pushNoRouteMutex.RLock()
+	defer fake.pushNoRouteMutex.RUnlock()
+	argsForCall := fake.pushNoRouteArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeCfWorkflow) PushNoRouteReturns(result1 []cmdStartWaiter.CmdStartWaiter) {
+	fake.pushNoRouteMutex.Lock()
+	defer fake.pushNoRouteMutex.Unlock()
+	fake.PushNoRouteStub = nil
+	fake.pushNoRouteReturns = struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfWorkflow) PushNoRouteReturnsOnCall(i int, result1 []cmdStartWaiter.CmdStartWaiter) {
+	fake.pushNoRouteMutex.Lock()
+	defer fake.pushNoRouteMutex.Unlock()
+	fake.PushNoRouteStub = nil
+	if fake.pushNoRouteReturnsOnCall == nil {
+		fake.pushNoRouteReturnsOnCall = make(map[int]struct {
+			result1 []cmdStartWaiter.CmdStartWaiter
+		})
+	}
+	fake.pushNoRouteReturnsOnCall[i] = struct {
 		result1 []cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
@@ -786,6 +950,112 @@ func (fake *FakeCfWorkflow) StreamLogsReturnsOnCall(i int, result1 []cmdStartWai
 	}{result1}
 }
 
+func (fake *FakeCfWorkflow) TCPDomain() string {
+	fake.tCPDomainMutex.Lock()
+	ret, specificReturn := fake.tCPDomainReturnsOnCall[len(fake.tCPDomainArgsForCall)]
+	fake.tCPDomainArgsForCall = append(fake.tCPDomainArgsForCall, struct {
+	}{})
+	stub := fake.TCPDomainStub
+	fakeReturns := fake.tCPDomainReturns
+	fake.recordInvocation("TCPDomain", []interface{}{})
+	fake.tCPDomainMutex.Unlock()
+	if stub != nil {
+		return stub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeCfWorkflow) TCPDomainCallCount() int {
+	fake.tCPDomainMutex.RLock()
+	defer fake.tCPDomainMutex.RUnlock()
+	return len(fake.tCPDomainArgsForCall)
+}
+
+func (fake *FakeCfWorkflow) TCPDomainCalls(stub func() string) {
+	fake.tCPDomainMutex.Lock()
+	defer fake.tCPDomainMutex.Unlock()
+	fake.TCPDomainStub = stub
+}
+
+func (fake *FakeCfWorkflow) TCPDomainReturns(result1 string) {
+	fake.tCPDomainMutex.Lock()
+	defer fake.tCPDomainMutex.Unlock()
+	fake.TCPDomainStub = nil
+	fake.tCPDomainReturns = struct {
+		result1 string
+	}{result1}
+}
+
+func (fake *FakeCfWorkflow) TCPDomainReturnsOnCall(i int, result1 string) {
+	fake.tCPDomainMutex.Lock()
+	defer fake.tCPDomainMutex.Unlock()
+	fake.TCPDomainStub = nil
+	if fake.tCPDomainReturnsOnCall == nil {
+		fake.tCPDomainReturnsOnCall = make(map[int]struct {
+			result1 string
+		})
+	}
+	fake.tCPDomainReturnsOnCall[i] = struct {
+		result1 string
+	}{result1}
+}
+
+func (fake *FakeCfWorkflow) TCPPort() int {
+	fake.tCPPortMutex.Lock()
+	ret, specificReturn := fake.tCPPortReturnsOnCall[len(fake.tCPPortArgsForCall)]
+	fake.tCPPortArgsForCall = append(fake.tCPPortArgsForCall, struct {
+	}{})
+	stub := fake.TCPPortStub
+	fakeReturns := fake.tCPPortReturns
+	fake.recordInvocation("TCPPort", []interface{}{})
+	fake.tCPPortMutex.Unlock()
+	if stub != nil {
+		return stub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeCfWorkflow) TCPPortCallCount() int {
+	fake.tCPPortMutex.RLock()
+	defer fake.tCPPortMutex.RUnlock()
+	return len(fake.tCPPortArgsForCall)
+}
+
+func (fake *FakeCfWorkflow) TCPPortCalls(stub func() int) {
+	fake.tCPPortMutex.Lock()
+	defer fake.tCPPortMutex.Unlock()
+	fake.TCPPortStub = stub
+}
+
+func (fake *FakeCfWorkflow) TCPPortReturns(result1 int) {
+	fake.tCPPortMutex.Lock()
+	defer fake.tCPPortMutex.Unlock()
+	fake.TCPPortStub = nil
+	fake.tCPPortReturns = struct {
+		result1 int
+	}{result1}
+}
+
+func (fake *FakeCfWorkflow) TCPPortReturnsOnCall(i int, result1 int) {
+	fake.tCPPortMutex.Lock()
+	defer fake.tCPPortMutex.Unlock()
+	fake.TCPPortStub = nil
+	if fake.tCPPortReturnsOnCall == nil {
+		fake.tCPPortReturnsOnCall = make(map[int]struct {
+			result1 int
+		})
+	}
+	fake.tCPPortReturnsOnCall[i] = struct {
+		result1 int
+	}{result1}
+}
+
 func (fake *FakeCfWorkflow) TearDown(arg1 cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
 	fake.tearDownMutex.Lock()
 	ret, specificReturn := fake.tearDownReturnsOnCall[len(fake.tearDownArgsForCall)]
@@ -856,12 +1126,16 @@ func (fake *FakeCfWorkflow) Invocations() map[string][][]interface{} {
 	defer fake.createAndBindSyslogDrainServiceMutex.RUnlock()
 	fake.deleteMutex.RLock()
 	defer fake.deleteMutex.RUnlock()
-	fake.mapRouteMutex.RLock()
-	defer fake.mapRouteMutex.RUnlock()
+	fake.mapSyslogRouteMutex.RLock()
+	defer fake.mapSyslogRouteMutex.RUnlock()
+	fake.mapTCPRouteMutex.RLock()
+	defer fake.mapTCPRouteMutex.RUnlock()
 	fake.orgMutex.RLock()
 	defer fake.orgMutex.RUnlock()
 	fake.pushMutex.RLock()
 	defer fake.pushMutex.RUnlock()
+	fake.pushNoRouteMutex.RLock()
+	defer fake.pushNoRouteMutex.RUnlock()
 	fake.quotaMutex.RLock()
 	defer fake.quotaMutex.RUnlock()
 	fake.recentLogsMutex.RLock()
@@ -872,6 +1146,10 @@ func (fake *FakeCfWorkflow) Invocations() map[string][][]interface{} {
 	defer fake.spaceMutex.RUnlock()
 	fake.streamLogsMutex.RLock()
 	defer fake.streamLogsMutex.RUnlock()
+	fake.tCPDomainMutex.RLock()
+	defer fake.tCPDomainMutex.RUnlock()
+	fake.tCPPortMutex.RLock()
+	defer fake.tCPPortMutex.RUnlock()
 	fake.tearDownMutex.RLock()
 	defer fake.tearDownMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}

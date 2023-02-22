@@ -29,6 +29,7 @@ import (
 	"github.com/cloudfoundry/uptimer/measurement"
 	"github.com/cloudfoundry/uptimer/orchestrator"
 	"github.com/cloudfoundry/uptimer/syslogSink"
+	"github.com/cloudfoundry/uptimer/tcpApp"
 	"github.com/cloudfoundry/uptimer/version"
 )
 
@@ -75,6 +76,18 @@ func main() {
 	logger.Println("Finished preparing included app")
 	defer os.RemoveAll(appPath)
 
+	var tcpPath string
+	if cfg.OptionalTests.RunTcpAvailability {
+		logger.Println("Preparing included tcp app...")
+		tcpPath, err = prepareIncludedApp("tcpApp", tcpApp.Source)
+		if err != nil {
+			logger.Println("Failed to prepare included tcp app: ", err)
+			performMeasurements = false
+		}
+		logger.Println("Finished preparing included tcp app")
+		defer os.RemoveAll(tcpPath)
+	}
+
 	var sinkAppPath string
 	if cfg.OptionalTests.RunAppSyslogAvailability {
 		logger.Println("Preparing included syslog sink app...")
@@ -84,7 +97,7 @@ func main() {
 		}
 		logger.Println("Finished preparing included syslog sink app")
 	}
-	orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, sinkTmpDir, err := createTmpDirs()
+	orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, tcpTmpDir, sinkTmpDir, err := createTmpDirs()
 	if err != nil {
 		logger.Println("Failed to create temp dirs:", err)
 		performMeasurements = false
@@ -112,6 +125,26 @@ func main() {
 		)
 	}
 
+	var tcpWorkflow cfWorkflow.CfWorkflow
+	var tcpCmdGenerator cfCmdGenerator.CfCmdGenerator
+	if cfg.OptionalTests.RunTcpAvailability {
+		tcpCmdGenerator = cfCmdGenerator.New(tcpTmpDir, *useBuildpackDetection)
+		tcpWorkflow = createWorkflow(cfg.CF, tcpPath, *useQuotas)
+		logger.Printf("Setting up tcp app workflow with org %s ...", tcpWorkflow.Org())
+		err = bufferedRunner.RunInSequence(
+			append(append(
+				tcpWorkflow.Setup(tcpCmdGenerator),
+				tcpWorkflow.PushNoRoute(tcpCmdGenerator)...),
+				tcpWorkflow.MapTCPRoute(tcpCmdGenerator)...)...)
+
+		if err != nil {
+			logBufferedRunnerFailure(logger, "tcp workflow setup", err, runnerOutBuf, runnerErrBuf)
+			performMeasurements = false
+		} else {
+			logger.Println("Finished setting up tcp workflow")
+		}
+	}
+
 	var sinkWorkflow cfWorkflow.CfWorkflow
 	var sinkCmdGenerator cfCmdGenerator.CfCmdGenerator
 	if cfg.OptionalTests.RunAppSyslogAvailability {
@@ -122,7 +155,7 @@ func main() {
 			append(append(
 				sinkWorkflow.Setup(sinkCmdGenerator),
 				sinkWorkflow.Push(sinkCmdGenerator)...),
-				sinkWorkflow.MapRoute(sinkCmdGenerator)...)...)
+				sinkWorkflow.MapSyslogRoute(sinkCmdGenerator)...)...)
 		if err != nil {
 			logBufferedRunnerFailure(logger, "sink workflow setup", err, runnerOutBuf, runnerErrBuf)
 			performMeasurements = false
@@ -150,6 +183,20 @@ func main() {
 		cfg.AllowedFailures,
 		authFailedRetryFunc,
 	)
+
+	if cfg.OptionalTests.RunTcpAvailability {
+		measurements = append(
+			measurements,
+			createTcpAvailabilityMeasurement(
+				clock,
+				logger,
+				tcpWorkflow,
+				tcpCmdGenerator,
+				cfg.AllowedFailures,
+				authFailedRetryFunc,
+			),
+		)
+	}
 
 	if cfg.OptionalTests.RunAppSyslogAvailability {
 		measurements = append(
@@ -190,6 +237,8 @@ func main() {
 		logger,
 		pushWorkflow,
 		pushCmdGenerator,
+		tcpWorkflow,
+		tcpCmdGenerator,
 		sinkWorkflow,
 		sinkCmdGenerator,
 		bufferedRunner,
@@ -201,29 +250,33 @@ func main() {
 	os.Exit(exitCode)
 }
 
-func createTmpDirs() (string, string, string, string, string, error) {
+func createTmpDirs() (string, string, string, string, string, string, error) {
 	orcTmpDir, err := os.MkdirTemp("", "uptimer")
 	if err != nil {
-		return "", "", "", "", "", err
+		return "", "", "", "", "", "", err
 	}
 	recentLogsTmpDir, err := os.MkdirTemp("", "uptimer")
 	if err != nil {
-		return "", "", "", "", "", err
+		return "", "", "", "", "", "", err
 	}
 	streamingLogsTmpDir, err := os.MkdirTemp("", "uptimer")
 	if err != nil {
-		return "", "", "", "", "", err
+		return "", "", "", "", "", "", err
 	}
 	pushTmpDir, err := os.MkdirTemp("", "uptimer")
 	if err != nil {
-		return "", "", "", "", "", err
+		return "", "", "", "", "", "", err
+	}
+	tcpTmpDir, err := os.MkdirTemp("", "uptimer")
+	if err != nil {
+		return "", "", "", "", "", "", err
 	}
 	sinkTmpDir, err := os.MkdirTemp("", "uptimer")
 	if err != nil {
-		return "", "", "", "", "", err
+		return "", "", "", "", "", "", err
 	}
 
-	return orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, sinkTmpDir, nil
+	return orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, tcpTmpDir, sinkTmpDir, nil
 }
 
 func prepareIncludedApp(name, source string) (string, error) {
@@ -367,6 +420,29 @@ func createMeasurements(
 	}
 }
 
+func createTcpAvailabilityMeasurement(
+	clock clock.Clock,
+	logger *log.Logger,
+	tcpWorkflow cfWorkflow.CfWorkflow,
+	tcpCmdGenerator cfCmdGenerator.CfCmdGenerator,
+	allowedFailures config.AllowedFailures,
+	authFailedRetryFunc func(stdOut, stdErr string) bool,
+) measurement.Measurement {
+	tcpAvailabilityMeasurement := measurement.NewTCPAvailability(
+		tcpWorkflow.TCPDomain(),
+		tcpWorkflow.TCPPort())
+
+	return measurement.NewPeriodic(
+		logger,
+		clock,
+		time.Second,
+		tcpAvailabilityMeasurement,
+		measurement.NewResultSet(),
+		allowedFailures.TCPAvailability,
+		func(string, string) bool { return false },
+	)
+}
+
 func createAppSyslogAvailabilityMeasurement(
 	clock clock.Clock,
 	logger *log.Logger,
@@ -427,6 +503,8 @@ func tearDown(
 	logger *log.Logger,
 	pushWorkflow cfWorkflow.CfWorkflow,
 	pushCmdGenerator cfCmdGenerator.CfCmdGenerator,
+	tcpWorkflow cfWorkflow.CfWorkflow,
+	tcpCmdGenerator cfCmdGenerator.CfCmdGenerator,
 	sinkWorkflow cfWorkflow.CfWorkflow,
 	sinkCmdGenerator cfCmdGenerator.CfCmdGenerator,
 	runner cmdRunner.CmdRunner,
@@ -441,6 +519,11 @@ func tearDown(
 		logBufferedRunnerFailure(logger, "push workflow teardown", err, runnerOutBuf, runnerErrBuf)
 	}
 
+	if tcpWorkflow != nil {
+		if err := runner.RunInSequence(tcpWorkflow.TearDown(tcpCmdGenerator)...); err != nil {
+			logBufferedRunnerFailure(logger, "tcp workflow teardown", err, runnerOutBuf, runnerErrBuf)
+		}
+	}
 	if sinkWorkflow != nil {
 		if err := runner.RunInSequence(sinkWorkflow.TearDown(sinkCmdGenerator)...); err != nil {
 			logBufferedRunnerFailure(logger, "sink workflow teardown", err, runnerOutBuf, runnerErrBuf)

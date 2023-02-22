@@ -19,7 +19,7 @@ type CfCmdGenerator interface {
 	CreateOrg(org string) cmdStartWaiter.CmdStartWaiter
 	CreateSpace(org, space string) cmdStartWaiter.CmdStartWaiter
 	Target(org, space string) cmdStartWaiter.CmdStartWaiter
-	Push(name, path string, instances int) cmdStartWaiter.CmdStartWaiter
+	Push(name, path string, instances int, noRoute bool) cmdStartWaiter.CmdStartWaiter
 	Delete(name string) cmdStartWaiter.CmdStartWaiter
 	DeleteOrg(org string) cmdStartWaiter.CmdStartWaiter
 	DeleteQuota(quota string) cmdStartWaiter.CmdStartWaiter
@@ -116,8 +116,7 @@ func (c *cfCmdGenerator) Target(org string, space string) cmdStartWaiter.CmdStar
 		),
 	)
 }
-
-func (c *cfCmdGenerator) Push(name, path string, instances int) cmdStartWaiter.CmdStartWaiter {
+func (c *cfCmdGenerator) Push(name, path string, instances int, noRoute bool) cmdStartWaiter.CmdStartWaiter {
 	args := []string{
 		"push", name,
 		"-f", "manifest.yml",
@@ -126,6 +125,10 @@ func (c *cfCmdGenerator) Push(name, path string, instances int) cmdStartWaiter.C
 
 	if !c.useBuildpackDetection {
 		args = append(args, "-b", "go_buildpack")
+	}
+
+	if noRoute {
+		args = append(args, "--no-route")
 	}
 
 	cmd := exec.Command("cf", args...)
