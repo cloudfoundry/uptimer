@@ -142,7 +142,7 @@ in the `Cf` section of the configuration.
 For the `run_app_syslog_availability` test,
 TCP routing is required,
 and you must specify
-the `tcp_domain` and `availalbe_port` values
+the `tcp_domain` and `available_port` values
 in the `Cf` section of the configuration.
 
 ### Allowed Failures (optional)
