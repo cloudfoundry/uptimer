@@ -251,7 +251,7 @@ func main() {
 }
 
 func createTmpDirs() (string, string, string, string, string, string, error) {
-	orcTmpDir, err := ioutil.TempDir("", "uptimer")
+	orcTmpDir, err := os.MkdirTemp("", "uptimer")
 	if err != nil {
 		return "", "", "", "", "", "", err
 	}
@@ -267,7 +267,7 @@ func createTmpDirs() (string, string, string, string, string, string, error) {
 	if err != nil {
 		return "", "", "", "", "", "", err
 	}
-	tcpTmpDir, err := ioutil.TempDir("", "uptimer")
+	tcpTmpDir, err := os.MkdirTemp("", "uptimer")
 	if err != nil {
 		return "", "", "", "", "", "", err
 	}
