@@ -6,7 +6,7 @@ require (
 	code.cloudfoundry.org/goshims v0.12.0
 	github.com/benbjohnson/clock v1.3.0
 	github.com/onsi/ginkgo/v2 v2.9.0
-	github.com/onsi/gomega v1.27.1
+	github.com/onsi/gomega v1.27.2
 	github.com/satori/go.uuid v1.2.0
 )
 
