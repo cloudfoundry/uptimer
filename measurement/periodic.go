@@ -22,11 +22,11 @@ type periodic struct {
 }
 
 type Summary struct {
-	Name string `json:"name"`
-	Failed int `json:"failed"`
-	SummaryPhrase string `json:"summaryPhrase"`
-	AllowedFailures int	`json:"allowedFailures"`
-	Total int `json:"total"`
+	Name            string `json:"name"`
+	Failed          int    `json:"failed"`
+	SummaryPhrase   string `json:"summaryPhrase"`
+	AllowedFailures int    `json:"allowedFailures"`
+	Total           int    `json:"total"`
 }
 
 func (p *periodic) Name() string {
