@@ -285,7 +285,7 @@ func prepareIncludedApp(name, source string) (string, error) {
 		return "", err
 	}
 
-	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(app.Source), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(source), 0644); err != nil {
 		os.RemoveAll(dir)
 		return "", err
 	}
