@@ -2,6 +2,7 @@ package cfWorkflow_test
 
 import (
 	"context"
+	"os/exec"
 	"time"
 
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
@@ -9,6 +10,7 @@ import (
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	"github.com/cloudfoundry/uptimer/config"
 
+	"github.com/google/go-cmp/cmp/cmpopts"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -232,13 +234,15 @@ var _ = Describe("CfWorkflow", func() {
 			defer cancelFunc()
 			cmds := cw.StreamLogs(ctx, ccg)
 
-			Expect(cmds).To(Equal(
+			Expect(cmds).To(BeComparableTo(
 				[]cmdStartWaiter.CmdStartWaiter{
 					ccg.Api("jigglypuff.cf-app.com"),
 					ccg.Auth("pika", "chu"),
 					ccg.Target("someOrg", "someSpace"),
 					ccg.StreamLogs(ctx, "doraApp"),
 				},
+				cmpopts.IgnoreUnexported(exec.Cmd{}),
+				cmpopts.IgnoreFields(exec.Cmd{}, "Cancel", "Err"),
 			))
 		})
 	})
