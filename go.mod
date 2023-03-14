@@ -3,7 +3,7 @@ module github.com/cloudfoundry/uptimer
 go 1.20
 
 require (
-	code.cloudfoundry.org/goshims v0.12.0
+	code.cloudfoundry.org/goshims v0.13.0
 	github.com/benbjohnson/clock v1.3.0
 	github.com/google/go-cmp v0.5.9
 	github.com/onsi/ginkgo/v2 v2.9.1
