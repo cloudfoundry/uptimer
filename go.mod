@@ -7,7 +7,7 @@ require (
 	github.com/benbjohnson/clock v1.3.5
 	github.com/google/go-cmp v0.6.0
 	github.com/onsi/ginkgo/v2 v2.13.0
-	github.com/onsi/gomega v1.29.0
+	github.com/onsi/gomega v1.30.0
 	github.com/satori/go.uuid v1.2.0
 )
 
