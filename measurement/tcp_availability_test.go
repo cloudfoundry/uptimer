@@ -23,7 +23,7 @@ var _ = Describe("TCPAvailability", func() {
 
 	BeforeEach(func() {
 		url = "localhost"
-		port = 6000
+		port = 6000 + GinkgoParallelProcess()
 
 		am = NewTCPAvailability(url, port)
 	})
