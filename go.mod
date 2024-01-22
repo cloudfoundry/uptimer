@@ -1,6 +1,6 @@
 module github.com/cloudfoundry/uptimer
 
-go 1.20
+go 1.21
 
 require (
 	code.cloudfoundry.org/goshims v0.29.0
