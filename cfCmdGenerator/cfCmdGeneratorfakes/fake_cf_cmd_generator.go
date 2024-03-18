@@ -124,6 +124,18 @@ type FakeCfCmdGenerator struct {
 	deleteQuotaReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
+	EnableOrgIsolationStub        func(string, string) cmdStartWaiter.CmdStartWaiter
+	enableOrgIsolationMutex       sync.RWMutex
+	enableOrgIsolationArgsForCall []struct {
+		arg1 string
+		arg2 string
+	}
+	enableOrgIsolationReturns struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
+	enableOrgIsolationReturnsOnCall map[int]struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
 	LogOutStub        func() cmdStartWaiter.CmdStartWaiter
 	logOutMutex       sync.RWMutex
 	logOutArgsForCall []struct {
@@ -181,6 +193,18 @@ type FakeCfCmdGenerator struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
 	restageReturnsOnCall map[int]struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
+	SetOrgDefaultIsolationSegmentStub        func(string, string) cmdStartWaiter.CmdStartWaiter
+	setOrgDefaultIsolationSegmentMutex       sync.RWMutex
+	setOrgDefaultIsolationSegmentArgsForCall []struct {
+		arg1 string
+		arg2 string
+	}
+	setOrgDefaultIsolationSegmentReturns struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
+	setOrgDefaultIsolationSegmentReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
 	SetQuotaStub        func(string, string) cmdStartWaiter.CmdStartWaiter
@@ -837,6 +861,68 @@ func (fake *FakeCfCmdGenerator) DeleteQuotaReturnsOnCall(i int, result1 cmdStart
 	}{result1}
 }
 
+func (fake *FakeCfCmdGenerator) EnableOrgIsolation(arg1 string, arg2 string) cmdStartWaiter.CmdStartWaiter {
+	fake.enableOrgIsolationMutex.Lock()
+	ret, specificReturn := fake.enableOrgIsolationReturnsOnCall[len(fake.enableOrgIsolationArgsForCall)]
+	fake.enableOrgIsolationArgsForCall = append(fake.enableOrgIsolationArgsForCall, struct {
+		arg1 string
+		arg2 string
+	}{arg1, arg2})
+	stub := fake.EnableOrgIsolationStub
+	fakeReturns := fake.enableOrgIsolationReturns
+	fake.recordInvocation("EnableOrgIsolation", []interface{}{arg1, arg2})
+	fake.enableOrgIsolationMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeCfCmdGenerator) EnableOrgIsolationCallCount() int {
+	fake.enableOrgIsolationMutex.RLock()
+	defer fake.enableOrgIsolationMutex.RUnlock()
+	return len(fake.enableOrgIsolationArgsForCall)
+}
+
+func (fake *FakeCfCmdGenerator) EnableOrgIsolationCalls(stub func(string, string) cmdStartWaiter.CmdStartWaiter) {
+	fake.enableOrgIsolationMutex.Lock()
+	defer fake.enableOrgIsolationMutex.Unlock()
+	fake.EnableOrgIsolationStub = stub
+}
+
+func (fake *FakeCfCmdGenerator) EnableOrgIsolationArgsForCall(i int) (string, string) {
+	fake.enableOrgIsolationMutex.RLock()
+	defer fake.enableOrgIsolationMutex.RUnlock()
+	argsForCall := fake.enableOrgIsolationArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeCfCmdGenerator) EnableOrgIsolationReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.enableOrgIsolationMutex.Lock()
+	defer fake.enableOrgIsolationMutex.Unlock()
+	fake.EnableOrgIsolationStub = nil
+	fake.enableOrgIsolationReturns = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfCmdGenerator) EnableOrgIsolationReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.enableOrgIsolationMutex.Lock()
+	defer fake.enableOrgIsolationMutex.Unlock()
+	fake.EnableOrgIsolationStub = nil
+	if fake.enableOrgIsolationReturnsOnCall == nil {
+		fake.enableOrgIsolationReturnsOnCall = make(map[int]struct {
+			result1 cmdStartWaiter.CmdStartWaiter
+		})
+	}
+	fake.enableOrgIsolationReturnsOnCall[i] = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
 func (fake *FakeCfCmdGenerator) LogOut() cmdStartWaiter.CmdStartWaiter {
 	fake.logOutMutex.Lock()
 	ret, specificReturn := fake.logOutReturnsOnCall[len(fake.logOutArgsForCall)]
@@ -1139,6 +1225,68 @@ func (fake *FakeCfCmdGenerator) RestageReturnsOnCall(i int, result1 cmdStartWait
 	}{result1}
 }
 
+func (fake *FakeCfCmdGenerator) SetOrgDefaultIsolationSegment(arg1 string, arg2 string) cmdStartWaiter.CmdStartWaiter {
+	fake.setOrgDefaultIsolationSegmentMutex.Lock()
+	ret, specificReturn := fake.setOrgDefaultIsolationSegmentReturnsOnCall[len(fake.setOrgDefaultIsolationSegmentArgsForCall)]
+	fake.setOrgDefaultIsolationSegmentArgsForCall = append(fake.setOrgDefaultIsolationSegmentArgsForCall, struct {
+		arg1 string
+		arg2 string
+	}{arg1, arg2})
+	stub := fake.SetOrgDefaultIsolationSegmentStub
+	fakeReturns := fake.setOrgDefaultIsolationSegmentReturns
+	fake.recordInvocation("SetOrgDefaultIsolationSegment", []interface{}{arg1, arg2})
+	fake.setOrgDefaultIsolationSegmentMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeCfCmdGenerator) SetOrgDefaultIsolationSegmentCallCount() int {
+	fake.setOrgDefaultIsolationSegmentMutex.RLock()
+	defer fake.setOrgDefaultIsolationSegmentMutex.RUnlock()
+	return len(fake.setOrgDefaultIsolationSegmentArgsForCall)
+}
+
+func (fake *FakeCfCmdGenerator) SetOrgDefaultIsolationSegmentCalls(stub func(string, string) cmdStartWaiter.CmdStartWaiter) {
+	fake.setOrgDefaultIsolationSegmentMutex.Lock()
+	defer fake.setOrgDefaultIsolationSegmentMutex.Unlock()
+	fake.SetOrgDefaultIsolationSegmentStub = stub
+}
+
+func (fake *FakeCfCmdGenerator) SetOrgDefaultIsolationSegmentArgsForCall(i int) (string, string) {
+	fake.setOrgDefaultIsolationSegmentMutex.RLock()
+	defer fake.setOrgDefaultIsolationSegmentMutex.RUnlock()
+	argsForCall := fake.setOrgDefaultIsolationSegmentArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeCfCmdGenerator) SetOrgDefaultIsolationSegmentReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.setOrgDefaultIsolationSegmentMutex.Lock()
+	defer fake.setOrgDefaultIsolationSegmentMutex.Unlock()
+	fake.SetOrgDefaultIsolationSegmentStub = nil
+	fake.setOrgDefaultIsolationSegmentReturns = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfCmdGenerator) SetOrgDefaultIsolationSegmentReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.setOrgDefaultIsolationSegmentMutex.Lock()
+	defer fake.setOrgDefaultIsolationSegmentMutex.Unlock()
+	fake.SetOrgDefaultIsolationSegmentStub = nil
+	if fake.setOrgDefaultIsolationSegmentReturnsOnCall == nil {
+		fake.setOrgDefaultIsolationSegmentReturnsOnCall = make(map[int]struct {
+			result1 cmdStartWaiter.CmdStartWaiter
+		})
+	}
+	fake.setOrgDefaultIsolationSegmentReturnsOnCall[i] = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
 func (fake *FakeCfCmdGenerator) SetQuota(arg1 string, arg2 string) cmdStartWaiter.CmdStartWaiter {
 	fake.setQuotaMutex.Lock()
 	ret, specificReturn := fake.setQuotaReturnsOnCall[len(fake.setQuotaArgsForCall)]
@@ -1348,6 +1496,8 @@ func (fake *FakeCfCmdGenerator) Invocations() map[string][][]interface{} {
 	defer fake.deleteOrgMutex.RUnlock()
 	fake.deleteQuotaMutex.RLock()
 	defer fake.deleteQuotaMutex.RUnlock()
+	fake.enableOrgIsolationMutex.RLock()
+	defer fake.enableOrgIsolationMutex.RUnlock()
 	fake.logOutMutex.RLock()
 	defer fake.logOutMutex.RUnlock()
 	fake.mapRouteMutex.RLock()
@@ -1358,6 +1508,8 @@ func (fake *FakeCfCmdGenerator) Invocations() map[string][][]interface{} {
 	defer fake.recentLogsMutex.RUnlock()
 	fake.restageMutex.RLock()
 	defer fake.restageMutex.RUnlock()
+	fake.setOrgDefaultIsolationSegmentMutex.RLock()
+	defer fake.setOrgDefaultIsolationSegmentMutex.RUnlock()
 	fake.setQuotaMutex.RLock()
 	defer fake.setQuotaMutex.RUnlock()
 	fake.streamLogsMutex.RLock()

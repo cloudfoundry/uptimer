@@ -19,10 +19,11 @@ type Command struct {
 }
 
 type Cf struct {
-	API           string `json:"api"`
-	AppDomain     string `json:"app_domain"`
-	AdminUser     string `json:"admin_user"`
-	AdminPassword string `json:"admin_password"`
+	API              string `json:"api"`
+	AppDomain        string `json:"app_domain"`
+	AdminUser        string `json:"admin_user"`
+	AdminPassword    string `json:"admin_password"`
+	IsolationSegment string `json:"isolation_segment"`
 
 	TCPDomain     string `json:"tcp_domain"`
 	TCPPort       int    `json:"tcp_port"`

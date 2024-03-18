@@ -18,6 +18,8 @@ type CfCmdGenerator interface {
 	SetQuota(org, quota string) cmdStartWaiter.CmdStartWaiter
 	CreateOrg(org string) cmdStartWaiter.CmdStartWaiter
 	CreateSpace(org, space string) cmdStartWaiter.CmdStartWaiter
+	EnableOrgIsolation(org, isolationSegment string) cmdStartWaiter.CmdStartWaiter
+	SetOrgDefaultIsolationSegment(org, isolationSegment string) cmdStartWaiter.CmdStartWaiter
 	Target(org, space string) cmdStartWaiter.CmdStartWaiter
 	Push(name, path string, instances int, noRoute bool) cmdStartWaiter.CmdStartWaiter
 	Delete(name string) cmdStartWaiter.CmdStartWaiter
@@ -94,6 +96,21 @@ func (c *cfCmdGenerator) CreateOrg(org string) cmdStartWaiter.CmdStartWaiter {
 	return c.setCfHome(
 		exec.Command(
 			"cf", "create-org", org,
+		),
+	)
+}
+
+func (c *cfCmdGenerator) EnableOrgIsolation(org, isolationSegment string) cmdStartWaiter.CmdStartWaiter {
+	return c.setCfHome(
+		exec.Command(
+			"cf", "enable-org-isolation", org, isolationSegment,
+		),
+	)
+}
+func (c *cfCmdGenerator) SetOrgDefaultIsolationSegment(org, isolationSegment string) cmdStartWaiter.CmdStartWaiter {
+	return c.setCfHome(
+		exec.Command(
+			"cf", "set-org-default-isolation-segment", org, isolationSegment,
 		),
 	)
 }

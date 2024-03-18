@@ -56,6 +56,7 @@ Here is an example config `json`:
         "app_domain": "my-cf.com",
         "admin_user": "admin",
         "admin_password": "PASS",
+        "isolation_segment": name-of-my-isolation-segment",
         "tcp_domain": "tcp.my-cf.com",
         "use_single_app_instance": false,
         "available_port": 1025
@@ -105,6 +106,9 @@ during test setup.
 The `tcp_domain` and `available_port` values
 are not required
 _unless_ you elect to run the `app_syslog_availability` test.
+
+The `isolation_segment` value is not required _unless_
+you wish to run uptimer against apps pushed to an isolation segment.
 
 Uptimer by default pushes two instances of an app
 for its uptime measurements,
