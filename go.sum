@@ -1,5 +1,5 @@
-code.cloudfoundry.org/goshims v0.31.0 h1:muF3J/r8RYT+YD2K5BGWiIgzrnw8ih4JCVGBedeb5DE=
-code.cloudfoundry.org/goshims v0.31.0/go.mod h1:ACKdB0vuZ7TvEZJpxDFqnW1nL8GhjcqfNg61GhCW5L0=
+code.cloudfoundry.org/goshims v0.32.0 h1:ReUY/5C9L0u17arD5BRgEXkKftVELw0kufFRxWBcByU=
+code.cloudfoundry.org/goshims v0.32.0/go.mod h1:hY7PQBfEWiZol5Y4ceJlWgTOueH/lzP8kXhRhlhAgpM=
 github.com/benbjohnson/clock v1.3.5 h1:VvXlSJBzZpA/zum6Sj74hxwYI2DIxRWuNIoXAzHZz5o=
 github.com/benbjohnson/clock v1.3.5/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
