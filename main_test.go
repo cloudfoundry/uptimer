@@ -1,48 +1,103 @@
 package main_test
 
 import (
+	"encoding/json"
 	"os"
+	"os/exec"
+
+	"github.com/cloudfoundry/uptimer/config"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega/gbytes"
+	. "github.com/onsi/gomega/gexec"
 )
 
-var _ = Describe("Main", func() {
-	It("Prints error when when run_app_syslog_availability and tcp_domain and available_port are not provided", func() {
-		configFile, err := os.CreateTemp("", "config")
-		Expect(err).ToNot(HaveOccurred())
+var _ = Describe("uptimer", func() {
+	var (
+		cfg     *config.Config
+		session *Session
+	)
 
-		defer os.Remove(configFile.Name())
+	BeforeEach(func() {
+		cfg = &config.Config{
+			While: []*config.Command{
+				{
+					Command:     "sleep",
+					CommandArgs: []string{"5"},
+				},
+			},
+			CF: &config.Cf{
+				API:           "api.my-cf.com",
+				AppDomain:     "my-cf.com",
+				AdminUser:     "admin",
+				AdminPassword: "pass",
+			},
+			AllowedFailures: config.AllowedFailures{
+				AppPushability:   2,
+				HttpAvailability: 5,
+				RecentLogs:       2,
+				StreamingLogs:    2,
+			},
+		}
+	})
 
-		configJson := `{
-    "while": [
-        {
-            "command": "sleep",
-            "command_args": ["5"]
-        }
-    ],
-    "cf": {
-        "api": "api.my-cf.com",
-        "app_domain": "my-cf.com",
-        "admin_user": "admin",
-        "admin_password": "PASS"
-    },
-    "optional_tests": {
-      "run_app_syslog_availability": true
-    },
-    "allowed_failures": {
-        "app_pushability": 2,
-        "http_availability": 5,
-        "recent_logs": 2,
-        "streaming_logs": 2,
-        "app_syslog_availability": 2
-    }
-}`
-		_, err = configFile.WriteString(configJson)
-		Expect(err).ToNot(HaveOccurred())
+	JustBeforeEach(func() {
+		tmpDir := GinkgoT().TempDir()
+		f, err := os.Create(tmpDir + "/config.json")
+		Expect(err).NotTo(HaveOccurred())
+		defer f.Close()
+		b, err := json.Marshal(cfg)
+		Expect(err).NotTo(HaveOccurred())
+		_, err = f.Write(b)
+		Expect(err).NotTo(HaveOccurred())
+		cmd := exec.Command(uptimerPath, "-configFile", f.Name())
+		session, err = Start(cmd, GinkgoWriter, GinkgoWriter)
+		Expect(err).NotTo(HaveOccurred())
+		Eventually(session, "10s").Should(Exit())
+	})
 
-		session := runCommand("-configFile", configFile.Name())
+	Context("when configured to test app syslog availability", func() {
+		BeforeEach(func() {
+			cfg.OptionalTests.RunAppSyslogAvailability = true
+			cfg.AllowedFailures.AppSyslogAvailability = 2
+		})
 
-		Expect(string(session.Out.Contents())).To(ContainSubstring("`cf.tcp_domain` and `cf.available_port` must be set in order to run App Syslog Availability tests."))
+		Context("when tcp_domain and available_port are not provided", func() {
+			BeforeEach(func() {
+				cfg.CF.AvailablePort = 0
+				cfg.CF.TCPDomain = ""
+			})
+
+			It("exits with a error code of 1", func() {
+				Expect(session.ExitCode()).To(Equal(1))
+			})
+
+			It("prints an error", func() {
+				Expect(session.Out).To(Say("`cf.tcp_domain` and `cf.available_port` must be set in order to run App Syslog Availability tests."))
+			})
+		})
+	})
+
+	Context("when configured to test TCP availability", func() {
+		BeforeEach(func() {
+			cfg.OptionalTests.RunTcpAvailability = true
+			cfg.AllowedFailures.TCPAvailability = 2
+		})
+
+		Context("when tcp_domain and tcp_port are not provided", func() {
+			BeforeEach(func() {
+				cfg.CF.TCPDomain = ""
+				cfg.CF.TCPPort = 0
+			})
+
+			It("exits with a error code of 1", func() {
+				Expect(session.ExitCode()).To(Equal(1))
+			})
+
+			It("prints an error", func() {
+				Expect(session.Out).To(Say("`cf.tcp_domain` and `cf.tcp_port` must be set in order to run TCP Availability tests."))
+			})
+		})
 	})
 })
