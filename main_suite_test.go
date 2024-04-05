@@ -5,32 +5,21 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
 
-	"os/exec"
 	"testing"
 )
 
-func TestUptimer(t *testing.T) {
+func TestIntegration(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Main Suite")
+	RunSpecs(t, "Integration Suite")
 }
 
-var commandPath string
+var uptimerPath string
 
-var _ = BeforeSuite(func() {
-	executablePath, err := Build("github.com/cloudfoundry/uptimer")
+var _ = SynchronizedBeforeSuite(func() []byte {
+	path, err := Build("github.com/cloudfoundry/uptimer")
 	Expect(err).NotTo(HaveOccurred())
-	commandPath = string(executablePath)
+	DeferCleanup(CleanupBuildArtifacts)
+	return []byte(path)
+}, func(data []byte) {
+	uptimerPath = string(data)
 })
-
-var _ = AfterSuite(func() {
-	CleanupBuildArtifacts()
-})
-
-func runCommand(args ...string) *Session {
-	cmd := exec.Command(commandPath, args...)
-	session, err := Start(cmd, GinkgoWriter, GinkgoWriter)
-	Expect(err).NotTo(HaveOccurred())
-	<-session.Exited
-
-	return session
-}
