@@ -13,11 +13,12 @@ It measures:
 - app syslog availability,
   by periodically checking that app logs
   drain to a syslog sink.
+- app stats availability,
+  by periodically checking that app stats
+  are not unavailable.
 
-The CF Release Integration team uses it
-to monitor availability during migrations
-from `cf-release` to `cf-deployment`,
-and during upgrade deployments.
+It is often used to monitor availability
+during upgrade deployments.
 
 ## Installation
 
@@ -66,6 +67,7 @@ Here is an example config `json`:
     "allowed_failures": {
         "app_pushability": 2,
         "http_availability": 5,
+        "app_stats": 2,
         "recent_logs": 2,
         "streaming_logs": 2,
         "app_syslog_availability": 2

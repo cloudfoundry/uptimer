@@ -162,6 +162,14 @@ var _ = Describe("CfCmdGenerator", func() {
 		})
 	})
 
+	Describe("AppStats", func() {
+		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "app", "appName")
+			cmd := generator.AppStats("appName")
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
+		})
+	})
+
 	Describe("RecentLogs", func() {
 		It("Generates the correct command", func() {
 			expectedCmd := exec.Command("cf", "logs", "appName", "--recent")

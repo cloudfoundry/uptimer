@@ -166,3 +166,19 @@ func NewAppPushability(
 		runnerErrBuf:                         runnerErrBuf,
 	}
 }
+
+func NewStatsAvailability(
+	statsAvailabilityCommandGeneratorFunc func() []cmdStartWaiter.CmdStartWaiter,
+	runner cmdRunner.CmdRunner,
+	runnerOutBuf *bytes.Buffer,
+	runnerErrBuf *bytes.Buffer,
+) BaseMeasurement {
+	return &statsAvailability{
+		name:                                  "Stats availability",
+		summaryPhrase:                         "retrieve stats for app",
+		statsAvailabilityCommandGeneratorFunc: statsAvailabilityCommandGeneratorFunc,
+		runner:                                runner,
+		runnerOutBuf:                          runnerOutBuf,
+		runnerErrBuf:                          runnerErrBuf,
+	}
+}

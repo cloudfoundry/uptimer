@@ -36,6 +36,7 @@ type AllowedFailures struct {
 	HttpAvailability      int `json:"http_availability"`
 	RecentLogs            int `json:"recent_logs"`
 	StreamingLogs         int `json:"streaming_logs"`
+	AppStats              int `json:"app_stats"`
 	AppSyslogAvailability int `json:"app_syslog_availability"`
 	TCPAvailability       int `json:"tcp_availability"`
 }

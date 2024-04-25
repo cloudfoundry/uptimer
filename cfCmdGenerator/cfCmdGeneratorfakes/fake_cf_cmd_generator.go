@@ -21,6 +21,17 @@ type FakeCfCmdGenerator struct {
 	apiReturnsOnCall map[int]struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}
+	AppStatsStub        func(string) cmdStartWaiter.CmdStartWaiter
+	appStatsMutex       sync.RWMutex
+	appStatsArgsForCall []struct {
+		arg1 string
+	}
+	appStatsReturns struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
+	appStatsReturnsOnCall map[int]struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}
 	AuthStub        func(string, string) cmdStartWaiter.CmdStartWaiter
 	authMutex       sync.RWMutex
 	authArgsForCall []struct {
@@ -280,6 +291,67 @@ func (fake *FakeCfCmdGenerator) ApiReturnsOnCall(i int, result1 cmdStartWaiter.C
 		})
 	}
 	fake.apiReturnsOnCall[i] = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfCmdGenerator) AppStats(arg1 string) cmdStartWaiter.CmdStartWaiter {
+	fake.appStatsMutex.Lock()
+	ret, specificReturn := fake.appStatsReturnsOnCall[len(fake.appStatsArgsForCall)]
+	fake.appStatsArgsForCall = append(fake.appStatsArgsForCall, struct {
+		arg1 string
+	}{arg1})
+	stub := fake.AppStatsStub
+	fakeReturns := fake.appStatsReturns
+	fake.recordInvocation("AppStats", []interface{}{arg1})
+	fake.appStatsMutex.Unlock()
+	if stub != nil {
+		return stub(arg1)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeCfCmdGenerator) AppStatsCallCount() int {
+	fake.appStatsMutex.RLock()
+	defer fake.appStatsMutex.RUnlock()
+	return len(fake.appStatsArgsForCall)
+}
+
+func (fake *FakeCfCmdGenerator) AppStatsCalls(stub func(string) cmdStartWaiter.CmdStartWaiter) {
+	fake.appStatsMutex.Lock()
+	defer fake.appStatsMutex.Unlock()
+	fake.AppStatsStub = stub
+}
+
+func (fake *FakeCfCmdGenerator) AppStatsArgsForCall(i int) string {
+	fake.appStatsMutex.RLock()
+	defer fake.appStatsMutex.RUnlock()
+	argsForCall := fake.appStatsArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeCfCmdGenerator) AppStatsReturns(result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.appStatsMutex.Lock()
+	defer fake.appStatsMutex.Unlock()
+	fake.AppStatsStub = nil
+	fake.appStatsReturns = struct {
+		result1 cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfCmdGenerator) AppStatsReturnsOnCall(i int, result1 cmdStartWaiter.CmdStartWaiter) {
+	fake.appStatsMutex.Lock()
+	defer fake.appStatsMutex.Unlock()
+	fake.AppStatsStub = nil
+	if fake.appStatsReturnsOnCall == nil {
+		fake.appStatsReturnsOnCall = make(map[int]struct {
+			result1 cmdStartWaiter.CmdStartWaiter
+		})
+	}
+	fake.appStatsReturnsOnCall[i] = struct {
 		result1 cmdStartWaiter.CmdStartWaiter
 	}{result1}
 }
@@ -1330,6 +1402,8 @@ func (fake *FakeCfCmdGenerator) Invocations() map[string][][]interface{} {
 	defer fake.invocationsMutex.RUnlock()
 	fake.apiMutex.RLock()
 	defer fake.apiMutex.RUnlock()
+	fake.appStatsMutex.RLock()
+	defer fake.appStatsMutex.RUnlock()
 	fake.authMutex.RLock()
 	defer fake.authMutex.RUnlock()
 	fake.bindServiceMutex.RLock()
