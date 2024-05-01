@@ -11,6 +11,17 @@ import (
 )
 
 type FakeCfWorkflow struct {
+	AppStatsStub        func(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
+	appStatsMutex       sync.RWMutex
+	appStatsArgsForCall []struct {
+		arg1 cfCmdGenerator.CfCmdGenerator
+	}
+	appStatsReturns struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}
+	appStatsReturnsOnCall map[int]struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}
 	AppUrlStub        func() string
 	appUrlMutex       sync.RWMutex
 	appUrlArgsForCall []struct {
@@ -185,6 +196,67 @@ type FakeCfWorkflow struct {
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
+}
+
+func (fake *FakeCfWorkflow) AppStats(arg1 cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
+	fake.appStatsMutex.Lock()
+	ret, specificReturn := fake.appStatsReturnsOnCall[len(fake.appStatsArgsForCall)]
+	fake.appStatsArgsForCall = append(fake.appStatsArgsForCall, struct {
+		arg1 cfCmdGenerator.CfCmdGenerator
+	}{arg1})
+	stub := fake.AppStatsStub
+	fakeReturns := fake.appStatsReturns
+	fake.recordInvocation("AppStats", []interface{}{arg1})
+	fake.appStatsMutex.Unlock()
+	if stub != nil {
+		return stub(arg1)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeCfWorkflow) AppStatsCallCount() int {
+	fake.appStatsMutex.RLock()
+	defer fake.appStatsMutex.RUnlock()
+	return len(fake.appStatsArgsForCall)
+}
+
+func (fake *FakeCfWorkflow) AppStatsCalls(stub func(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter) {
+	fake.appStatsMutex.Lock()
+	defer fake.appStatsMutex.Unlock()
+	fake.AppStatsStub = stub
+}
+
+func (fake *FakeCfWorkflow) AppStatsArgsForCall(i int) cfCmdGenerator.CfCmdGenerator {
+	fake.appStatsMutex.RLock()
+	defer fake.appStatsMutex.RUnlock()
+	argsForCall := fake.appStatsArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeCfWorkflow) AppStatsReturns(result1 []cmdStartWaiter.CmdStartWaiter) {
+	fake.appStatsMutex.Lock()
+	defer fake.appStatsMutex.Unlock()
+	fake.AppStatsStub = nil
+	fake.appStatsReturns = struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}{result1}
+}
+
+func (fake *FakeCfWorkflow) AppStatsReturnsOnCall(i int, result1 []cmdStartWaiter.CmdStartWaiter) {
+	fake.appStatsMutex.Lock()
+	defer fake.appStatsMutex.Unlock()
+	fake.AppStatsStub = nil
+	if fake.appStatsReturnsOnCall == nil {
+		fake.appStatsReturnsOnCall = make(map[int]struct {
+			result1 []cmdStartWaiter.CmdStartWaiter
+		})
+	}
+	fake.appStatsReturnsOnCall[i] = struct {
+		result1 []cmdStartWaiter.CmdStartWaiter
+	}{result1}
 }
 
 func (fake *FakeCfWorkflow) AppUrl() string {
@@ -1120,6 +1192,8 @@ func (fake *FakeCfWorkflow) TearDownReturnsOnCall(i int, result1 []cmdStartWaite
 func (fake *FakeCfWorkflow) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
+	fake.appStatsMutex.RLock()
+	defer fake.appStatsMutex.RUnlock()
 	fake.appUrlMutex.RLock()
 	defer fake.appUrlMutex.RUnlock()
 	fake.createAndBindSyslogDrainServiceMutex.RLock()

@@ -213,6 +213,21 @@ var _ = Describe("CfWorkflow", func() {
 		})
 	})
 
+	Describe("AppStats", func() {
+		It("returns a set of commands to get stats for an app", func() {
+			cmds := cw.AppStats(ccg)
+
+			Expect(cmds).To(Equal(
+				[]cmdStartWaiter.CmdStartWaiter{
+					ccg.Api("jigglypuff.cf-app.com"),
+					ccg.Auth("pika", "chu"),
+					ccg.Target("someOrg", "someSpace"),
+					ccg.AppStats("doraApp"),
+				},
+			))
+		})
+	})
+
 	Describe("RecentLogs", func() {
 		It("returns a set of commands to get recent logs for an app", func() {
 			cmds := cw.RecentLogs(ccg)

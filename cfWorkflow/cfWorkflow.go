@@ -24,6 +24,7 @@ type CfWorkflow interface {
 	Delete(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 	TearDown(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 	RecentLogs(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
+	AppStats(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 	StreamLogs(context.Context, cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
 
 	MapSyslogRoute(cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter
@@ -139,6 +140,15 @@ func (c *cfWorkflow) TearDown(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaite
 	ret = append(ret, ccg.LogOut())
 
 	return ret
+}
+
+func (c *cfWorkflow) AppStats(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {
+	return []cmdStartWaiter.CmdStartWaiter{
+		ccg.Api(c.cf.API),
+		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
+		ccg.Target(c.org, c.space),
+		ccg.AppStats(c.appName),
+	}
 }
 
 func (c *cfWorkflow) RecentLogs(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.CmdStartWaiter {

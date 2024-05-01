@@ -97,7 +97,7 @@ func main() {
 		}
 		logger.Println("Finished preparing included syslog sink app")
 	}
-	orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, tcpTmpDir, sinkTmpDir, err := createTmpDirs()
+	orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, appStatsTmpDir, pushTmpDir, tcpTmpDir, sinkTmpDir, err := createTmpDirs()
 	if err != nil {
 		logger.Println("Failed to create temp dirs:", err)
 		performMeasurements = false
@@ -179,6 +179,7 @@ func main() {
 		pushWorkflowGeneratorFunc,
 		cfCmdGenerator.New(recentLogsTmpDir, *useBuildpackDetection),
 		cfCmdGenerator.New(streamingLogsTmpDir, *useBuildpackDetection),
+		cfCmdGenerator.New(appStatsTmpDir, *useBuildpackDetection),
 		pushCmdGenerator,
 		cfg.AllowedFailures,
 		authFailedRetryFunc,
@@ -250,33 +251,37 @@ func main() {
 	os.Exit(exitCode)
 }
 
-func createTmpDirs() (string, string, string, string, string, string, error) {
+func createTmpDirs() (string, string, string, string, string, string, string, error) {
 	orcTmpDir, err := os.MkdirTemp("", "uptimer")
 	if err != nil {
-		return "", "", "", "", "", "", err
+		return "", "", "", "", "", "", "", err
 	}
 	recentLogsTmpDir, err := os.MkdirTemp("", "uptimer")
 	if err != nil {
-		return "", "", "", "", "", "", err
+		return "", "", "", "", "", "", "", err
 	}
 	streamingLogsTmpDir, err := os.MkdirTemp("", "uptimer")
 	if err != nil {
-		return "", "", "", "", "", "", err
+		return "", "", "", "", "", "", "", err
+	}
+	appsStatsTmpDir, err := os.MkdirTemp("", "uptimer")
+	if err != nil {
+		return "", "", "", "", "", "", "", err
 	}
 	pushTmpDir, err := os.MkdirTemp("", "uptimer")
 	if err != nil {
-		return "", "", "", "", "", "", err
+		return "", "", "", "", "", "", "", err
 	}
 	tcpTmpDir, err := os.MkdirTemp("", "uptimer")
 	if err != nil {
-		return "", "", "", "", "", "", err
+		return "", "", "", "", "", "", "", err
 	}
 	sinkTmpDir, err := os.MkdirTemp("", "uptimer")
 	if err != nil {
-		return "", "", "", "", "", "", err
+		return "", "", "", "", "", "", "", err
 	}
 
-	return orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, pushTmpDir, tcpTmpDir, sinkTmpDir, nil
+	return orcTmpDir, recentLogsTmpDir, streamingLogsTmpDir, appsStatsTmpDir, pushTmpDir, tcpTmpDir, sinkTmpDir, nil
 }
 
 func prepareIncludedApp(name, source string) (string, error) {
@@ -328,7 +333,7 @@ func createMeasurements(
 	logger *log.Logger,
 	orcWorkflow cfWorkflow.CfWorkflow,
 	pushWorkFlowGeneratorFunc func() cfWorkflow.CfWorkflow,
-	recentLogsCmdGenerator, streamingLogsCmdGenerator, pushCmdGenerator cfCmdGenerator.CfCmdGenerator,
+	recentLogsCmdGenerator, streamingLogsCmdGenerator, appStatsCmdGenerator, pushCmdGenerator cfCmdGenerator.CfCmdGenerator,
 	allowedFailures config.AllowedFailures,
 	authFailedRetryFunc func(stdOut, stdErr string) bool,
 ) []measurement.Measurement {
@@ -380,6 +385,16 @@ func createMeasurements(
 		},
 	)
 
+	appStatsRunner, appStatsRunnerOutBuf, appStatsRunnerErrBuf := createBufferedRunner()
+	appStatsMeasurement := measurement.NewStatsAvailability(
+		func() []cmdStartWaiter.CmdStartWaiter {
+			return orcWorkflow.AppStats(appStatsCmdGenerator)
+		},
+		appStatsRunner,
+		appStatsRunnerOutBuf,
+		appStatsRunnerErrBuf,
+	)
+
 	return []measurement.Measurement{
 		measurement.NewPeriodic(
 			logger,
@@ -415,6 +430,15 @@ func createMeasurements(
 			streamingLogsMeasurement,
 			measurement.NewResultSet(),
 			allowedFailures.StreamingLogs,
+			authFailedRetryFunc,
+		),
+		measurement.NewPeriodic(
+			logger,
+			clock,
+			10*time.Second,
+			appStatsMeasurement,
+			measurement.NewResultSet(),
+			allowedFailures.AppStats,
 			authFailedRetryFunc,
 		),
 	}

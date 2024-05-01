@@ -24,6 +24,7 @@ type CfCmdGenerator interface {
 	DeleteOrg(org string) cmdStartWaiter.CmdStartWaiter
 	DeleteQuota(quota string) cmdStartWaiter.CmdStartWaiter
 	LogOut() cmdStartWaiter.CmdStartWaiter
+	AppStats(appName string) cmdStartWaiter.CmdStartWaiter
 	RecentLogs(appName string) cmdStartWaiter.CmdStartWaiter
 	StreamLogs(ctx context.Context, appName string) cmdStartWaiter.CmdStartWaiter
 	MapRoute(appName, domain string, port int) cmdStartWaiter.CmdStartWaiter
@@ -171,6 +172,14 @@ func (c *cfCmdGenerator) LogOut() cmdStartWaiter.CmdStartWaiter {
 	return c.setCfHome(
 		exec.Command(
 			"cf", "logout",
+		),
+	)
+}
+
+func (c *cfCmdGenerator) AppStats(appName string) cmdStartWaiter.CmdStartWaiter {
+	return c.setCfHome(
+		exec.Command(
+			"cf", "app", appName,
 		),
 	)
 }
