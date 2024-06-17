@@ -219,6 +219,22 @@ var _ = Describe("CfCmdGenerator", func() {
 			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
 		})
 	})
+
+	Describe("EnableOrgIsolation", func() {
+		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "enable-org-isolation", "someOrg", "someIsoSeg")
+			cmd := generator.EnableOrgIsolation("someOrg", "someIsoSeg")
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
+		})
+	})
+
+	Describe("SetOrgDefaultIsolationSegment", func() {
+		It("Generates the correct command", func() {
+			expectedCmd := exec.Command("cf", "set-org-default-isolation-segment", "someOrg", "someIsoSeg")
+			cmd := generator.SetOrgDefaultIsolationSegment("someOrg", "someIsoSeg")
+			expectCommandToBeEquivalent(cmd, expectedCmd, cfHomeEnvVar)
+		})
+	})
 })
 
 func expectCommandToBeEquivalent(cmd cmdStartWaiter.CmdStartWaiter, expectedCmd *exec.Cmd, envIncludes ...string) {

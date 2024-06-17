@@ -82,8 +82,16 @@ func (c *cfWorkflow) Setup(ccg cfCmdGenerator.CfCmdGenerator) []cmdStartWaiter.C
 		ccg.Api(c.cf.API),
 		ccg.Auth(c.cf.AdminUser, c.cf.AdminPassword),
 		ccg.CreateOrg(c.org),
-		ccg.CreateSpace(c.org, c.space),
 	}
+
+	if c.cf.IsolationSegment != "" {
+		ret = append(ret,
+			ccg.EnableOrgIsolation(c.org, c.cf.IsolationSegment),
+			ccg.SetOrgDefaultIsolationSegment(c.org, c.cf.IsolationSegment),
+		)
+	}
+	ret = append(ret, ccg.CreateSpace(c.org, c.space))
+
 	if c.quota != "" {
 		ret = append(ret, ccg.CreateQuota(c.quota), ccg.SetQuota(c.org, c.quota))
 	}
