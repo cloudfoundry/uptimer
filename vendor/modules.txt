@@ -1,4 +1,4 @@
-# code.cloudfoundry.org/goshims v0.38.0
+# code.cloudfoundry.org/goshims v0.39.0
 ## explicit; go 1.20
 code.cloudfoundry.org/goshims/ioutilshim
 code.cloudfoundry.org/goshims/ioutilshim/ioutil_fake
