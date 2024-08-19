@@ -59,7 +59,7 @@ func (c *cfWorkflow) AppUrl() string {
 }
 
 func (c *cfWorkflow) TCPDomain() string {
-	return fmt.Sprintf(c.cf.TCPDomain)
+	return c.cf.TCPDomain
 }
 
 func (c *cfWorkflow) TCPPort() int {
