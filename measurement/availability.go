@@ -26,7 +26,7 @@ func (a *availability) PerformMeasurement() (string, string, string, bool) {
 	if err != nil {
 		return err.Error(), "", "", false
 	}
-	defer res.Body.Close()
+	defer res.Body.Close() //nolint:errcheck
 
 	if res.StatusCode != http.StatusOK {
 		buf := new(bytes.Buffer)

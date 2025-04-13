@@ -46,7 +46,7 @@ var _ = Describe("uptimer", func() {
 		tmpDir := GinkgoT().TempDir()
 		f, err := os.Create(tmpDir + "/config.json")
 		Expect(err).NotTo(HaveOccurred())
-		defer f.Close()
+		defer f.Close() //nolint:errcheck
 		b, err := json.Marshal(cfg)
 		Expect(err).NotTo(HaveOccurred())
 		_, err = f.Write(b)
@@ -74,7 +74,7 @@ var _ = Describe("uptimer", func() {
 			})
 
 			It("prints an error", func() {
-				Expect(session.Out).To(Say("`cf.tcp_domain` and `cf.available_port` must be set in order to run App Syslog Availability tests."))
+				Expect(session.Out).To(Say("`cf.tcp_domain` and `cf.available_port` must be set in order to run App Syslog Availability tests"))
 			})
 		})
 	})
@@ -96,7 +96,7 @@ var _ = Describe("uptimer", func() {
 			})
 
 			It("prints an error", func() {
-				Expect(session.Out).To(Say("`cf.tcp_domain` and `cf.tcp_port` must be set in order to run TCP Availability tests."))
+				Expect(session.Out).To(Say("`cf.tcp_domain` and `cf.tcp_port` must be set in order to run TCP Availability tests"))
 			})
 		})
 	})
