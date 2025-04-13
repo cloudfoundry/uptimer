@@ -62,12 +62,12 @@ func Load(filename string) (*Config, error) {
 func (c Config) Validate() error {
 	if c.OptionalTests.RunAppSyslogAvailability {
 		if c.CF != nil && (c.CF.TCPDomain == "" || c.CF.AvailablePort == 0) {
-			return errors.New("`cf.tcp_domain` and `cf.available_port` must be set in order to run App Syslog Availability tests.")
+			return errors.New("`cf.tcp_domain` and `cf.available_port` must be set in order to run App Syslog Availability tests")
 		}
 	}
 	if c.OptionalTests.RunTcpAvailability {
 		if c.CF != nil && (c.CF.TCPDomain == "" || c.CF.TCPPort == 0) {
-			return errors.New("`cf.tcp_domain` and `cf.tcp_port` must be set in order to run TCP Availability tests.")
+			return errors.New("`cf.tcp_domain` and `cf.tcp_port` must be set in order to run TCP Availability tests")
 		}
 	}
 	return nil

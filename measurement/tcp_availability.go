@@ -25,11 +25,12 @@ func (t *tcpAvailability) SummaryPhrase() string {
 }
 
 func (t *tcpAvailability) PerformMeasurement() (string, string, string, bool) {
-	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", t.url, t.port), 5*time.Second)
+	addr := net.JoinHostPort(t.url, fmt.Sprintf("%d", t.port))
+	conn, err := net.DialTimeout("tcp", addr, 5*time.Second)
 	if err != nil {
 		return err.Error(), "", "", false
 	}
-	defer conn.Close()
+	defer conn.Close() //nolint:errcheck
 
 	_, err = conn.Write([]byte("knock-knock"))
 	if err != nil {

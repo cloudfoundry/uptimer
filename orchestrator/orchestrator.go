@@ -13,13 +13,14 @@ import (
 
 	"code.cloudfoundry.org/goshims/ioutilshim"
 
+	uuid "github.com/satori/go.uuid"
+
 	"github.com/cloudfoundry/uptimer/cfCmdGenerator"
 	"github.com/cloudfoundry/uptimer/cfWorkflow"
 	"github.com/cloudfoundry/uptimer/cmdRunner"
 	"github.com/cloudfoundry/uptimer/cmdStartWaiter"
 	"github.com/cloudfoundry/uptimer/config"
 	"github.com/cloudfoundry/uptimer/measurement"
-	uuid "github.com/satori/go.uuid"
 )
 
 //go:generate counterfeiter . Orchestrator

@@ -3,7 +3,6 @@ package measurement_test
 import (
 	"fmt"
 	"net"
-	"os"
 
 	. "github.com/cloudfoundry/uptimer/measurement"
 
@@ -17,8 +16,6 @@ var _ = Describe("TCPAvailability", func() {
 		port int
 
 		am BaseMeasurement
-
-		listener net.Listener
 	)
 
 	BeforeEach(func() {
@@ -41,37 +38,42 @@ var _ = Describe("TCPAvailability", func() {
 	})
 
 	Describe("PerformMeasurement", func() {
+		var (
+			listener net.Listener
+
+			done chan any
+		)
+
 		Context("When the measurement client gets the expected response", func() {
 			BeforeEach(func() {
 				var err error
 				listener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", url, port))
-				if err != nil {
-					fmt.Println("Error listening: ", err.Error())
-					os.Exit(1)
-				}
+				Expect(err).NotTo(HaveOccurred())
+
+				done = make(chan any)
 
 				// Listen for an incoming connection.
 				go func() {
-					conn, err := listener.Accept()
-					if err != nil {
-						fmt.Println("Error accepting: ", err.Error())
-						os.Exit(1)
-					}
-					// Handle connections in a new goroutine.
-					go func(conn net.Conn) {
-						defer conn.Close()
+					defer GinkgoRecover()
 
-						_, err := conn.Write([]byte("Hello from Uptimer."))
-						if err != nil {
-							fmt.Println("Error writing:", err.Error())
-							os.Exit(1)
-						}
-					}(conn)
+					conn, err := listener.Accept()
+					Expect(err).NotTo(HaveOccurred())
+
+					_, err = conn.Write([]byte("Hello from Uptimer."))
+					Expect(err).NotTo(HaveOccurred())
+
+					err = conn.Close()
+					Expect(err).NotTo(HaveOccurred())
+
+					close(done)
 				}()
 			})
 
 			AfterEach(func() {
-				listener.Close()
+				err := listener.Close()
+				Expect(err).NotTo(HaveOccurred())
+
+				Eventually(done).Should(BeClosed())
 			})
 
 			It("records a matching string as success", func() {
@@ -86,35 +88,36 @@ var _ = Describe("TCPAvailability", func() {
 			BeforeEach(func() {
 				var err error
 				listener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", url, port))
-				if err != nil {
-					fmt.Println("Error listening: ", err.Error())
-					os.Exit(1)
-				}
+				Expect(err).NotTo(HaveOccurred())
+
+				done = make(chan any)
 
 				// Listen for an incoming connection.
 				go func() {
-					conn, err := listener.Accept()
-					if err != nil {
-						fmt.Println("Error accepting: ", err.Error())
-						os.Exit(1)
-					}
-					// Handle connections in a new goroutine.
-					go func(conn net.Conn) {
-						defer conn.Close()
+					defer GinkgoRecover()
 
-						_, err := conn.Write([]byte("Hello from Zuptimer."))
-						if err != nil {
-							fmt.Println("Error writing:", err.Error())
-							os.Exit(1)
-						}
-					}(conn)
+					conn, err := listener.Accept()
+					Expect(err).NotTo(HaveOccurred())
+
+					_, err = conn.Write([]byte("Hello from Zuptimer."))
+					Expect(err).NotTo(HaveOccurred())
+
+					err = conn.Close()
+					Expect(err).NotTo(HaveOccurred())
+
+					close(done)
 				}()
+			})
+
+			AfterEach(func() {
+				err := listener.Close()
+				Expect(err).NotTo(HaveOccurred())
+
+				Eventually(done).Should(BeClosed())
 			})
 
 			It("records a mismatched string as failure", func() {
 				err, _, _, res := am.PerformMeasurement()
-
-				listener.Close()
 				Expect(err).To(Equal("TCP App not returning expected response"))
 				Expect(res).To(BeFalse())
 			})

@@ -4,8 +4,9 @@ import (
 	"io"
 )
 
-// CmdStartWaiter is a subset of the interface satisfied by exec.Cmd
 //go:generate counterfeiter . CmdStartWaiter
+
+// CmdStartWaiter is a subset of the interface satisfied by exec.Cmd
 type CmdStartWaiter interface {
 	Start() error
 	Wait() error

@@ -6,11 +6,12 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
-	. "github.com/cloudfoundry/uptimer/measurement"
 
-	"github.com/cloudfoundry/uptimer/measurement/measurementfakes"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/cloudfoundry/uptimer/measurement"
+	"github.com/cloudfoundry/uptimer/measurement/measurementfakes"
 )
 
 var _ = Describe("Periodic", func() {
@@ -24,7 +25,7 @@ var _ = Describe("Periodic", func() {
 		allowedFailures     int
 		shouldRetry         bool
 
-		p Measurement
+		p measurement.Measurement
 	)
 
 	BeforeEach(func() {
@@ -39,7 +40,7 @@ var _ = Describe("Periodic", func() {
 		allowedFailures = 0
 		shouldRetry = false
 
-		p = NewPeriodic(
+		p = measurement.NewPeriodic(
 			logger,
 			mockClock,
 			freq,
@@ -78,7 +79,7 @@ var _ = Describe("Periodic", func() {
 
 		Context("without measure immediately", func() {
 			BeforeEach(func() {
-				p = NewPeriodicWithoutMeasuringImmediately(
+				p = measurement.NewPeriodicWithoutMeasuringImmediately(
 					logger,
 					mockClock,
 					freq,
@@ -109,7 +110,7 @@ var _ = Describe("Periodic", func() {
 				fakeResultSet.FailedReturns(2)
 				allowedFailures = 4
 
-				p = NewPeriodic(
+				p = measurement.NewPeriodic(
 					logger,
 					mockClock,
 					freq,
@@ -204,7 +205,7 @@ var _ = Describe("Periodic", func() {
 				fakeResultSet.FailedReturns(1)
 				allowedFailures = 2
 
-				p = NewPeriodic(
+				p = measurement.NewPeriodic(
 					logger,
 					mockClock,
 					freq,
@@ -320,7 +321,7 @@ var _ = Describe("Periodic", func() {
 
 	Describe("Failed", func() {
 		BeforeEach(func() {
-			p = NewPeriodic(logger, mockClock, freq, fakeBaseMeasurement, fakeResultSet, 5, func(string, string) bool { return shouldRetry })
+			p = measurement.NewPeriodic(logger, mockClock, freq, fakeBaseMeasurement, fakeResultSet, 5, func(string, string) bool { return shouldRetry })
 		})
 
 		It("Returns true if failure count > allowed number of failures", func() {
@@ -348,7 +349,7 @@ var _ = Describe("Periodic", func() {
 			succeeded := 3
 			allowedFailures := 3
 
-			p = NewPeriodic(logger, mockClock, freq, fakeBaseMeasurement, fakeResultSet, allowedFailures, func(string, string) bool { return shouldRetry })
+			p = measurement.NewPeriodic(logger, mockClock, freq, fakeBaseMeasurement, fakeResultSet, allowedFailures, func(string, string) bool { return shouldRetry })
 			fakeResultSet.FailedReturns(failed)
 			fakeResultSet.SuccessfulReturns(succeeded)
 			fakeResultSet.TotalReturns(failed + succeeded)
@@ -368,7 +369,7 @@ var _ = Describe("Periodic", func() {
 			succeeded := 4
 			allowedFailures := 2
 
-			p = NewPeriodic(logger, mockClock, freq, fakeBaseMeasurement, fakeResultSet, allowedFailures, func(string, string) bool { return shouldRetry })
+			p = measurement.NewPeriodic(logger, mockClock, freq, fakeBaseMeasurement, fakeResultSet, allowedFailures, func(string, string) bool { return shouldRetry })
 			fakeResultSet.FailedReturns(failed)
 			fakeResultSet.SuccessfulReturns(succeeded)
 			fakeResultSet.TotalReturns(failed + succeeded)
@@ -388,7 +389,7 @@ var _ = Describe("Periodic", func() {
 			succeeded := 1
 			allowedFailures := 2
 
-			p = NewPeriodic(logger, mockClock, freq, fakeBaseMeasurement, fakeResultSet, allowedFailures, func(string, string) bool { return shouldRetry })
+			p = measurement.NewPeriodic(logger, mockClock, freq, fakeBaseMeasurement, fakeResultSet, allowedFailures, func(string, string) bool { return shouldRetry })
 			fakeResultSet.FailedReturns(failed)
 			fakeResultSet.SuccessfulReturns(succeeded)
 			fakeResultSet.TotalReturns(failed + succeeded)
@@ -410,12 +411,12 @@ var _ = Describe("Periodic", func() {
 			succeeded := 3
 			allowedFailures := 3
 
-			p = NewPeriodic(logger, mockClock, freq, fakeBaseMeasurement, fakeResultSet, allowedFailures, func(string, string) bool { return shouldRetry })
+			p = measurement.NewPeriodic(logger, mockClock, freq, fakeBaseMeasurement, fakeResultSet, allowedFailures, func(string, string) bool { return shouldRetry })
 			fakeResultSet.FailedReturns(failed)
 			fakeResultSet.SuccessfulReturns(succeeded)
 			fakeResultSet.TotalReturns(failed + succeeded)
 
-			Expect(p.SummaryData()).To(Equal(Summary{
+			Expect(p.SummaryData()).To(Equal(measurement.Summary{
 				Name:            "foo measurement",
 				Failed:          2,
 				SummaryPhrase:   "wingdang the foobrizzle",

@@ -74,7 +74,7 @@ func main() {
 		performMeasurements = false
 	}
 	logger.Println("Finished preparing included app")
-	defer os.RemoveAll(appPath)
+	defer os.RemoveAll(appPath) //nolint:errcheck
 
 	var tcpPath string
 	if cfg.OptionalTests.RunTcpAvailability {
@@ -85,7 +85,7 @@ func main() {
 			performMeasurements = false
 		}
 		logger.Println("Finished preparing included tcp app")
-		defer os.RemoveAll(tcpPath)
+		defer os.RemoveAll(tcpPath) //nolint:errcheck
 	}
 
 	var sinkAppPath string
@@ -290,27 +290,30 @@ func prepareIncludedApp(name, source string) (string, error) {
 		return "", err
 	}
 
-	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(source), 0644); err != nil {
-		os.RemoveAll(dir)
+	defer func() {
+		if err != nil {
+			os.RemoveAll(dir) //nolint:errcheck
+		}
+	}()
+
+	err = os.WriteFile(filepath.Join(dir, "main.go"), []byte(source), 0644)
+	if err != nil {
 		return "", err
 	}
 
-	manifest := goManifest(name)
-	if err := os.WriteFile(filepath.Join(dir, "manifest.yml"), []byte(manifest), 0644); err != nil {
-		os.RemoveAll(dir)
-		return "", err
-	}
-
-	return dir, nil
-}
-
-func goManifest(appName string) string {
-	return fmt.Sprintf(`applications:
+	manifest := fmt.Sprintf(`applications:
 - name: %s
   memory: 64M
   disk: 16M
   env:
-    GOPACKAGENAME: github.com/cloudfoundry/uptimer/%s`, appName, appName)
+    GOPACKAGENAME: github.com/cloudfoundry/uptimer/%s`, name, name)
+
+	err = os.WriteFile(filepath.Join(dir, "manifest.yml"), []byte(manifest), 0644)
+	if err != nil {
+		return "", err
+	}
+
+	return dir, nil
 }
 
 func createWorkflow(cfc *config.Cf, appPath string, useQuotas bool) cfWorkflow.CfWorkflow {
